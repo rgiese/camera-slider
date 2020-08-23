@@ -91,7 +91,7 @@ jobs:
 workflows:
   version: 2
 
-  cloud-and-firmware:
+  firmware:
     jobs:
       - build:
           context: camera-slider-particle
