@@ -1,0 +1,15 @@
+{
+  "name": "@grumpycorp/camera-slider-formatfixes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Camera Slider root-level format fixing services",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rgiese/camera-slider.git"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "author": "robin@grumpycorp.com",
+  "scripts": {
+    "format:fix": "prettier --write {.,..,../..,../../.circleci}/*.{css,html,js,jsx,json,md,scss,ts,tsx,webmanifest,yml}"
+  }
+}
