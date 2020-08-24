@@ -40,11 +40,50 @@ class BuildCommand extends Command {
     glob
       .sync(`${projectRoot}/**/*.{c,cpp,h,hpp,properties}`, { ignore: "**/tests/**/*" })
       .forEach(fileName => {
-        const relativePath = path.relative(projectRoot, fileName).replace("\\", "/");
+        const relativePath = path.relative(projectRoot, fileName).replace(/\\/g, "/");
         this.log(`  ${relativePath}`);
 
         projectFilesObject[relativePath] = fileName;
       });
+
+    // Find external dependencies
+    const includeRoots = new Array();
+
+    if (flags.includeRoots) {
+      flags.includeRoots.map(includeRootGlob => {
+        glob.sync(`${packageRoot}/${includeRootGlob}`).forEach(pathName => {
+          const relativePath = path.relative(packageRoot, pathName).replace(/\\/g, "/");
+          this.log(`Include root: ${relativePath}`);
+
+          includeRoots.push(relativePath);
+        });
+      });
+    }
+
+    if (flags.includes) {
+      flags.includes.map(includeGlob => {
+        glob
+          .sync(`${packageRoot}/${includeGlob}`, { ignore: "**/tests/**/*" })
+          .forEach(fileName => {
+            const relativePath = path.relative(packageRoot, fileName).replace(/\\/g, "/");
+
+            // Add file minus include root, if found
+            for (const includeRoot of includeRoots) {
+              if (relativePath.startsWith(includeRoot)) {
+                const rootRelativePath = relativePath.substring(includeRoot.length + 1); // +1 for path separator
+
+                this.log(`  ${rootRelativePath} (was: ${relativePath})`);
+                projectFilesObject[rootRelativePath] = fileName;
+                return;
+              }
+            }
+
+            // Add file as-is
+            this.log(`  ${relativePath}`);
+            projectFilesObject[relativePath] = fileName;
+          });
+      });
+    }
 
     // Compile
     let compileResult;
@@ -111,6 +150,12 @@ Provide name of project directory with -p
 
 BuildCommand.flags = {
   project: flags.string({ char: "p", description: "Project to build" }),
+  includes: flags.string({ char: "i", description: "Include glob", multiple: true }),
+  includeRoots: flags.string({
+    char: "r",
+    description: "Include directories to be treated as roots",
+    multiple: true,
+  }),
 };
 
 module.exports = BuildCommand;
