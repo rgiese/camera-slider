@@ -6,4 +6,4 @@
 	url = https://github.com/adafruit/Adafruit-GFX-Library.git
 [submodule "packages/firmware/external/Adafruit_BusIO"]
 	path = packages/firmware/external/Adafruit_BusIO
-	url = https://github.com/adafruit/Adafruit_BusIO
+	url = https://github.com/rgiese/Adafruit_BusIO.git
