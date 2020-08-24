@@ -17,6 +17,7 @@ jobs:
     steps:
       # Check out source
       - checkout
+      - run: git submodule update --init --recursive
 
       # Download and cache dependencies
       - restore_cache:

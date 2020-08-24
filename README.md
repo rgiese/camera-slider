@@ -12,6 +12,9 @@ Licensed under [CC-BY-NC-SA](LICENSE.md). Commercial licensing negotiable (hah).
 # Dev setup
 
 - Getting started
+  - Getting code
+    - `git submodule init`
+    - `git submodule update`
   - For firmware development:
     - Configure credentials
       - Set the environment variable `PARTICLE_ACCESS_TOKEN` to a Particle API token (generate with `particle token create`)
