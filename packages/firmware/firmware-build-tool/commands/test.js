@@ -44,7 +44,7 @@ class TestCommand extends Command {
     execSync(
       `g++ -I${projectRoot} -I${testsRoot} ${includes
         .map(include => `-I${include}`)
-        .join(" ")} ${sourceFiles.join(" ")} -lstdc++ -lm -o ${testExecutable}`,
+        .join(" ")} ${sourceFiles.join(" ")} -DIS_TEST_BUILD -lstdc++ -lm -o ${testExecutable}`,
       {
         cwd: testsRoot,
         stdio: "inherit",
