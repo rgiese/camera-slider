@@ -14,7 +14,9 @@ PRODUCT_VERSION(1);  // Increment for each release
 // Globals
 //
 
-pin_t constexpr c_LedPin = D7;
+pin_t constexpr c_UIButtonPin = D2;
+
+Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
 
 //
 // Declarations
@@ -36,12 +38,12 @@ void setup()
     Serial.begin();
     Serial.println("Slider started.");
 
-    {
-        Activity testActivity("StartupTestDelay");
-        delay(10 * 1000);
-    }
+    // Configure pins
+    pinMode(c_UIButtonPin, INPUT_PULLUP);
 
-    pinMode(c_LedPin, OUTPUT);
+    // Configure devices
+    g_Display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Generate display voltage from 3.3V internally, 0x3C = I2C address
+    g_Display.display();
 
     // Request connection to cloud (not blocking)
     {
