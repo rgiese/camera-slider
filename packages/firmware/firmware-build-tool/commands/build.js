@@ -62,6 +62,8 @@ class BuildCommand extends Command {
 
     if (flags.includes) {
       flags.includes.map(includeGlob => {
+        this.log(`Processing include glob ${includeGlob}...`);
+
         glob
           .sync(`${packageRoot}/${includeGlob}`, { ignore: "**/tests/**/*" })
           .forEach(fileName => {
