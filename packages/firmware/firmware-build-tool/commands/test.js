@@ -25,6 +25,16 @@ class TestCommand extends Command {
       fs.mkdirSync(outputRoot);
     }
 
+    const includes = new Array();
+
+    if (flags.includes) {
+      flags.includes.map(includeGlob => {
+        glob.sync(`${packageRoot}/${includeGlob}`).forEach(pathName => {
+          includes.push(pathName);
+        });
+      });
+    }
+
     // Build
     this.log(`Building tests...`);
 
@@ -32,9 +42,9 @@ class TestCommand extends Command {
     const testExecutable = path.join(outputRoot, "tests");
 
     execSync(
-      `g++ -I${projectRoot} -I${testsRoot} ${sourceFiles.join(
-        " "
-      )} -lstdc++ -lm -o ${testExecutable}`,
+      `g++ -I${projectRoot} -I${testsRoot} ${includes
+        .map(include => `-I${include}`)
+        .join(" ")} ${sourceFiles.join(" ")} -lstdc++ -lm -o ${testExecutable}`,
       {
         cwd: testsRoot,
         stdio: "inherit",
@@ -58,6 +68,7 @@ Provide name of project directory with -p
 
 TestCommand.flags = {
   project: flags.string({ char: "p", description: "Project to test" }),
+  includes: flags.string({ char: "i", description: "Include glob", multiple: true }),
 };
 
 module.exports = TestCommand;
