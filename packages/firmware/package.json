@@ -11,7 +11,7 @@
   "author": "robin@grumpycorp.com",
   "files": [
     "./firmware-build-tool",
-    "./slider-controller"
+    "./slider"
   ],
   "scripts": {
     "build": "node firmware-build-tool/run.js build -p slider -r \"external/Adafruit{_BusIO,_SSD1306,-GFX-Library}\" -i \"external/Adafruit{_BusIO,_SSD1306,-GFX-Library}/*.{c,cpp,h}\"",
