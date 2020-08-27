@@ -42,8 +42,8 @@ void setup()
     pinMode(c_UIButtonPin, INPUT_PULLUP);
 
     // Configure devices
-    g_Display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Generate display voltage from 3.3V internally, 0x3C = I2C address
-    g_Display.display(); // Display logo
+    g_Display.begin();
+    g_Display.display();  // Display logo
 
     delay(2000);
 
