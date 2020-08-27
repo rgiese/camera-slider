@@ -43,6 +43,25 @@ void setup()
 
     // Configure devices
     g_Display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Generate display voltage from 3.3V internally, 0x3C = I2C address
+    g_Display.display(); // Display logo
+
+    delay(2000);
+
+    g_Display.clearDisplay();
+    g_Display.display();
+
+    delay(2000);
+
+    g_Display.invertDisplay(true);
+    delay(2000);
+
+    g_Display.invertDisplay(false);
+
+    g_Display.setTextSize(1);
+    g_Display.setTextColor(SSD1306_WHITE);
+    g_Display.setCursor(0, 0);
+    g_Display.println("Hello world!");
+    g_Display.setCursor(0, 0);
     g_Display.display();
 
     // Request connection to cloud (not blocking)
