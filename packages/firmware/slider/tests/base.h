@@ -19,12 +19,14 @@
 #include "mocks/io.h"
 #include "mocks/locks.h"
 #include "mocks/particle.h"
+#include "mocks/print.h"
 #include "mocks/serial.h"
 #include "mocks/system.h"
 #include "mocks/time.h"
 #include "mocks/wifi.h"
 #include "mocks/wire.h"
 
+#include "mocks/adafruit_gfx.h"
 #include "mocks/adafruit_ssd1306.h"
 
 // Code-under-test
