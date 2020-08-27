@@ -16,7 +16,7 @@ PRODUCT_VERSION(1);  // Increment for each release
 
 pin_t constexpr c_UIButtonPin = D2;
 
-Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
+Adafruit_SSD1306 g_Display = Adafruit_SSD1306(D4);
 
 //
 // Declarations
@@ -58,10 +58,11 @@ void setup()
     g_Display.invertDisplay(false);
 
     g_Display.setTextSize(1);
-    g_Display.setTextColor(SSD1306_WHITE);
+    //g_Display.setTextColor(SSD1306_WHITE);
+    g_Display.clearDisplay();
     g_Display.setCursor(0, 0);
-    g_Display.println("Hello world!");
-    g_Display.setCursor(0, 0);
+    g_Display.write(0); g_Display.write(1);
+    //g_Display.setCursor(0, 0);
     g_Display.display();
 
     // Request connection to cloud (not blocking)
