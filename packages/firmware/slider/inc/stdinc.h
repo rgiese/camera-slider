@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef IS_TEST_BUILD
+#include <Particle.h>
+#endif
+
 #include <math.h>
 #include <mutex>
 
