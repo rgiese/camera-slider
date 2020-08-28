@@ -9,4 +9,4 @@
 	url = https://github.com/rgiese/Adafruit_BusIO.git
 [submodule "packages/firmware/external/tic-arduino"]
 	path = packages/firmware/external/tic-arduino
-	url = https://github.com/pololu/tic-arduino.git
+	url = https://github.com/rgiese/tic-arduino.git
