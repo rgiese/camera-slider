@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "CameraSlider-Default",
+            "includePath": [
+                "${workspaceFolder}/packages/firmware/external/**", "${workspaceFolder}/../device-os/**", "${workspaceFolder}/packages/firmware/slider/**"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
