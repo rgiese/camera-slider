@@ -7,3 +7,6 @@
 [submodule "packages/firmware/external/Adafruit_BusIO"]
 	path = packages/firmware/external/Adafruit_BusIO
 	url = https://github.com/rgiese/Adafruit_BusIO.git
+[submodule "packages/firmware/external/tic-arduino"]
+	path = packages/firmware/external/tic-arduino
+	url = https://github.com/pololu/tic-arduino.git
