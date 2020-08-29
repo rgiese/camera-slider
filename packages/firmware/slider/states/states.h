@@ -7,22 +7,16 @@ extern TicI2C g_MotorController;
 // Our state machine is articulated through transient objects derived from StateRoot.
 // The lifetime of each state object is bound to the lifetime of the given state.
 //
+// The StateKeeper will transition state objects on loop ticks only
+// so we can make sure only one state object is alive at a time.
+//
 
 // Forward declarations
-class StateRoot;
+class StateKeeper;
 
 class InitializingMotorState;
 class MotorHomingReverseState;
 class MotorInitializedState;
-
-// Global state pointer
-std::unique_ptr<StateRoot> g_State;
-
-template <typename State>
-void transitionTo()
-{
-    g_State.reset(new State());
-}
 
 //
 // State root
@@ -38,8 +32,12 @@ public:
     virtual char const* getName() = 0;
 
     // All handlers (optional to implement)
-    virtual void onLoop(){};
     virtual void onUIButtonPressed(){};
+
+protected:
+    // Invoked via onLoop in StateKeeper
+    friend class StateKeeper;
+    virtual void onLoop(){};
 
 private:
     // Non-copyable
@@ -47,10 +45,82 @@ private:
     StateRoot& operator=(StateRoot const&) = delete;
 };
 
+template <typename _Derived>
+class StateRootBase : public StateRoot
+{
+protected:
+    // Invoked via StateCreatorFn in StateKeeper
+    friend class StateKeeper;
+    static StateRoot* createInstance()
+    {
+        return new _Derived();
+    }
+};
+
+//
+// State keeper
+//
+
+class StateKeeper
+{
+public:
+    typedef StateRoot* (*StateCreatorFn)();
+
+public:
+    StateKeeper(){};
+
+    // For use by main code
+    StateRoot* operator->() const
+    {
+        return m_CurrentState.get();
+    };
+
+    void onLoop()
+    {
+        if (m_RequestedStateCreator)
+        {
+            // Delete current state object
+            m_CurrentState.release();
+
+            // Save off creator functor
+            StateCreatorFn const requestedStateCreator = m_RequestedStateCreator;
+
+            // Reset requested creator function in case it's already updated during the new state's constructor
+            m_RequestedStateCreator = nullptr;
+
+            // Invoke creator functor and store returned state object
+            m_CurrentState.reset(requestedStateCreator());
+        }
+
+        if (m_CurrentState)
+        {
+            m_CurrentState->onLoop();
+        }
+    }
+
+    // For use by state objects
+    template <typename State>
+    void RequestState()
+    {
+        m_RequestedStateCreator = &State::createInstance;
+    }
+
+private:
+    std::unique_ptr<StateRoot> m_CurrentState;
+    StateCreatorFn m_RequestedStateCreator;
+
+private:
+    // Non-copyable
+    StateKeeper(StateKeeper const&) = delete;
+    StateKeeper& operator=(StateKeeper const&) = delete;
+};
+
+StateKeeper g_State;
+
 //
 // Initializing motor
 //
-class InitializingMotorState : public StateRoot
+class InitializingMotorState : public StateRootBase<InitializingMotorState>
 {
 public:
     char const* getName() override
@@ -68,7 +138,7 @@ public:
         // Try to initialize motor
         if (tryInitializeMotor())
         {
-            transitionTo<MotorHomingReverseState>();
+            g_State.RequestState<MotorHomingReverseState>();
             return;
         }
     }
@@ -102,7 +172,7 @@ private:
 //
 // Homing motor to reverse end switch
 //
-class MotorHomingReverseState : public StateRoot
+class MotorHomingReverseState : public StateRootBase<MotorHomingReverseState>
 {
 public:
     char const* getName() override
@@ -116,7 +186,7 @@ public:
 
         if (g_MotorController.getOperationState() != TicOperationState::Normal)
         {
-            transitionTo<InitializingMotorState>();
+            g_State.RequestState<InitializingMotorState>();
             return;
         }
 
@@ -128,7 +198,7 @@ public:
         if (!g_MotorController.getHomingActive())
         {
             // Homing complete
-            transitionTo<MotorInitializedState>();
+            g_State.RequestState<MotorInitializedState>();
         }
     }
 };
@@ -136,7 +206,7 @@ public:
 //
 // Motor has been initalized
 //
-class MotorInitializedState : public StateRoot
+class MotorInitializedState : public StateRootBase<MotorInitializedState>
 {
 public:
     char const* getName() override

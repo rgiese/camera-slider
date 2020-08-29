@@ -63,7 +63,7 @@ void setup()
     }
 
     // Configure state
-    g_State.reset(new InitializingMotorState());
+    g_State.RequestState<InitializingMotorState>();
 }
 
 
@@ -82,7 +82,7 @@ void loop()
     g_UIButton.onLoop();
 
     // Advance state machine
-    g_State->onLoop();
+    g_State.onLoop();
 
     // Print debug stats
     if (s_LoopCounter % 200 == 0)
