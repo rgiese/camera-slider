@@ -1,4 +1,5 @@
 #include "inc/stdinc.h"
+#include "inc/Button.h"
 #include <Tic.h>
 
 //
@@ -8,6 +9,12 @@
 PRODUCT_ID(11817);
 PRODUCT_VERSION(1);  // Increment for each release
 
+//
+// Declarations
+//
+
+void dumpMotorControllerState();
+void onUIButtonPressed();
 
 //
 // Globals
@@ -18,12 +25,7 @@ uint8_t constexpr c_MotorControllerI2CAddress = 14;
 
 Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
 TicI2C g_MotorController(c_MotorControllerI2CAddress);
-
-//
-// Declarations
-//
-
-void dumpMotorControllerState();
+Button g_UIButton(c_UIButtonPin, &onUIButtonPressed);
 
 //
 // Setup
@@ -72,13 +74,18 @@ void setup()
 
 void loop()
 {
-    dumpMotorControllerState();
+    static uint16_t s_LoopCounter = 0;
 
+    // Process recurring UI events
+    g_UIButton.onLoop();
+
+    if (s_LoopCounter % 200 == 0)
     {
-        Activity loopDelayActivity("LoopDelay");
-
-        delay(1000);
+        dumpMotorControllerState();
     }
+
+    delay(10);
+    ++s_LoopCounter;
 }
 
 //
@@ -251,4 +258,9 @@ void dumpMotorControllerState()
                         isReverseLimitActive ? "yes" : "no",
                         isHoming ? "yes" : "no");
     }
+}
+
+void onUIButtonPressed()
+{
+    Serial.println(">>> Button pressed!");
 }
