@@ -50,6 +50,7 @@ void setup()
     g_Display.begin();
     setDisplay("Starting...");
 
+    // Delay for debugging (give serial monitor time to attach)
     delay(5000);
 
     // Configure motor controller
