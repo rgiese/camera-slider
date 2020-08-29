@@ -5,7 +5,8 @@
 #endif
 
 #include <math.h>
-#include <mutex>
+
+#include <memory>
 
 // Dependencies
 #ifndef IS_TEST_BUILD
@@ -16,3 +17,7 @@
 // Core definitions
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
+
+// Globals
+extern void setDisplay(char const* const szText);
+extern void dumpMotorControllerState();

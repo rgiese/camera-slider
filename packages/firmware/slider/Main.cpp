@@ -2,6 +2,8 @@
 #include "inc/Button.h"
 #include <Tic.h>
 
+#include "states/states.h"
+
 //
 // Particle configuration
 //
@@ -13,19 +15,16 @@ PRODUCT_VERSION(1);  // Increment for each release
 // Declarations
 //
 
-void dumpMotorControllerState();
 void onUIButtonPressed();
 
 //
 // Globals
 //
 
-pin_t constexpr c_UIButtonPin = D2;
-uint8_t constexpr c_MotorControllerI2CAddress = 14;
-
 Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
-TicI2C g_MotorController(c_MotorControllerI2CAddress);
-Button g_UIButton(c_UIButtonPin, &onUIButtonPressed);
+TicI2C g_MotorController(14 /* default I2C address */);
+Button g_UIButton(D2, &onUIButtonPressed);
+
 
 //
 // Setup
@@ -38,33 +37,33 @@ SYSTEM_MODE(SEMI_AUTOMATIC);  // defer networking connection until explicit call
 
 void setup()
 {
+    //
+    // Configure system
+    //
+
     // Configure debugging output
     Serial.begin();
     Serial.println("Slider started.");
 
-    // Configure pins
-    pinMode(c_UIButtonPin, INPUT_PULLUP);
-
     // Configure display
     g_Display.begin();
+    setDisplay("Starting...");
 
-    g_Display.clearDisplay();
-    g_Display.setTextSize(2);
-    g_Display.setTextColor(SSD1306_WHITE);
-    g_Display.setCursor(0, 0);
-    g_Display.println("Starting...");
-    g_Display.display();
+    delay(5000);
 
     // Configure motor controller
+    delay(100);  // Give motor controller time to start
+
     g_MotorController.setProduct(TicProduct::T500);
-    g_MotorController.deenergize();
-    g_MotorController.exitSafeStart();
 
     // Request connection to cloud (not blocking)
     {
         Activity connectActivity("Connect");
         Particle.connect();
     }
+
+    // Configure state
+    g_State.reset(new InitializingMotorState());
 }
 
 
@@ -76,14 +75,24 @@ void loop()
 {
     static uint16_t s_LoopCounter = 0;
 
-    // Process recurring UI events
+    // Reset watchdog on motor controller
+    g_MotorController.resetCommandTimeout();
+
+    // Deliver interrupt-sourced events
     g_UIButton.onLoop();
 
+    // Advance state machine
+    g_State->onLoop();
+
+    // Print debug stats
     if (s_LoopCounter % 200 == 0)
     {
+        Serial.printlnf("-- Current state: %s", g_State->getName());
+
         dumpMotorControllerState();
     }
 
+    // Loop around (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
     delay(10);
     ++s_LoopCounter;
 }
@@ -91,6 +100,19 @@ void loop()
 //
 // Helpers
 //
+
+void setDisplay(char const* const szText)
+{
+    g_Display.clearDisplay();
+
+    g_Display.setTextSize(1);
+    g_Display.setTextColor(SSD1306_WHITE);
+
+    g_Display.setCursor(0, 0);
+    g_Display.println(szText);
+
+    g_Display.display();
+}
 
 void dumpMotorControllerState()
 {
@@ -130,7 +152,7 @@ void dumpMotorControllerState()
     // Controller errors
     {
         uint16_t const errorStatus = g_MotorController.getErrorStatus();
-        Serial.print(" Errors: ");
+        Serial.print("  Errors: ");
 
         if (errorStatus & (1 << static_cast<uint8_t>(TicError::IntentionallyDeenergized)))
         {
@@ -175,6 +197,8 @@ void dumpMotorControllerState()
         {
             Serial.print("error-line-high ");
         }
+
+        Serial.println("");
     }
 
     // Motor configuration: physical
@@ -258,9 +282,11 @@ void dumpMotorControllerState()
                         isReverseLimitActive ? "yes" : "no",
                         isHoming ? "yes" : "no");
     }
+
+    Serial.println("");
 }
 
 void onUIButtonPressed()
 {
-    Serial.println(">>> Button pressed!");
+    g_State->onUIButtonPressed();
 }
