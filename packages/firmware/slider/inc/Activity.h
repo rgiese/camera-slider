@@ -3,13 +3,17 @@
 class Activity
 {
 public:
-    Activity(char const* const szName)
+    Activity(char const* const szName, unsigned long const minimumTimeToReport_msec = 0)
         : m_szName(szName)
         , m_StartTime_msec(millis())
+        , m_MinimumTimeToReport_msec(minimumTimeToReport_msec)
     {
-        WITH_LOCK(Serial)
+        if (!m_MinimumTimeToReport_msec)
         {
-            Serial.printlnf(">> %s (SSID: %s)", m_szName, getSSID());
+            WITH_LOCK(Serial)
+            {
+                Serial.printlnf(">> %s (SSID: %s)", m_szName, getSSID());
+            }
         }
     }
 
@@ -18,15 +22,23 @@ public:
         unsigned long const endTime_msec = millis();
         unsigned long const duration_msec = endTime_msec - m_StartTime_msec;
 
-        WITH_LOCK(Serial)
+        if (duration_msec > m_MinimumTimeToReport_msec)
         {
-            Serial.printlnf("<< %s (%lu msec) (SSID: %s)", m_szName, duration_msec, getSSID());
+            WITH_LOCK(Serial)
+            {
+                Serial.printlnf("%s %s (%lu msec) (SSID: %s)",
+                                m_MinimumTimeToReport_msec ? "<>" : "<<",
+                                m_szName,
+                                duration_msec,
+                                getSSID());
+            }
         }
     }
 
 private:
     char const* const m_szName;
     unsigned long const m_StartTime_msec;
+    unsigned long const m_MinimumTimeToReport_msec;
 
     char const* getSSID() const
     {
