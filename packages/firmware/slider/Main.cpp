@@ -16,6 +16,7 @@ PRODUCT_VERSION(1);  // Increment for each release
 //
 
 void onUIButtonPressed();
+void stateMachineThreadFn(void*);
 
 //
 // Globals
@@ -30,10 +31,10 @@ Button g_UIButton(D2, &onUIButtonPressed);
 // Setup
 //
 
-SYSTEM_THREAD(ENABLED);       // separate app thread from networking thread, c.f.
-                              // https://docs.particle.io/reference/device-os/firmware/photon/#system-thread
-SYSTEM_MODE(SEMI_AUTOMATIC);  // defer networking connection until explicit call, c.f.
-                              // https://docs.particle.io/reference/device-os/firmware/photon/#semi-automatic-mode
+SYSTEM_THREAD(ENABLED);  // separate app thread from networking thread, c.f.
+                         // https://docs.particle.io/reference/device-os/firmware/photon/#system-thread
+SYSTEM_MODE(MANUAL);     // defer networking connection until explicit call, c.f.
+                         // https://docs.particle.io/reference/device-os/firmware/argon/#system-modes
 
 void setup()
 {
@@ -62,8 +63,16 @@ void setup()
         Particle.connect();
     }
 
-    // Configure state
-    g_State.RequestState<InitializingMotorState>();
+    // Kick off state machine
+    {
+        os_thread_t threadHandle;
+        os_thread_create(&threadHandle,
+                         "stateMachine",
+                         7,  // Minimum priority required so we don't get preempted by WiFi management thread
+                         &stateMachineThreadFn,
+                         nullptr,
+                         OS_THREAD_STACK_SIZE_DEFAULT);
+    }
 }
 
 
@@ -73,29 +82,51 @@ void setup()
 
 void loop()
 {
-    static uint16_t s_LoopCounter = 0;
+    delay(1000);
 
-    // Reset watchdog on motor controller
-    g_MotorController.resetCommandTimeout();
-
-    // Deliver interrupt-sourced events
-    g_UIButton.onLoop();
-
-    // Advance state machine
-    g_State.onLoop();
-
-    // Print debug stats
-    if (s_LoopCounter % 200 == 0)
+    if (Particle.connected())
     {
-        Serial.printlnf("-- Current state: %s", g_State->getName());
-
-        dumpMotorControllerState();
+        Particle.process();
     }
-
-    // Loop around (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
-    delay(10);
-    ++s_LoopCounter;
 }
+
+
+//
+// State machine thread
+//
+
+void stateMachineThreadFn(void*)
+{
+    // Configure state
+    g_State.RequestState<InitializingMotorState>();
+
+    // Run state machine
+    system_tick_t previousWakeTime = 0;
+
+    for (uint16_t loopCounter = 0; /* forever */; ++loopCounter)
+    {
+        // Reset watchdog on motor controller
+        g_MotorController.resetCommandTimeout();
+
+        // Advance state machine
+        g_State.onLoop();
+
+        // Deliver interrupt-sourced events
+        g_UIButton.onLoop();
+
+        // Print debug stats
+        if (loopCounter % 200 == 0)
+        {
+            Serial.printlnf("-- Current state: %s", g_State->getName());
+
+            dumpMotorControllerState();
+        }
+
+        // Loop delay (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
+        os_thread_delay_until(&previousWakeTime, 100 /* msec */);
+    }
+}
+
 
 //
 // Helpers
