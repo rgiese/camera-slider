@@ -18,10 +18,8 @@
 #include <Tic.h>
 #include "TicTools.h"
 
-#ifndef IS_TEST_BUILD
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#endif
 
 // Globals
 extern TicI2C g_MotorController;

@@ -16,6 +16,7 @@ typedef uint16_t pin_t;
 #include "features/particle.h"
 #include "features/pinmap_defines.h"
 #include "features/serial.h"
+#include "features/string.h"
 #include "features/system.h"
 #include "features/time.h"
 #include "features/wifi.h"

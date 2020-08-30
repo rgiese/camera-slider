@@ -15,8 +15,5 @@
 // Mocks
 #include <Arduino.h>  // from mocks/platform
 
-#include "mocks/adafruit_gfx.h"
-#include "mocks/adafruit_ssd1306.h"
-
 // Code-under-test
 #include "inc/stdinc.h"

@@ -1,9 +1,9 @@
 #pragma once
 
-class Wire
+class TwoWire
 {
 public:
-    Wire()
+    TwoWire()
     {
     }
 
@@ -21,3 +21,5 @@ public:
     {
     }
 };
+
+extern TwoWire Wire;

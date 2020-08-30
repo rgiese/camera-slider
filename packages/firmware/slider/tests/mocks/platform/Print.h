@@ -13,3 +13,5 @@ public:
     void println(const char*){};
     void printlnf(const char*, ...){};
 };
+
+class __FlashStringHelper;
