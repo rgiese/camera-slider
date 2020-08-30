@@ -12,6 +12,7 @@
 
 // Dependencies
 #include <Tic.h>
+#include "TicTools.h"
 
 #ifndef IS_TEST_BUILD
 #include <Adafruit_GFX.h>

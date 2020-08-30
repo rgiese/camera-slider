@@ -10,6 +10,7 @@ void MotorHomingReverseState::onEnteringState()
         return;
     }
 
+    g_MotorController.setMaxSpeed(TicTools::Speed::toTicUnits(TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec));
     g_MotorController.goHomeReverse();
 }
 
