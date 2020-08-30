@@ -38,7 +38,7 @@ class TestCommand extends Command {
     // Build
     this.log(`Building tests...`);
 
-    const sourceFiles = glob.sync(`${testsRoot}/*.cpp`);
+    const sourceFiles = glob.sync(`${testsRoot}/**/*.cpp`);
     const testExecutable = path.join(outputRoot, "tests");
 
     execSync(
