@@ -25,7 +25,6 @@
 
 // Forward declarations
 extern void setDisplay(char const* const szText);
-extern void dumpMotorControllerState();
 
 // Globals
 extern TicI2C g_MotorController;
