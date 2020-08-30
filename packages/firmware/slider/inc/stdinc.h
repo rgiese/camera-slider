@@ -4,6 +4,8 @@
 #include <Particle.h>
 #endif
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <math.h>
 
 #include <memory>

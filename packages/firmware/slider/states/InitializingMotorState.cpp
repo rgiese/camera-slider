@@ -27,7 +27,21 @@ void InitializingMotorState::onLoop()
         if (commandTimeout > 1000 /* msec */)
         {
             // Unsafe command timeout
-            g_StateKeeper.RequestState(new UnrecoverableErrorState());
+            g_StateKeeper.RequestState(new UnrecoverableErrorState("Unsafe command timeout %ums", commandTimeout));
+            return;
+        }
+    }
+
+    {
+        uint8_t softErrorResponse;
+
+        g_MotorController.getSetting(0x53, sizeof(softErrorResponse), &softErrorResponse);
+
+        if (softErrorResponse != 0 /* de-energize */)
+        {
+            // Unsafe soft error response
+            g_StateKeeper.RequestState(
+                new UnrecoverableErrorState("Unsafe soft error response 0x%02x", softErrorResponse));
             return;
         }
     }
