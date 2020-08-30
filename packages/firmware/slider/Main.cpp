@@ -1,8 +1,5 @@
 #include "inc/stdinc.h"
 #include "inc/Button.h"
-#include <Tic.h>
-
-#include "states/states.h"
 
 //
 // Particle configuration
@@ -99,7 +96,7 @@ void loop()
 void stateMachineThreadFn(void*)
 {
     // Configure state
-    g_State.RequestState<InitializingMotorState>();
+    g_StateKeeper.RequestState(new InitializingMotorState());
 
     // Run state machine
     system_tick_t previousWakeTime = 0;
@@ -110,7 +107,7 @@ void stateMachineThreadFn(void*)
         g_MotorController.resetCommandTimeout();
 
         // Advance state machine
-        g_State.onLoop();
+        g_StateKeeper.onLoop();
 
         // Deliver interrupt-sourced events
         g_UIButton.onLoop();
@@ -118,7 +115,14 @@ void stateMachineThreadFn(void*)
         // Print debug stats
         if (loopCounter % 200 == 0)
         {
-            Serial.printlnf("-- Current state: %s", g_State->getName());
+            if (g_StateKeeper.CurrentState())
+            {
+                Serial.printlnf("-- Current state: %s", g_StateKeeper.CurrentState()->getName());
+            }
+            else
+            {
+                Serial.println("-- Current state: <stateless>");
+            }
 
             dumpMotorControllerState();
         }
@@ -320,5 +324,8 @@ void dumpMotorControllerState()
 
 void onUIButtonPressed()
 {
-    g_State->onUIButtonPressed();
+    if (g_StateKeeper.CurrentState())
+    {
+        g_StateKeeper.CurrentState()->onUIButtonPressed();
+    }
 }
