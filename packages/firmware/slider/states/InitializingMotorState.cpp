@@ -28,8 +28,8 @@ void InitializingMotorState::onLoop()
         if (commandTimeout > 1000 /* msec */)
         {
             // Unsafe command timeout
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Unsafe command timeout %ums", commandTimeout));
-            return;
+            return g_StateKeeper.RequestState(
+                new UnrecoverableErrorState("Unsafe command timeout %ums", commandTimeout));
         }
     }
 
@@ -42,9 +42,8 @@ void InitializingMotorState::onLoop()
         if (softErrorResponse != 0 /* de-energize */)
         {
             // Unsafe soft error response
-            g_StateKeeper.RequestState(
+            return g_StateKeeper.RequestState(
                 new UnrecoverableErrorState("Unsafe soft error response 0x%02x", softErrorResponse));
-            return;
         }
     }
 
@@ -61,8 +60,7 @@ void InitializingMotorState::onLoop()
 
         if (configBitSet02 & (1 << static_cast<int>(ConfigBitSet02::AutoHoming)))
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Auto-homing should be disabled"));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState("Auto-homing should be disabled"));
         }
     }
 
@@ -80,14 +78,12 @@ void InitializingMotorState::onLoop()
 
         if (configBitSet03 & (1 << static_cast<int>(ConfigBitSet03::DisableSafeStart)))
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Safe start should be enabled"));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState("Safe start should be enabled"));
         }
 
         if (configBitSet03 & (1 << static_cast<int>(ConfigBitSet03::AutoHomingForward)))
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Auto-homing forward should be disabled"));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState("Auto-homing forward should be disabled"));
         }
     }
 
@@ -101,16 +97,14 @@ void InitializingMotorState::onLoop()
 
         if (TicTools::Speed::fromTicUnits(homingSpeedTowards) > TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec)
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Unsafe homing (towards) speed %u",
-                                                                   TicTools::Speed::fromTicUnits(homingSpeedTowards)));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState(
+                "Unsafe homing (towards) speed %u", TicTools::Speed::fromTicUnits(homingSpeedTowards)));
         }
 
         if (TicTools::Speed::fromTicUnits(homingSpeedAway) > TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec)
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Unsafe homing (away) speed %u",
-                                                                   TicTools::Speed::fromTicUnits(homingSpeedAway)));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState(
+                "Unsafe homing (away) speed %u", TicTools::Speed::fromTicUnits(homingSpeedAway)));
         }
     }
 
@@ -124,8 +118,7 @@ void InitializingMotorState::onLoop()
 
             if (txPinConfiguration != 8 /* limit switch forward */)
             {
-                g_StateKeeper.RequestState(new UnrecoverableErrorState("Forward limit switch not configured"));
-                return;
+                return g_StateKeeper.RequestState(new UnrecoverableErrorState("Forward limit switch not configured"));
             }
 
             uint8_t limitSwitchForwardMap;
@@ -134,8 +127,7 @@ void InitializingMotorState::onLoop()
 
             if (limitSwitchForwardMap != (1 << 2) /* limit switch forward is TX */)
             {
-                g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch forward misconfigured"));
-                return;
+                return g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch forward misconfigured"));
             }
         }
 
@@ -147,8 +139,7 @@ void InitializingMotorState::onLoop()
 
             if (rxPinConfiguration != 9 /* limit switch reverse */)
             {
-                g_StateKeeper.RequestState(new UnrecoverableErrorState("Reverse limit switch not configured"));
-                return;
+                return g_StateKeeper.RequestState(new UnrecoverableErrorState("Reverse limit switch not configured"));
             }
 
             uint8_t limitSwitchReverseMap;
@@ -157,8 +148,7 @@ void InitializingMotorState::onLoop()
 
             if (limitSwitchReverseMap != (1 << 3) /* limit switch reverse is RX */)
             {
-                g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch reverse misconfigured"));
-                return;
+                return g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch reverse misconfigured"));
             }
         }
 
@@ -169,8 +159,7 @@ void InitializingMotorState::onLoop()
 
         if (!(!!(switchPolarityMap & (1 << 2)) && !!(switchPolarityMap & (1 << 3))))
         {
-            g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch polarity misconfigured"));
-            return;
+            return g_StateKeeper.RequestState(new UnrecoverableErrorState("Limit switch polarity misconfigured"));
         }
     }
 
@@ -200,5 +189,5 @@ void InitializingMotorState::onLoop()
     g_MotorController.exitSafeStart();
 
     // Advance state
-    g_StateKeeper.RequestState(new MotorHomingReverseState());
+    return g_StateKeeper.RequestState(new MotorHomingReverseState());
 }

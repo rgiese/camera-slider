@@ -6,8 +6,7 @@ void MotorHomingReverseState::onEnteringState()
 
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     g_MotorController.setMaxSpeed(TicTools::Speed::toTicUnits(TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec));
@@ -18,13 +17,12 @@ void MotorHomingReverseState::onLoop()
 {
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     if (!g_MotorController.getHomingActive())
     {
         // Homing complete
-        g_StateKeeper.RequestState(new MotorInitializedState());
+        return g_StateKeeper.RequestState(new MotorInitializedState());
     }
 }

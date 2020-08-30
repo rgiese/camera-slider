@@ -7,14 +7,12 @@ void MotorFindingForwardRangeState::onEnteringState()
     // Make sure motor is ready and at a known position
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     if (g_MotorController.getPositionUncertain())
     {
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     // Set up slow homing speed since this is a bit of a janky process
@@ -33,8 +31,7 @@ void MotorFindingForwardRangeState::onLoop()
     {
         Serial.println("!! Motor controller exited normal state - abandoning forward range finding");
 
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     if (g_MotorController.getPositionUncertain())
@@ -43,8 +40,7 @@ void MotorFindingForwardRangeState::onLoop()
         Serial.printlnf("!! Max forward position: %d", m_LatestCertainPosition);
 
         // Re-home motor reverse
-        g_StateKeeper.RequestState(new MotorHomingReverseState());
-        return;
+        return g_StateKeeper.RequestState(new MotorHomingReverseState());
     }
 
     // Save latest position

@@ -10,8 +10,7 @@ void MotorInitializedState::onLoop()
 {
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
-        g_StateKeeper.RequestState(new InitializingMotorState());
-        return;
+        return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 }
 
