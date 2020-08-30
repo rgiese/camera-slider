@@ -15,6 +15,7 @@ BinPackArguments: false
 BinPackParameters: false
 
 AccessModifierOffset: -4
+NamespaceIndentation: All
 
 BreakBeforeBraces: Custom
 BraceWrapping:   
