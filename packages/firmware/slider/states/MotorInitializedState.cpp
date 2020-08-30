@@ -14,3 +14,9 @@ void MotorInitializedState::onLoop()
         return;
     }
 }
+
+void MotorInitializedState::onUIButtonPressed()
+{
+    // TEMPORARY: Testing other states
+    g_StateKeeper.RequestState(new MotorFindingForwardRangeState());
+}

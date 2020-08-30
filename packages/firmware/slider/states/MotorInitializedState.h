@@ -10,4 +10,6 @@ public:
 
     void onEnteringState() override;
     void onLoop() override;
+
+    void onUIButtonPressed() override;
 };
