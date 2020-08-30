@@ -2,7 +2,7 @@
 
 void MotorHomingReverseState::onEnteringState()
 {
-    setDisplay("Homing motor");
+    Display::set("Homing motor");
 
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {

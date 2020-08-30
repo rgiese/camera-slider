@@ -2,7 +2,7 @@
 
 void MotorFindingForwardRangeState::onEnteringState()
 {
-    setDisplay("Finding forward range");
+    Display::set("Finding forward range");
 
     // Make sure motor is ready and at a known position
     if (g_MotorController.getOperationState() != TicOperationState::Normal)

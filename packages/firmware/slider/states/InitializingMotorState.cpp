@@ -3,7 +3,7 @@
 
 void InitializingMotorState::onEnteringState()
 {
-    setDisplay("Initializing motor");
+    Display::set("Initializing motor");
 }
 
 void InitializingMotorState::onLoop()

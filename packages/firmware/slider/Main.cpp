@@ -19,7 +19,6 @@ void stateMachineThreadFn(void*);
 // Globals
 //
 
-Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
 TicI2C g_MotorController(14 /* default I2C address */);
 Button g_UIButton(D2, &onUIButtonPressed);
 
@@ -44,12 +43,11 @@ void setup()
     Serial.println("Slider started.");
 
     // Configure display
-    g_Display.begin();
-    setDisplay("Starting...");
+    Display::begin();
+    Display::set("Starting...");
 
     // Configure motor controller
     delay(100);  // Give motor controller time to start
-
     g_MotorController.setProduct(TicProduct::T500);
 
     // Request connection to cloud (not blocking)
@@ -133,19 +131,6 @@ void stateMachineThreadFn(void*)
 //
 // Helpers
 //
-
-void setDisplay(char const* const szText)
-{
-    g_Display.clearDisplay();
-
-    g_Display.setTextSize(1);
-    g_Display.setTextColor(SSD1306_WHITE);
-
-    g_Display.setCursor(0, 0);
-    g_Display.println(szText);
-
-    g_Display.display();
-}
 
 void onUIButtonPressed()
 {

@@ -10,6 +10,10 @@
 
 #include <memory>
 
+// Core definitions
+#include "inc/CoreDefs.h"
+#include "inc/Activity.h"
+
 // Dependencies
 #include <Tic.h>
 #include "TicTools.h"
@@ -19,15 +23,9 @@
 #include <Adafruit_SSD1306.h>
 #endif
 
-// Core definitions
-#include "inc/CoreDefs.h"
-#include "inc/Activity.h"
-
-// Forward declarations
-extern void setDisplay(char const* const szText);
-
 // Globals
 extern TicI2C g_MotorController;
 
 // Features
+#include "inc/Display.h"
 #include "states/states.h"
