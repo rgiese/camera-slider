@@ -8,7 +8,6 @@ MockSerial Serial;
 MockSystem System;
 MockTime Time;
 MockWiFi WiFi;
-MockWire Wire;
 
 // Bogus test case
 TEST_CASE("Tests execute", "[basics]")

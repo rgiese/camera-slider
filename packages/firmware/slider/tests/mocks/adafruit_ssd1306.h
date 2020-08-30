@@ -7,7 +7,7 @@
 class Adafruit_SSD1306 : public Adafruit_GFX
 {
 public:
-    Adafruit_SSD1306(uint8_t w, uint8_t h, MockWire *twi){};
+    Adafruit_SSD1306(uint8_t w, uint8_t h, Wire *twi){};
 
 public:
     void begin(uint8_t vcs = 0, uint8_t addr = 0){};

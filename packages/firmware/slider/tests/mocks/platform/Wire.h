@@ -1,9 +1,9 @@
 #pragma once
 
-class MockWire
+class Wire
 {
 public:
-    MockWire()
+    Wire()
     {
     }
 
@@ -21,5 +21,3 @@ public:
     {
     }
 };
-
-extern MockWire Wire;
