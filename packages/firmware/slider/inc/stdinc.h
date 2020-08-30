@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef IS_TEST_BUILD
 #include <Particle.h>
-#endif
 
 #include <stdio.h>
 #include <stdarg.h>
