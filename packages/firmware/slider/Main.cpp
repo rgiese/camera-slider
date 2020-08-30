@@ -249,15 +249,13 @@ void dumpMotorControllerState()
     // Motor configuration: logical
     {
         int32_t const maxSpeed = g_MotorController.getMaxSpeed();
-        int32_t const startingSpeed = g_MotorController.getStartingSpeed();
         int32_t const maxAcceleration = g_MotorController.getMaxAccel();
         int32_t const maxDeceleration = g_MotorController.getMaxDecel();
 
-        Serial.printlnf(
-            "  Max speed: %d microsteps/10Ksec, starting speed: %d microsteps/10Ksec", maxSpeed, startingSpeed);
-        Serial.printlnf("  Max acceleration: %d microsteps/sec*100sec, max deceleration: %d microsteps/sec*100sec",
-                        maxAcceleration,
-                        maxDeceleration);
+        Serial.printlnf("  Max speed: %d steps/sec", TicTools::Speed::fromTicUnits(maxSpeed));
+        Serial.printlnf("  Max acceleration: %d steps/sec^2, max deceleration: %d steps/sec^2",
+                        TicTools::Acceleration::fromTicUnits(maxAcceleration),
+                        TicTools::Acceleration::fromTicUnits(maxDeceleration));
 
         TicPlanningMode const planningMode = g_MotorController.getPlanningMode();
 
