@@ -12,15 +12,24 @@ void TrackingDesiredPositionState::onLoop()
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
+
+    if (g_MotorController.getPositionUncertain())
+    {
+        return g_StateKeeper.RequestState(new HomingState());
+    }
 }
 
 bool TrackingDesiredPositionState::onRequest(Request const& request)
 {
-    // TEMPORARY: Testing other states
     switch (request.Type)
     {
         case RequestType::UIButtonPressed:
+            // TEMPORARY: Testing
             g_StateKeeper.RequestState(new FindingForwardRangeState());
+            return true;
+
+        case RequestType::DesiredPosition:
+            g_MotorController.setTargetPosition(request.Data.DesiredPosition);
             return true;
 
         default:
