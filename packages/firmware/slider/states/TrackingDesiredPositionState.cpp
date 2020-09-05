@@ -3,7 +3,7 @@
 
 void TrackingDesiredPositionState::onEnteringState()
 {
-    Display::set("Tracking desired position");
+    g_Display.set("Tracking desired position");
 }
 
 void TrackingDesiredPositionState::onLoop()

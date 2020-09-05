@@ -42,8 +42,8 @@ void setup()
     Serial.println("Slider started.");
 
     // Configure display
-    Display::begin();
-    Display::set("Starting...");
+    g_Display.begin();
+    g_Display.set("Starting...");
 
     // Configure motor controller
     g_MotorController.begin();

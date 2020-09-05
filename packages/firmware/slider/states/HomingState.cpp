@@ -2,7 +2,7 @@
 
 void HomingState::onEnteringState()
 {
-    Display::set("Homing");
+    g_Display.set("Homing");
 
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {

@@ -14,7 +14,7 @@ UnrecoverableErrorState::UnrecoverableErrorState(char const* format, ...)
 
 void UnrecoverableErrorState::onEnteringState()
 {
-    Display::set(m_ErrorMessage);
+    g_Display.set(m_ErrorMessage);
 }
 
 void UnrecoverableErrorState::onLoop()

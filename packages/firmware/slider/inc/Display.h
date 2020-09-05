@@ -1,33 +1,23 @@
 #pragma once
 
-namespace Display
+class Display
 {
-    namespace
+public:
+    Display()
+        : m_Display(128, 32, &Wire)
     {
-        Adafruit_SSD1306 g_Display = Adafruit_SSD1306(128, 32, &Wire);
     }
 
-    inline void begin()
-    {
-        g_Display.begin();
-    }
+    void begin();
+    void set(char const* const szText);
 
-    inline void set(char const* const szText)
-    {
-        g_Display.clearDisplay();
+private:
+    Adafruit_SSD1306 m_Display;
 
-        g_Display.setTextSize(1);
-        g_Display.setTextColor(SSD1306_WHITE);
+private:
+    // Non-copyable
+    Display(Display const&) = delete;
+    Display& operator=(Display const&) = delete;
+};
 
-        g_Display.setCursor(0, 0);
-        g_Display.println(szText);
-
-        g_Display.display();
-
-        WITH_LOCK(Serial)
-        {
-            Serial.print("-- Display update: ");
-            Serial.println(szText);
-        }
-    }
-}  // namespace Display
+extern Display g_Display;
