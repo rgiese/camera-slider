@@ -104,11 +104,29 @@ void stateMachineThreadFn(void*)
         // Reset watchdog on motor controller
         g_MotorController.resetCommandTimeout();
 
-        // Advance state machine
-        g_StateKeeper.onLoop();
+        // Update Bluetooth state
+        g_Bluetooth.statusService().setReportedPosition(g_MotorController.getCurrentPosition());
 
         // Deliver interrupt-sourced events
         g_UIButton.onLoop();
+
+        // Deliver requests
+        if (g_StateKeeper.CurrentState())
+        {
+            Request request;
+            while (g_RequestQueue.try_pop(request))
+            {
+                bool const wasProcessed = g_StateKeeper.CurrentState()->onRequest(request);
+
+                if (!wasProcessed)
+                {
+                    Serial.printlnf("!! Request type %u dropped (rejected).", static_cast<int>(request.Type));
+                }
+            }
+        }
+
+        // Advance state machine
+        g_StateKeeper.onLoop();
 
         // Print debug stats
         if (loopCounter % 200 == 0)
@@ -128,8 +146,5 @@ void stateMachineThreadFn(void*)
 
 void onUIButtonPressed()
 {
-    if (g_StateKeeper.CurrentState())
-    {
-        g_StateKeeper.CurrentState()->onUIButtonPressed();
-    }
+    g_RequestQueue.push({Type : RequestType::UIButtonPressed});
 }

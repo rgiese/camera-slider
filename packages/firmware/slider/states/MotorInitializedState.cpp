@@ -14,8 +14,16 @@ void MotorInitializedState::onLoop()
     }
 }
 
-void MotorInitializedState::onUIButtonPressed()
+bool MotorInitializedState::onRequest(Request const& request)
 {
     // TEMPORARY: Testing other states
-    g_StateKeeper.RequestState(new MotorFindingForwardRangeState());
+    switch (request.Type)
+    {
+        case RequestType::UIButtonPressed:
+            g_StateKeeper.RequestState(new MotorFindingForwardRangeState());
+            return true;
+
+        default:
+            return false;
+    }
 }

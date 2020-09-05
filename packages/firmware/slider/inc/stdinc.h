@@ -9,6 +9,8 @@
 #include <math.h>
 
 #include <memory>
+#include <mutex>
+#include <queue>
 
 // Core definitions
 #include "inc/CoreDefs.h"
@@ -27,4 +29,5 @@ extern TicI2C g_MotorController;
 // Features
 #include "inc/Display.h"
 #include "inc/Bluetooth.h"
+#include "inc/Requests.h"
 #include "states/states.h"

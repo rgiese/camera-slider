@@ -7,23 +7,34 @@ class Bluetooth;
 class BluetoothStatusService
 {
 public:
-    BluetoothStatusService()
-        : m_ServiceUuid("fcccbeb7-eb63-4726-9315-e198b1e5ec1c")
-        , m_StateCharacteristic(
-              "state", BleCharacteristicProperty::READ, "dc5d99b0-303c-45c2-b7a2-af6baadc0388", m_ServiceUuid)
-    {
-    }
+    BluetoothStatusService();
 
-    void setState(char const* const stateName)
-    {
-        m_StateCharacteristic.setValue(stateName);
-    }
+    void setState(char const* const stateName);
+    void setReportedPosition(int32_t const position);
 
 private:
     friend class Bluetooth;
 
+    void begin();
+
+private:
+    static void onDesiredPositionChanged(uint8_t const* const pData,
+                                         size_t const cbData,
+                                         BlePeerDevice const& peerDevice,
+                                         void* pContext);
+
+private:
     BleUuid const m_ServiceUuid;
     BleCharacteristic m_StateCharacteristic;
+    BleCharacteristic m_ReportedPositionCharacteristic;
+    BleCharacteristic m_DesiredPositionCharacteristic;
+
+    int32_t m_LastReportedPosition;
+
+private:
+    // Non-copyable
+    BluetoothStatusService(BluetoothStatusService const&) = delete;
+    BluetoothStatusService& operator=(BluetoothStatusService const&) = delete;
 };
 
 class Bluetooth

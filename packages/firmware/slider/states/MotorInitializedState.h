@@ -11,5 +11,5 @@ public:
     void onEnteringState() override;
     void onLoop() override;
 
-    void onUIButtonPressed() override;
+    bool onRequest(Request const& request) override;
 };

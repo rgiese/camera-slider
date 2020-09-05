@@ -9,8 +9,11 @@ public:
     // Debugging tools (must implement)
     virtual char const* getName() = 0;
 
-    // All handlers (optional to implement)
-    virtual void onUIButtonPressed(){};
+    // Request handler (return true if handled)
+    virtual bool onRequest(Request const& request)
+    {
+        return false;
+    };
 
 protected:
     friend class StateKeeper;
