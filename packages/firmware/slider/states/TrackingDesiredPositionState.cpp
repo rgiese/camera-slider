@@ -13,7 +13,7 @@ void TrackingDesiredPositionState::onLoop()
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (g_MotorController.getPositionUncertain())
+    if (!g_MotorController.isPositionCertain())
     {
         return g_StateKeeper.RequestState(new HomingState());
     }

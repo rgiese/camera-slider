@@ -9,8 +9,8 @@ void HomingState::onEnteringState()
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    g_MotorController.setMaxSpeed(TicTools::Speed::toTicUnits(TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec));
-    g_MotorController.goHomeReverse();
+    g_MotorController.setMaxSpeed(MotorController::c_MaxSafeHomingSpeed_StepsPerSec);
+    g_MotorController.goHome();
 }
 
 void HomingState::onLoop()
@@ -20,7 +20,7 @@ void HomingState::onLoop()
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (!g_MotorController.getHomingActive())
+    if (!g_MotorController.isHomingActive())
     {
         // Homing complete
         return g_StateKeeper.RequestState(new TrackingDesiredPositionState());

@@ -10,13 +10,13 @@ void FindingForwardRangeState::onEnteringState()
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (g_MotorController.getPositionUncertain())
+    if (!g_MotorController.isPositionCertain())
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
     // Set up slow homing speed since this is a bit of a janky process
-    g_MotorController.setMaxSpeed(TicTools::Speed::toTicUnits(TicTools::Speed::c_MaxSafeHomingSpeed_StepsPerSec / 2));
+    g_MotorController.setMaxSpeed(MotorController::c_MaxSafeHomingSpeed_StepsPerSec / 2);
 
     // Save position
     m_LatestCertainPosition = g_MotorController.getCurrentPosition();
@@ -34,7 +34,7 @@ void FindingForwardRangeState::onLoop()
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (g_MotorController.getPositionUncertain())
+    if (!g_MotorController.isPositionCertain())
     {
         // Position now uncertain -> report latest certain position as max range
         Serial.printlnf("!! Max forward position: %d", m_LatestCertainPosition);

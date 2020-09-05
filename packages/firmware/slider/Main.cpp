@@ -19,7 +19,6 @@ void stateMachineThreadFn(void*);
 // Globals
 //
 
-TicI2C g_MotorController(14 /* default I2C address */);
 Button g_UIButton(D2, &onUIButtonPressed);
 
 
@@ -47,8 +46,7 @@ void setup()
     Display::set("Starting...");
 
     // Configure motor controller
-    delay(100);  // Give motor controller time to start
-    g_MotorController.setProduct(TicProduct::T500);
+    g_MotorController.begin();
 
     // Configure BLE
     g_Bluetooth.begin();
@@ -101,22 +99,21 @@ void stateMachineThreadFn(void*)
 
     for (uint16_t loopCounter = 0; /* forever */; ++loopCounter)
     {
-        // Reset watchdog on motor controller
-        g_MotorController.resetCommandTimeout();
+        g_MotorController.onLoop();
 
-        // Update Bluetooth state
+        // TEMPORARY: Update Bluetooth state
         g_Bluetooth.statusService().setReportedPosition(g_MotorController.getCurrentPosition());
 
-        // Deliver interrupt-sourced events
+        // Deliver interrupt-sourced events (creates Requests)
         g_UIButton.onLoop();
 
-        // Advance state machine
+        // Advance state machine (moves state, delivers Requests)
         g_StateKeeper.onLoop();
 
         // Print debug stats
         if (loopCounter % 200 == 0)
         {
-            TicTools::Debug::dumpMotorControllerState(g_MotorController);
+            g_MotorController.dumpState();
         }
 
         // Loop delay (needs to be under 1000ms so the motor controller watchdog doesn't trigger)

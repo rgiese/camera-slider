@@ -17,17 +17,13 @@
 #include "inc/Activity.h"
 
 // Dependencies
-#include <Tic.h>
-#include "TicTools.h"
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-
-// Globals
-extern TicI2C g_MotorController;
+#include <Tic.h>
 
 // Features
 #include "inc/Display.h"
 #include "inc/Bluetooth.h"
+#include "inc/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"
