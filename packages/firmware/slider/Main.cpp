@@ -50,6 +50,9 @@ void setup()
     delay(100);  // Give motor controller time to start
     g_MotorController.setProduct(TicProduct::T500);
 
+    // Configure BLE
+    g_Bluetooth.begin();
+
     // Request connection to cloud (not blocking)
     {
         Activity connectActivity("Connect");
@@ -110,15 +113,6 @@ void stateMachineThreadFn(void*)
         // Print debug stats
         if (loopCounter % 200 == 0)
         {
-            if (g_StateKeeper.CurrentState())
-            {
-                Serial.printlnf("-- Current state: %s", g_StateKeeper.CurrentState()->getName());
-            }
-            else
-            {
-                Serial.println("-- Current state: <stateless>");
-            }
-
             TicTools::Debug::dumpMotorControllerState(g_MotorController);
         }
 

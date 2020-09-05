@@ -23,5 +23,11 @@ namespace Display
         g_Display.println(szText);
 
         g_Display.display();
+
+        WITH_LOCK(Serial)
+        {
+            Serial.print("-- Display update: ");
+            Serial.println(szText);
+        }
     }
 }  // namespace Display

@@ -11,30 +11,7 @@ public:
         return m_CurrentState.get();
     };
 
-    void onLoop()
-    {
-        if (m_NextState)
-        {
-            if (m_CurrentState)
-            {
-                m_CurrentState->onExitingState();
-            }
-
-            m_CurrentState.reset(m_NextState.release());
-
-            if (m_CurrentState)
-            {
-                m_CurrentState->onEnteringState();
-            }
-        }
-        else
-        {
-            if (m_CurrentState)
-            {
-                m_CurrentState->onLoop();
-            }
-        }
-    }
+    void onLoop();
 
     // For use by state objects
     void RequestState(AbstractState* const nextState)

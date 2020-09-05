@@ -1,5 +1,7 @@
 #pragma once
 
+#define PLATFORM_ID 12  // Particle Argon
+
 #include <Particle.h>
 
 #include <stdio.h>
@@ -24,4 +26,5 @@ extern TicI2C g_MotorController;
 
 // Features
 #include "inc/Display.h"
+#include "inc/Bluetooth.h"
 #include "states/states.h"
