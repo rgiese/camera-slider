@@ -5,6 +5,7 @@ StateKeeper g_StateKeeper;
 
 void StateKeeper::onLoop()
 {
+    // Advance state if requested
     if (m_NextState)
     {
         if (m_CurrentState)
@@ -14,24 +15,36 @@ void StateKeeper::onLoop()
 
         m_CurrentState.reset(m_NextState.release());
 
-        if (m_CurrentState)
-        {
-            m_CurrentState->onEnteringState();
-        }
+        m_CurrentState->onEnteringState();
 
         // Update subscribers
         {
-            char const* const stateName = m_CurrentState ? m_CurrentState->getName() : "<none>";
+            char const* const stateName = m_CurrentState->getName();
 
             Serial.printlnf("-> State: %s", stateName);
             g_Bluetooth.statusService().setState(stateName);
         }
     }
-    else
+
+    // If we don't have a state yet, bail
+    if (!m_CurrentState)
     {
-        if (m_CurrentState)
+        return;
+    }
+
+    // Deliver loop notification to current state
+    m_CurrentState->onLoop();
+
+    // Deliver requests to current state as long as no state transition has been requested
+    Request request;
+
+    while (!m_NextState && g_RequestQueue.try_pop(request))
+    {
+        bool const wasProcessed = m_CurrentState->onRequest(request);
+
+        if (!wasProcessed)
         {
-            m_CurrentState->onLoop();
+            Serial.printlnf("!! Request type %u dropped (rejected).", static_cast<int>(request.Type));
         }
     }
 }

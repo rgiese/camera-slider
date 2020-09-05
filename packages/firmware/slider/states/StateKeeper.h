@@ -5,17 +5,16 @@ class StateKeeper
 public:
     StateKeeper(){};
 
-    // For use by main code to deliver notifications to current state
-    AbstractState* CurrentState() const
-    {
-        return m_CurrentState.get();
-    };
-
     void onLoop();
 
     // For use by state objects
     void RequestState(AbstractState* const nextState)
     {
+        if (!nextState)
+        {
+            return;
+        }
+
         m_NextState.reset(nextState);
     }
 

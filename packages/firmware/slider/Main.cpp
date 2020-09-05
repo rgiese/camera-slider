@@ -110,21 +110,6 @@ void stateMachineThreadFn(void*)
         // Deliver interrupt-sourced events
         g_UIButton.onLoop();
 
-        // Deliver requests
-        if (g_StateKeeper.CurrentState())
-        {
-            Request request;
-            while (g_RequestQueue.try_pop(request))
-            {
-                bool const wasProcessed = g_StateKeeper.CurrentState()->onRequest(request);
-
-                if (!wasProcessed)
-                {
-                    Serial.printlnf("!! Request type %u dropped (rejected).", static_cast<int>(request.Type));
-                }
-            }
-        }
-
         // Advance state machine
         g_StateKeeper.onLoop();
 
