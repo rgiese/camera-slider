@@ -189,5 +189,5 @@ void InitializingMotorState::onLoop()
     g_MotorController.exitSafeStart();
 
     // Advance state
-    return g_StateKeeper.RequestState(new MotorHomingReverseState());
+    return g_StateKeeper.RequestState(new HomingState());
 }

@@ -1,11 +1,11 @@
 #pragma once
 
-class MotorHomingReverseState : public AbstractState
+class HomingState : public AbstractState
 {
 public:
     char const* getName() override
     {
-        return "homingMotorReverse";
+        return "homing";
     }
 
     void onEnteringState() override;

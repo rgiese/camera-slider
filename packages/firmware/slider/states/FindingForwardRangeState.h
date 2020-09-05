@@ -1,11 +1,11 @@
 #pragma once
 
-class MotorFindingForwardRangeState : public AbstractState
+class FindingForwardRangeState : public AbstractState
 {
 public:
     char const* getName() override
     {
-        return "motorFindingForwardRange";
+        return "findingForwardRange";
     }
 
     void onEnteringState() override;

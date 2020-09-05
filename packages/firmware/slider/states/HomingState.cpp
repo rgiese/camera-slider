@@ -1,8 +1,8 @@
 #include "../inc/stdinc.h"
 
-void MotorHomingReverseState::onEnteringState()
+void HomingState::onEnteringState()
 {
-    Display::set("Homing motor");
+    Display::set("Homing");
 
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
@@ -13,7 +13,7 @@ void MotorHomingReverseState::onEnteringState()
     g_MotorController.goHomeReverse();
 }
 
-void MotorHomingReverseState::onLoop()
+void HomingState::onLoop()
 {
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
@@ -23,6 +23,6 @@ void MotorHomingReverseState::onLoop()
     if (!g_MotorController.getHomingActive())
     {
         // Homing complete
-        return g_StateKeeper.RequestState(new MotorInitializedState());
+        return g_StateKeeper.RequestState(new TrackingDesiredPositionState());
     }
 }

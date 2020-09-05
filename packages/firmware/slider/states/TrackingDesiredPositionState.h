@@ -1,11 +1,11 @@
 #pragma once
 
-class MotorInitializedState : public AbstractState
+class TrackingDesiredPositionState : public AbstractState
 {
 public:
     char const* getName() override
     {
-        return "motorInitialized";
+        return "trackingDesiredPosition";
     }
 
     void onEnteringState() override;

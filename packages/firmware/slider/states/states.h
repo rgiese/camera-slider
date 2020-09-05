@@ -13,23 +13,9 @@
 
 extern StateKeeper g_StateKeeper;
 
-// Forward declarations
-
-// Terminal states
-class UnrecoverableErrorState;
-
-// Initialization states
-class InitializingMotorState;
-class MotorHomingReverseState;
-class MotorInitializedState;
-
-// Setup/admin states
-class MotorFindingForwardRangeState;
-
 #include "UnrecoverableErrorState.h"
 
 #include "InitializingMotorState.h"
-#include "MotorHomingReverseState.h"
-#include "MotorInitializedState.h"
-
-#include "MotorFindingForwardRangeState.h"
+#include "HomingState.h"
+#include "TrackingDesiredPositionState.h"
+#include "FindingForwardRangeState.h"

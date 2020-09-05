@@ -1,6 +1,6 @@
 #include "../inc/stdinc.h"
 
-void MotorFindingForwardRangeState::onEnteringState()
+void FindingForwardRangeState::onEnteringState()
 {
     Display::set("Finding forward range");
 
@@ -25,7 +25,7 @@ void MotorFindingForwardRangeState::onEnteringState()
     g_MotorController.setTargetPosition(10000000);
 }
 
-void MotorFindingForwardRangeState::onLoop()
+void FindingForwardRangeState::onLoop()
 {
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
@@ -40,7 +40,7 @@ void MotorFindingForwardRangeState::onLoop()
         Serial.printlnf("!! Max forward position: %d", m_LatestCertainPosition);
 
         // Re-home motor reverse
-        return g_StateKeeper.RequestState(new MotorHomingReverseState());
+        return g_StateKeeper.RequestState(new HomingState());
     }
 
     // Save latest position

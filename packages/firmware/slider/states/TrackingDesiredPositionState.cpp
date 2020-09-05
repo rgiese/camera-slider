@@ -1,12 +1,12 @@
 #include "../inc/stdinc.h"
 #include "states.h"
 
-void MotorInitializedState::onEnteringState()
+void TrackingDesiredPositionState::onEnteringState()
 {
-    Display::set("Initialized");
+    Display::set("Tracking desired position");
 }
 
-void MotorInitializedState::onLoop()
+void TrackingDesiredPositionState::onLoop()
 {
     if (g_MotorController.getOperationState() != TicOperationState::Normal)
     {
@@ -14,13 +14,13 @@ void MotorInitializedState::onLoop()
     }
 }
 
-bool MotorInitializedState::onRequest(Request const& request)
+bool TrackingDesiredPositionState::onRequest(Request const& request)
 {
     // TEMPORARY: Testing other states
     switch (request.Type)
     {
         case RequestType::UIButtonPressed:
-            g_StateKeeper.RequestState(new MotorFindingForwardRangeState());
+            g_StateKeeper.RequestState(new FindingForwardRangeState());
             return true;
 
         default:
