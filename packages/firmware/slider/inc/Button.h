@@ -58,4 +58,9 @@ private:
 
     unsigned long m_LastInterruptTime;
     std::atomic<int> m_ButtonPressedCount;
+
+private:
+    // Non-copyable
+    Button(Button const&) = delete;
+    Button& operator=(Button const&) = delete;
 };

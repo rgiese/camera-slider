@@ -44,4 +44,9 @@ private:
     {
         return Particle.connected() ? WiFi.SSID() : "<not connected>";
     }
+
+private:
+    // Non-copyable
+    Activity(Activity const&) = delete;
+    Activity& operator=(Activity const&) = delete;
 };
