@@ -10,6 +10,9 @@ typedef uint16_t pin_t;
 #include "Wire.h"
 
 // These headers are in a private subdirectory so they don't conflict with CRT headers (e.g. <time.h>)
+#include "features/enumflags.h"
+
+#include "features/bluetooth.h"
 #include "features/eeprom.h"
 #include "features/io.h"
 #include "features/locks.h"
