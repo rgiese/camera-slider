@@ -1,4 +1,4 @@
-import { BleError, BleManager, Characteristic, Device, Subscription } from "react-native-ble-plx";
+import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
 import base64 from "react-native-base64";
@@ -56,22 +56,7 @@ export class BluetoothStore {
           this.bleManager.stopDeviceScan();
 
           /* eslint-disable-next-line promise/no-promise-in-callback */
-          device
-            .connect()
-            .then(
-              async (device): Promise<Device> => {
-                return device.discoverAllServicesAndCharacteristics();
-              }
-            )
-            .then(
-              (device): Subscription => {
-                return device.monitorCharacteristicForService(
-                  "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
-                  "dc5d99b0-303c-45c2-b7a2-af6baadc0388",
-                  this.onStatusCharacteristicUpdated
-                );
-              }
-            )
+          this.onDeviceConnected(device)
             .then((): void => {
               return this.setState("connected");
             })
@@ -111,6 +96,22 @@ export class BluetoothStore {
     console.log(`BluetoothStore: ${this.state} -> ${state}`);
 
     this.state = state;
+  }
+
+  private async onDeviceConnected(device: Device): Promise<void> {
+    // Connect
+    await device.connect();
+
+    await device.discoverAllServicesAndCharacteristics();
+
+    // Set up subscriptions and perform initial reads
+    const statusCharacteristic = await device.readCharacteristicForService(
+      "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
+      "dc5d99b0-303c-45c2-b7a2-af6baadc0388"
+    );
+
+    this.onStatusCharacteristicUpdated(null, statusCharacteristic);
+    statusCharacteristic.monitor(this.onStatusCharacteristicUpdated);
   }
 
   private setError(error: string): void {
