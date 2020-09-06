@@ -1,6 +1,7 @@
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
+import { BluetoothStatusService } from "@grumpycorp/camera-slider-shared";
 import base64 from "react-native-base64";
 
 export type BluetoothStoreState =
@@ -41,7 +42,7 @@ export class BluetoothStore {
 
     this.bleManager.startDeviceScan(
       // Find device by service
-      ["fcccbeb7-eb63-4726-9315-e198b1e5ec1c"],
+      [BluetoothStatusService.serviceUuid],
       null,
       (error, device) => {
         try {
@@ -106,8 +107,8 @@ export class BluetoothStore {
 
     // Set up subscriptions and perform initial reads
     const statusCharacteristic = await device.readCharacteristicForService(
-      "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
-      "dc5d99b0-303c-45c2-b7a2-af6baadc0388"
+      BluetoothStatusService.serviceUuid,
+      BluetoothStatusService.stateCharacteristicUuid
     );
 
     this.onStatusCharacteristicUpdated(null, statusCharacteristic);

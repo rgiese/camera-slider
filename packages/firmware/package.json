@@ -33,6 +33,9 @@
     "path": "^0.12.7",
     "superagent": "^6.0.0"
   },
+  "dependencies": {
+    "@grumpycorp/camera-slider-shared": "^1.0.0"
+  },
   "oclif": {
     "commands": "./firmware-build-tool/commands"
   }
