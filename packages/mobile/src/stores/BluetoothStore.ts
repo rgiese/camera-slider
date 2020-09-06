@@ -1,41 +1,52 @@
-import { BleError, BleManager, Characteristic } from "react-native-ble-plx";
-import { action, observable } from "mobx";
+import { BleError, BleManager, Characteristic, Device, Subscription } from "react-native-ble-plx";
+import { action, computed, observable } from "mobx";
 
-import { StoreBase } from "./StoreBase";
 import base64 from "react-native-base64";
 
-export class BluetoothStore extends StoreBase {
+export type BluetoothStoreState =
+  | "initializing"
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error";
+
+export class BluetoothStore {
+  @observable public state: BluetoothStoreState = "initializing";
+
   @observable public deviceStatus = "";
+
+  public error?: string;
 
   private readonly bleManager: BleManager;
 
   public constructor() {
-    super("Bluetooth");
-
-    this.setState("initializing");
-
     // TODO: https://reactnative.dev/docs/permissionsandroid
     // to request permissions on app startup
     this.bleManager = new BleManager();
 
     const subscription = this.bleManager.onStateChange(state => {
       if (state === "PoweredOn") {
-        this.setState("ready");
+        this.setState("disconnected");
         subscription.remove();
       }
     }, true);
   }
 
-  @action public scanAndConnect() {
-    this.setState("fetching");
+  @computed public get isConnected(): boolean {
+    return this.state === "connected";
+  }
+
+  @action public connect(): void {
+    this.setState("connecting");
 
     this.bleManager.startDeviceScan(
+      // Find device by service
       ["fcccbeb7-eb63-4726-9315-e198b1e5ec1c"],
       null,
-      async (error, device) => {
+      (error, device) => {
         try {
           if (error) {
-            throw error ?? new Error("Unknown Bluetooth error");
+            throw error;
           }
 
           if (!device) {
@@ -44,17 +55,29 @@ export class BluetoothStore extends StoreBase {
 
           this.bleManager.stopDeviceScan();
 
-          const connectedDevice = await (
-            await device.connect()
-          ).discoverAllServicesAndCharacteristics();
-
-          connectedDevice.monitorCharacteristicForService(
-            "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
-            "dc5d99b0-303c-45c2-b7a2-af6baadc0388",
-            this.onStatusCharacteristicUpdated
-          );
-
-          this.setState("ready");
+          /* eslint-disable-next-line promise/no-promise-in-callback */
+          device
+            .connect()
+            .then(
+              async (device): Promise<Device> => {
+                return device.discoverAllServicesAndCharacteristics();
+              }
+            )
+            .then(
+              (device): Subscription => {
+                return device.monitorCharacteristicForService(
+                  "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
+                  "dc5d99b0-303c-45c2-b7a2-af6baadc0388",
+                  this.onStatusCharacteristicUpdated
+                );
+              }
+            )
+            .then((): void => {
+              return this.setState("connected");
+            })
+            .catch((reason: any) => {
+              throw new Error(reason);
+            });
         } catch (error) {
           this.setError(JSON.stringify(error)); // stringify exception
         }
@@ -62,10 +85,11 @@ export class BluetoothStore extends StoreBase {
     );
   }
 
+  /* eslint-disable @typescript-eslint/no-invalid-this */
   @action private readonly onStatusCharacteristicUpdated = (
     error: BleError | null,
     characteristic: Characteristic | null
-  ) => {
+  ): void => {
     if (error) {
       this.setError(JSON.stringify(error));
       return;
@@ -82,4 +106,17 @@ export class BluetoothStore extends StoreBase {
       this.deviceStatus = base64.decode(encodedValue);
     }
   };
+
+  @action private setState(state: BluetoothStoreState): void {
+    console.log(`BluetoothStore: ${this.state} -> ${state}`);
+
+    this.state = state;
+  }
+
+  private setError(error: string): void {
+    console.log(`BluetoothStore error: ${error}`);
+
+    this.error = error;
+    this.setState("error");
+  }
 }

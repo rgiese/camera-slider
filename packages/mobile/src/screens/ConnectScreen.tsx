@@ -32,7 +32,7 @@ const ConnectScreen: NavigationStackScreenComponent<{}> = (): React.ReactElement
           onPress={async (): Promise<void> => {
             //await authStore.authProvider.requestLogin();
             console.log("Mango");
-            rootStore.bluetoothStore.scanAndConnect();
+            rootStore.bluetoothStore.connect();
           }}
         >
           Sign in
