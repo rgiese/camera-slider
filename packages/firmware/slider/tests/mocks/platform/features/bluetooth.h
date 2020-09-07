@@ -15,6 +15,7 @@ enum class BleCharacteristicProperty : uint8_t
 
 ENABLE_ENUM_CLASS_BITWISE(BleCharacteristicProperty);
 
+class BleAdvertisingData;
 class BlePeerDevice;
 
 typedef void (*BleOnDataReceivedCallback)(const uint8_t* data, size_t len, const BlePeerDevice& peer, void* context);
