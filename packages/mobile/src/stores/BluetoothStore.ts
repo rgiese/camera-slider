@@ -1,4 +1,4 @@
-import { Base64DecodeString, Base64DecodeUInt32 } from "../Base64";
+import { Base64DecodeString, Base64DecodeUInt32, Base64EncodeUInt32 } from "../Base64";
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
@@ -21,6 +21,8 @@ export class BluetoothStore {
   public error?: string;
 
   private readonly bleManager: BleManager;
+
+  private device?: Device;
 
   public constructor() {
     // TODO: https://reactnative.dev/docs/permissionsandroid
@@ -61,6 +63,7 @@ export class BluetoothStore {
           /* eslint-disable-next-line promise/no-promise-in-callback */
           this.onDeviceConnected(device)
             .then((): void => {
+              this.device = device;
               return this.setState("connected");
             })
             .catch((reason: any) => {
@@ -121,6 +124,18 @@ export class BluetoothStore {
     console.log(`BluetoothStore: ${this.state} -> ${state}`);
 
     this.state = state;
+  }
+
+  public async setDesiredPosition(desiredPosition: number): Promise<void> {
+    if (!this.device) {
+      throw new Error("Bluetooth not connected.");
+    }
+
+    await this.device.writeCharacteristicWithoutResponseForService(
+      BluetoothStatusService.serviceUuid,
+      BluetoothStatusService.desiredPositionCharacteristicUuid,
+      Base64EncodeUInt32(desiredPosition)
+    );
   }
 
   private async onDeviceConnected(device: Device): Promise<void> {

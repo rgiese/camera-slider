@@ -6,6 +6,7 @@ import BaseView from "../components/BaseView";
 import React from "react";
 import ScreenProps from "./ScreenProps";
 import ScreenRoutes from "./ScreenRoutes";
+import Slider from "@react-native-community/slider";
 import { observer } from "mobx-react";
 import { useRootStore } from "../stores/RootStoreContext";
 
@@ -32,6 +33,14 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
     <BaseView>
       <Text>{bluetoothStore.deviceState}</Text>
       <Text>{bluetoothStore.reportedPosition}</Text>
+      <Slider
+        maximumValue={10000}
+        minimumValue={0}
+        onValueChange={async (value: number): Promise<void> => {
+          await bluetoothStore.setDesiredPosition(value);
+        }}
+        step={100}
+      />
     </BaseView>
   );
 };
