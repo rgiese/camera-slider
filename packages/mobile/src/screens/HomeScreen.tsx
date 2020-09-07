@@ -30,7 +30,8 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
 
   return (
     <BaseView>
-      <Text>{bluetoothStore.deviceStatus}</Text>
+      <Text>{bluetoothStore.deviceState}</Text>
+      <Text>{bluetoothStore.reportedPosition}</Text>
     </BaseView>
   );
 };

@@ -1,8 +1,8 @@
+import { Base64DecodeString, Base64DecodeUInt32 } from "../Base64";
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
 import { BluetoothStatusService } from "@grumpycorp/camera-slider-shared";
-import base64 from "react-native-base64";
 
 export type BluetoothStoreState =
   | "initializing"
@@ -14,7 +14,9 @@ export type BluetoothStoreState =
 export class BluetoothStore {
   @observable public state: BluetoothStoreState = "initializing";
 
-  @observable public deviceStatus = "";
+  @observable public deviceState = "";
+
+  @observable public reportedPosition = 0;
 
   public error?: string;
 
@@ -89,7 +91,29 @@ export class BluetoothStore {
     const encodedValue = characteristic.value;
 
     if (encodedValue) {
-      this.deviceStatus = base64.decode(encodedValue);
+      this.deviceState = Base64DecodeString(encodedValue);
+    }
+  };
+
+  /* eslint-disable @typescript-eslint/no-invalid-this */
+  @action private readonly onReportedPositionCharacteristicUpdated = (
+    error: BleError | null,
+    characteristic: Characteristic | null
+  ): void => {
+    if (error) {
+      this.setError(JSON.stringify(error));
+      return;
+    }
+
+    if (!characteristic) {
+      this.setError("Reported position characteristic: no characteristic provided");
+      return;
+    }
+
+    const encodedValue = characteristic.value;
+
+    if (encodedValue) {
+      this.reportedPosition = Base64DecodeUInt32(encodedValue);
     }
   };
 
@@ -113,6 +137,14 @@ export class BluetoothStore {
 
     this.onStatusCharacteristicUpdated(null, statusCharacteristic);
     statusCharacteristic.monitor(this.onStatusCharacteristicUpdated);
+
+    const reportedPositionCharacteristic = await device.readCharacteristicForService(
+      BluetoothStatusService.serviceUuid,
+      BluetoothStatusService.reportedPositionCharacteristicUuid
+    );
+
+    this.onReportedPositionCharacteristicUpdated(null, reportedPositionCharacteristic);
+    reportedPositionCharacteristic.monitor(this.onReportedPositionCharacteristicUpdated);
   }
 
   private setError(error: string): void {
