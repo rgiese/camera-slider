@@ -9,7 +9,13 @@
     "start-mobile-android": "react-native run-android",
     "start-mobile-ios": "react-native run-ios",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\""
+    "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\"",
+    "bundle-mobile": "run-script-os",
+    "bundle-mobile:win32": "jetify && cd .\\android && gradlew.bat clean && gradlew.bat bundleRelease",
+    "bundle-mobile:default": "jetify && cd ./android && ./gradlew clean && ./gradlew bundleRelease",
+    "clean-mobile": "run-script-os",
+    "clean-mobile:win32": "cd .\\android && gradlew.bat clean",
+    "clean-mobile:default": "cd ./android && ./gradlew clean"
   },
   "dependencies": {
     "@grumpycorp/camera-slider-shared": "^1.0.0",
