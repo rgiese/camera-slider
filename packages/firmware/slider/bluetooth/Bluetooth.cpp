@@ -7,6 +7,7 @@ void Bluetooth::begin()
     BLE.on();
 
     BleAdvertisingData advertisingData;
+    m_CapabilitiesService.begin(advertisingData);
     m_StatusService.begin(advertisingData);
 
     BLE.advertise(&advertisingData);

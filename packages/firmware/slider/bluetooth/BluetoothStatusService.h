@@ -2,8 +2,6 @@
 
 #include <Particle.h>
 
-class Bluetooth;
-
 class BluetoothStatusService
 {
 public:
@@ -35,26 +33,3 @@ private:
     BluetoothStatusService(BluetoothStatusService const&) = delete;
     BluetoothStatusService& operator=(BluetoothStatusService const&) = delete;
 };
-
-class Bluetooth
-{
-public:
-    Bluetooth() = default;
-
-    void begin();
-
-    BluetoothStatusService& statusService()
-    {
-        return m_StatusService;
-    }
-
-private:
-    BluetoothStatusService m_StatusService;
-
-private:
-    // Non-copyable
-    Bluetooth(Bluetooth const&) = delete;
-    Bluetooth& operator=(Bluetooth const&) = delete;
-};
-
-extern Bluetooth g_Bluetooth;

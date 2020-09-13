@@ -2,7 +2,10 @@ const { Command, flags } = require("@oclif/command");
 const fs = require("fs");
 const path = require("path");
 
-const { BluetoothStatusService } = require("@grumpycorp/camera-slider-shared");
+const {
+  BluetoothCapabilitiesService,
+  BluetoothStatusService,
+} = require("@grumpycorp/camera-slider-shared");
 
 class CodegenCommand extends Command {
   async run() {
@@ -43,6 +46,7 @@ class CodegenCommand extends Command {
       headerFileContent += `} // ${namespace}Constants\n`;
     }
 
+    generateConstants("BluetoothCapabilitiesService", BluetoothCapabilitiesService);
     generateConstants("BluetoothStatusService", BluetoothStatusService);
 
     fs.writeFileSync(path.join(projectGeneratedRoot, "bluetoothConstants.h"), headerFileContent);
