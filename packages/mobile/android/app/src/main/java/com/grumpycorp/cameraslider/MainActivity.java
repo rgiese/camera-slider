@@ -1,4 +1,4 @@
-package com.cameraslider;
+package com.grumpycorp.cameraslider;
 
 import com.facebook.react.ReactActivity;
 
