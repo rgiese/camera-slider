@@ -18,6 +18,7 @@ Licensed under [CC-BY-NC-SA](LICENSE.md). Commercial licensing negotiable (hah).
   - For firmware development:
     - Configure credentials
       - Set the environment variable `PARTICLE_ACCESS_TOKEN` to a Particle API token (generate with `particle token create`)
+  - For Android development: https://reactnative.dev/docs/environment-setup
   - `npm install`
   - `lerna bootstrap`
   - `lerna run build`
@@ -37,3 +38,7 @@ Licensed under [CC-BY-NC-SA](LICENSE.md). Commercial licensing negotiable (hah).
   - `lerna exec npm update --stream`
   - `lerna bootstrap`
   - `npm run build` to verify
+
+### Android
+
+- If the tooling complains about unaccepted SDK licenses, use an elevated command prompt to run "%ANDROID_SDK_ROOT%/tools/bin/sdkmanager" --licenses

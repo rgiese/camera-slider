@@ -15,7 +15,7 @@ public:
 private:
     friend class Bluetooth;
 
-    void begin();
+    void begin(BleAdvertisingData& advertisingData);
 
 private:
     static void onDesiredPositionChanged(uint8_t const* const pData,
@@ -24,7 +24,6 @@ private:
                                          void* pContext);
 
 private:
-    BleUuid const m_ServiceUuid;
     BleCharacteristic m_StateCharacteristic;
     BleCharacteristic m_ReportedPositionCharacteristic;
     BleCharacteristic m_DesiredPositionCharacteristic;

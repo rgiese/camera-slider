@@ -1,0 +1,42 @@
+{
+  "name": "@grumpycorp/camera-slider-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CameraSlider mobile app",
+  "scripts": {
+    "format:fix": "prettier --write {.,./src/**}/*.{css,js,jsx,json,md,scss,ts,tsx}",
+    "start-mobile-server": "react-native start",
+    "start-mobile-android": "react-native run-android",
+    "start-mobile-ios": "react-native run-ios",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\"",
+    "bundle-mobile": "run-script-os",
+    "bundle-mobile:win32": "jetify && cd .\\android && gradlew.bat clean && gradlew.bat bundleRelease",
+    "bundle-mobile:default": "jetify && cd ./android && ./gradlew clean && ./gradlew bundleRelease",
+    "clean-mobile": "run-script-os",
+    "clean-mobile:win32": "cd .\\android && gradlew.bat clean",
+    "clean-mobile:default": "cd ./android && ./gradlew clean"
+  },
+  "dependencies": {
+    "@grumpycorp/camera-slider-shared": "^1.0.0",
+    "@react-native-community/masked-view": "^0.1.10",
+    "@react-native-community/slider": "^3.0.3",
+    "@types/react-native-vector-icons": "^6.4.5",
+    "buffer": "^5.6.0",
+    "mobx": "^5.15.6",
+    "mobx-react": "^6.3.0",
+    "react": "16.13.1",
+    "react-native": "0.63.2",
+    "react-native-ble-plx": "^2.0.1",
+    "react-native-gesture-handler": "^1.8.0",
+    "react-native-paper": "^4.1.0",
+    "react-native-screens": "^2.8.0",
+    "react-native-safe-area-context": "^3.1.7",
+    "react-native-safe-area-view": "^1.1.1",
+    "react-native-svg": "^12.1.0",
+    "react-native-svg-transformer": "^0.14.3",
+    "react-native-vector-icons": "^7.0.0",
+    "react-navigation": "^4.4.0",
+    "react-navigation-stack": "^2.8.2"
+  }
+}
