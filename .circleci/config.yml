@@ -8,10 +8,6 @@ executors:
     working_directory: ~/camera-slider
 
 jobs:
-  #
-  # firmware jobs
-  #
-
   build:
     executor: grumpy-executor
     steps:
@@ -46,6 +42,8 @@ jobs:
           environment:
             # Limit NodeJS heap size so we don't OOM
             NODE_OPTIONS: --max_old_space_size=1500
+
+      - run: npm run bundle-mobile
 
       # Run tests
       - run: npm run test
