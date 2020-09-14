@@ -2,6 +2,10 @@
 
 #define PLATFORM_ID 12  // Particle Argon
 
+#ifndef __STATIC_INLINE  // Fixes VSCode's C++ getting confused about the definition of uint32_t (long story...)
+#define __STATIC_INLINE static inline
+#endif
+
 #include <Particle.h>
 
 #include <stdio.h>
