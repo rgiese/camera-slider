@@ -18,9 +18,11 @@ import { useRootStore } from "../stores/RootStoreContext";
 /* eslint-disable react/function-component-definition */
 
 const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.ReactElement => {
-  const bluetoothStore = useRootStore().bluetoothStore;
+  const rootStore = useRootStore();
+  const bluetoothConnection = rootStore.bluetoothConnection;
+  const bluetoothStatusStore = rootStore.bluetoothStatusStore;
 
-  if (!bluetoothStore.isConnected) {
+  if (!bluetoothConnection.isConnected) {
     setImmediate(() => {
       // Can only run this once render is done
       navigation.navigate(ScreenRoutes.Connect);
@@ -31,15 +33,15 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
 
   return (
     <BaseView>
-      <Text>{bluetoothStore.deviceState}</Text>
+      <Text>{bluetoothStatusStore.state}</Text>
       <Text>
-        {bluetoothStore.reportedPosition} ({bluetoothStore.reportedVelocity})
+        {bluetoothStatusStore.reportedPosition} ({bluetoothStatusStore.reportedVelocity})
       </Text>
       <Slider
         maximumValue={10000}
         minimumValue={0}
         onValueChange={async (value: number): Promise<void> => {
-          await bluetoothStore.setDesiredPosition(value);
+          await bluetoothStatusStore.setDesiredPosition(value);
         }}
         step={100}
       />

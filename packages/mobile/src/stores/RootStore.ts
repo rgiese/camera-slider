@@ -1,9 +1,13 @@
-import { BluetoothStore } from "./Bluetooth";
+import { BluetoothConnection } from "./Bluetooth/BluetoothConnection";
+import { BluetoothStatusStore } from "./Bluetooth/BluetoothStatusStore";
 
 export class RootStore {
-  public readonly bluetoothStore: BluetoothStore;
+  public readonly bluetoothConnection: BluetoothConnection;
+
+  public readonly bluetoothStatusStore: BluetoothStatusStore;
 
   public constructor() {
-    this.bluetoothStore = new BluetoothStore();
+    this.bluetoothConnection = new BluetoothConnection();
+    this.bluetoothStatusStore = new BluetoothStatusStore(this.bluetoothConnection);
   }
 }

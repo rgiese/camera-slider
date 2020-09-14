@@ -1,19 +1,18 @@
 import { BleManager, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
-import { Base64EncodeUInt32 } from "./Base64";
-import { BluetoothCharacteristicsStore } from "./Characteristics";
+import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothServices } from "@grumpycorp/camera-slider-shared";
 
-export type BluetoothStoreState =
+export type BluetoothConnectionState =
   | "initializing"
   | "disconnected"
   | "connecting"
   | "connected"
   | "error";
 
-export class BluetoothStore extends BluetoothCharacteristicsStore {
-  @observable public state: BluetoothStoreState = "initializing";
+export class BluetoothConnection {
+  @observable public state: BluetoothConnectionState = "initializing";
 
   public error?: string;
 
@@ -21,9 +20,9 @@ export class BluetoothStore extends BluetoothCharacteristicsStore {
 
   private device?: Device;
 
-  public constructor() {
-    super();
+  private readonly characteristicsStores: BluetoothCharacteristicsStoreBase[] = [];
 
+  public constructor() {
     // TODO: https://reactnative.dev/docs/permissionsandroid
     // to request permissions on app startup
     this.bleManager = new BleManager();
@@ -34,6 +33,13 @@ export class BluetoothStore extends BluetoothCharacteristicsStore {
         subscription.remove();
       }
     }, true);
+  }
+
+  @action public setError(error: string): void {
+    console.log(`BluetoothStore error: ${error}`);
+
+    this.error = error;
+    this.setState("error");
   }
 
   @computed public get isConnected(): boolean {
@@ -75,38 +81,41 @@ export class BluetoothStore extends BluetoothCharacteristicsStore {
     );
   }
 
-  @action private setState(state: BluetoothStoreState): void {
-    console.log(`BluetoothStore: ${this.state} -> ${state}`);
+  @action private setState(state: BluetoothConnectionState): void {
+    console.log(`BluetoothConnection: ${this.state} -> ${state}`);
 
     this.state = state;
   }
 
-  public async setDesiredPosition(desiredPosition: number): Promise<void> {
+  public addCharacteristicsStore(characteristicsStore: BluetoothCharacteristicsStoreBase): void {
+    this.characteristicsStores.push(characteristicsStore);
+  }
+
+  public async writeCharacteristicValue(
+    serviceId: string,
+    characteristicId: string,
+    value: string
+  ): Promise<void> {
     if (!this.device) {
       throw new Error("Bluetooth not connected.");
     }
 
     await this.device.writeCharacteristicWithoutResponseForService(
-      BluetoothServices.Tracking.Id,
-      BluetoothServices.Tracking.Characteristics.DesiredPosition,
-      Base64EncodeUInt32(desiredPosition)
+      serviceId,
+      characteristicId,
+      value
     );
   }
 
-  protected async onDeviceConnected(device: Device): Promise<void> {
+  private async onDeviceConnected(device: Device): Promise<void> {
     // Connect
     await device.connect();
 
     await device.discoverAllServicesAndCharacteristics();
 
     // Set up subscriptions and perform initial reads
-    await super.onDeviceConnected(device);
-  }
-
-  protected setError(error: string): void {
-    console.log(`BluetoothStore error: ${error}`);
-
-    this.error = error;
-    this.setState("error");
+    for (const characteristicsStore of this.characteristicsStores) {
+      await characteristicsStore.onDeviceConnected(device);
+    }
   }
 }

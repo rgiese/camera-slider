@@ -10,9 +10,9 @@ import { observer } from "mobx-react";
 import { useRootStore } from "../stores/RootStoreContext";
 
 const ConnectScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.ReactElement => {
-  const bluetoothStore = useRootStore().bluetoothStore;
+  const bluetoothConnection = useRootStore().bluetoothConnection;
 
-  if (bluetoothStore.state === "initializing" || bluetoothStore.state === "connecting") {
+  if (bluetoothConnection.state === "initializing" || bluetoothConnection.state === "connecting") {
     return (
       <BaseView>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -20,7 +20,7 @@ const ConnectScreen: NavigationStackScreenComponent<{}> = ({ navigation }): Reac
         </View>
       </BaseView>
     );
-  } else if (bluetoothStore.state === "disconnected") {
+  } else if (bluetoothConnection.state === "disconnected") {
     return (
       <BaseView>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -39,7 +39,7 @@ const ConnectScreen: NavigationStackScreenComponent<{}> = ({ navigation }): Reac
           <Button
             mode="contained"
             onPress={(): void => {
-              bluetoothStore.connect();
+              bluetoothConnection.connect();
             }}
           >
             Connect
@@ -47,18 +47,18 @@ const ConnectScreen: NavigationStackScreenComponent<{}> = ({ navigation }): Reac
         </View>
       </BaseView>
     );
-  } else if (bluetoothStore.state === "connected") {
+  } else if (bluetoothConnection.state === "connected") {
     setImmediate(() => {
       // Can only run this once render is done
       navigation.navigate(ScreenRoutes.Home);
     });
 
     return <BaseView />;
-  } else if (bluetoothStore.state === "error") {
+  } else if (bluetoothConnection.state === "error") {
     return (
       <BaseView>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Text>{bluetoothStore.error}</Text>
+          <Text>{bluetoothConnection.error}</Text>
         </View>
       </BaseView>
     );
