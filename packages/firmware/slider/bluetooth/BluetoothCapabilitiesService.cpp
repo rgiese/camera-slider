@@ -23,3 +23,18 @@ void BluetoothCapabilitiesService::begin(BleAdvertisingData& advertisingData)
     BLE.addCharacteristic(m_MaximumAccelerationCharacteristic);
     BLE.addCharacteristic(m_MaximumPositionCharacteristic);
 }
+
+void BluetoothCapabilitiesService::setMaximumSpeed(uint32_t const stepsPerSec)
+{
+    m_MaximumSpeedCharacteristic.setValue(stepsPerSec);
+}
+
+void BluetoothCapabilitiesService::setMaximumAcceleration(uint32_t const stepsPerSecPerSec)
+{
+    m_MaximumAccelerationCharacteristic.setValue(stepsPerSecPerSec);
+}
+
+void BluetoothCapabilitiesService::setMaximumPosition(int32_t const position)
+{
+    m_MaximumPositionCharacteristic.setValue(position);
+}

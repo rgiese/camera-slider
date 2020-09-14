@@ -58,7 +58,10 @@ public:
     // Constants
     //
 
+    static constexpr uint32_t c_MaxSafeSpeed_StepsPerSec = 10000;
     static constexpr uint32_t c_MaxSafeHomingSpeed_StepsPerSec = 2000;
+
+    static constexpr uint32_t c_MaxSafeAcceleration_StepsPerSecPerSec = 10000;
 
 private:
     TicI2C m_Tic;

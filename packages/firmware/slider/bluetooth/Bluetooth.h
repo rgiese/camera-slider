@@ -14,6 +14,11 @@ public:
 
     void begin();
 
+    BluetoothCapabilitiesService& capabilitiesService()
+    {
+        return m_CapabilitiesService;
+    }
+
     BluetoothStatusService& statusService()
     {
         return m_StatusService;

@@ -179,10 +179,17 @@ bool MotorController::tryInitialize()
     }
 
     {
-        uint32_t const maxAcceleration = accelerationToTicUnits(10000 /* steps per second per second */);
+        uint32_t const maxAcceleration = accelerationToTicUnits(c_MaxSafeAcceleration_StepsPerSecPerSec);
 
         m_Tic.setMaxAccel(maxAcceleration);
         m_Tic.setMaxDecel(maxAcceleration);
+    }
+
+    // Post settings to BLE
+    {
+        g_Bluetooth.capabilitiesService().setMaximumSpeed(c_MaxSafeSpeed_StepsPerSec);
+        g_Bluetooth.capabilitiesService().setMaximumAcceleration(c_MaxSafeAcceleration_StepsPerSecPerSec);
+        g_Bluetooth.capabilitiesService().setMaximumPosition(10000);
     }
 
     // Energize
