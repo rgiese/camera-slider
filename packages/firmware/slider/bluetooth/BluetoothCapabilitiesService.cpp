@@ -1,19 +1,19 @@
 #include "inc/stdinc.h"
-#include "generated/bluetoothConstants.h"
+#include "generated/bluetoothIds.h"
 
 BluetoothCapabilitiesService::BluetoothCapabilitiesService()
     : m_MaximumSpeedCharacteristic("maxSpeed",
                                    BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                   BluetoothCapabilitiesServiceConstants::maximumSpeedCharacteristicUuid,
-                                   BluetoothCapabilitiesServiceConstants::serviceUuid)
+                                   BluetoothIds::Capabilities::Characteristics::MaximumSpeed,
+                                   BluetoothIds::Capabilities::Id)
     , m_MaximumAccelerationCharacteristic("maxAcceleration",
                                           BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                          BluetoothCapabilitiesServiceConstants::maximumAccelerationCharacteristicUuid,
-                                          BluetoothCapabilitiesServiceConstants::serviceUuid)
+                                          BluetoothIds::Capabilities::Characteristics::MaximumAcceleration,
+                                          BluetoothIds::Capabilities::Id)
     , m_MaximumPositionCharacteristic("maxPosition",
                                       BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                      BluetoothCapabilitiesServiceConstants::maximumPositionCharacteristicUuid,
-                                      BluetoothCapabilitiesServiceConstants::serviceUuid)
+                                      BluetoothIds::Capabilities::Characteristics::MaximumPosition,
+                                      BluetoothIds::Capabilities::Id)
 {
 }
 

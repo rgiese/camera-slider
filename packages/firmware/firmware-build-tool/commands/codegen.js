@@ -2,10 +2,7 @@ const { Command, flags } = require("@oclif/command");
 const fs = require("fs");
 const path = require("path");
 
-const {
-  BluetoothCapabilitiesService,
-  BluetoothStatusService,
-} = require("@grumpycorp/camera-slider-shared");
+const { BluetoothServices } = require("@grumpycorp/camera-slider-shared");
 
 class CodegenCommand extends Command {
   async run() {
@@ -31,25 +28,34 @@ class CodegenCommand extends Command {
     //
 
     let headerFileContent = "#pragma once\n// This is a generated file.\n";
+    headerFileContent += `namespace BluetoothIds {\n`;
 
-    function generateConstants(namespace, constants) {
-      headerFileContent += `namespace ${namespace}Constants {\n`;
+    for (const serviceName in BluetoothServices) {
+      if (!BluetoothServices.hasOwnProperty(serviceName)) {
+        continue;
+      }
 
-      for (const prop in constants) {
-        if (!constants.hasOwnProperty(prop)) {
+      const service = BluetoothServices[serviceName];
+
+      headerFileContent += `  namespace ${serviceName} {\n`;
+      headerFileContent += `    const BleUuid Id("${service.Id}");\n`;
+      headerFileContent += `    namespace Characteristics {\n`;
+
+      for (const characteristicName in service.Characteristics) {
+        if (!service.Characteristics.hasOwnProperty(characteristicName)) {
           continue;
         }
 
-        headerFileContent += `    const BleUuid ${prop}("${constants[prop]}");\n`;
+        headerFileContent += `      const BleUuid ${characteristicName}("${service.Characteristics[characteristicName]}");\n`;
       }
 
-      headerFileContent += `} // ${namespace}Constants\n`;
+      headerFileContent += `    } // namespace Characteristics\n`;
+      headerFileContent += `  } // namespace ${serviceName}\n`;
     }
 
-    generateConstants("BluetoothCapabilitiesService", BluetoothCapabilitiesService);
-    generateConstants("BluetoothStatusService", BluetoothStatusService);
+    headerFileContent += `} // BluetoothIds\n`;
 
-    fs.writeFileSync(path.join(projectGeneratedRoot, "bluetoothConstants.h"), headerFileContent);
+    fs.writeFileSync(path.join(projectGeneratedRoot, "bluetoothIds.h"), headerFileContent);
 
     //
     // Codegen clang ignore file

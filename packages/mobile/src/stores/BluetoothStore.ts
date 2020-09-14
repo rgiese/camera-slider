@@ -2,7 +2,7 @@ import { Base64DecodeString, Base64DecodeUInt32, Base64EncodeUInt32 } from "../B
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
-import { BluetoothStatusService } from "@grumpycorp/camera-slider-shared";
+import { BluetoothServices } from "@grumpycorp/camera-slider-shared";
 
 export type BluetoothStoreState =
   | "initializing"
@@ -46,7 +46,7 @@ export class BluetoothStore {
 
     this.bleManager.startDeviceScan(
       // Find device by service
-      [BluetoothStatusService.serviceUuid],
+      [BluetoothServices.Status.Id],
       null,
       (error, device) => {
         try {
@@ -132,8 +132,8 @@ export class BluetoothStore {
     }
 
     await this.device.writeCharacteristicWithoutResponseForService(
-      BluetoothStatusService.serviceUuid,
-      BluetoothStatusService.desiredPositionCharacteristicUuid,
+      BluetoothServices.Status.Id,
+      BluetoothServices.Status.Characteristics.DesiredPosition,
       Base64EncodeUInt32(desiredPosition)
     );
   }
@@ -146,16 +146,16 @@ export class BluetoothStore {
 
     // Set up subscriptions and perform initial reads
     const statusCharacteristic = await device.readCharacteristicForService(
-      BluetoothStatusService.serviceUuid,
-      BluetoothStatusService.stateCharacteristicUuid
+      BluetoothServices.Status.Id,
+      BluetoothServices.Status.Characteristics.State
     );
 
     this.onStatusCharacteristicUpdated(null, statusCharacteristic);
     statusCharacteristic.monitor(this.onStatusCharacteristicUpdated);
 
     const reportedPositionCharacteristic = await device.readCharacteristicForService(
-      BluetoothStatusService.serviceUuid,
-      BluetoothStatusService.reportedPositionCharacteristicUuid
+      BluetoothServices.Status.Id,
+      BluetoothServices.Status.Characteristics.ReportedPosition
     );
 
     this.onReportedPositionCharacteristicUpdated(null, reportedPositionCharacteristic);

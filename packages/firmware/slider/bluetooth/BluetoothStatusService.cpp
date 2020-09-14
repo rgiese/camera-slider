@@ -1,19 +1,19 @@
 #include "inc/stdinc.h"
-#include "generated/bluetoothConstants.h"
+#include "generated/bluetoothIds.h"
 
 BluetoothStatusService::BluetoothStatusService()
     : m_StateCharacteristic("state",
                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                            BluetoothStatusServiceConstants::stateCharacteristicUuid,
-                            BluetoothStatusServiceConstants::serviceUuid)
+                            BluetoothIds::Status::Characteristics::State,
+                            BluetoothIds::Status::Id)
     , m_ReportedPositionCharacteristic("reportedPosition",
                                        BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                       BluetoothStatusServiceConstants::reportedPositionCharacteristicUuid,
-                                       BluetoothStatusServiceConstants::serviceUuid)
+                                       BluetoothIds::Status::Characteristics::ReportedPosition,
+                                       BluetoothIds::Status::Id)
     , m_DesiredPositionCharacteristic("desiredPosition",
                                       BleCharacteristicProperty::WRITE_WO_RSP,
-                                      BluetoothStatusServiceConstants::desiredPositionCharacteristicUuid,
-                                      BluetoothStatusServiceConstants::serviceUuid,
+                                      BluetoothIds::Status::Characteristics::DesiredPosition,
+                                      BluetoothIds::Status::Id,
                                       &BluetoothStatusService::onDesiredPositionChanged,
                                       nullptr)
     , m_LastReportedPosition(-1)
@@ -26,7 +26,7 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
     BLE.addCharacteristic(m_ReportedPositionCharacteristic);
     BLE.addCharacteristic(m_DesiredPositionCharacteristic);
 
-    advertisingData.appendServiceUUID(BluetoothStatusServiceConstants::serviceUuid);
+    advertisingData.appendServiceUUID(BluetoothIds::Status::Id);
 }
 
 void BluetoothStatusService::setState(char const* const stateName)
