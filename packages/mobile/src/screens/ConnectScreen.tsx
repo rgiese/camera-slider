@@ -1,4 +1,4 @@
-import { ActivityIndicator, Button, Surface, Title } from "react-native-paper";
+import { ActivityIndicator, Button, Surface, Text, Title } from "react-native-paper";
 
 import BaseView from "../components/BaseView";
 import GrumpyRobin from "../assets/grumpy-robin.svg";
@@ -54,6 +54,14 @@ const ConnectScreen: NavigationStackScreenComponent<{}> = ({ navigation }): Reac
     });
 
     return <BaseView />;
+  } else if (bluetoothStore.state === "error") {
+    return (
+      <BaseView>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text>{bluetoothStore.error}</Text>
+        </View>
+      </BaseView>
+    );
   } else {
     throw new Error("Unexpected authentication state");
   }
