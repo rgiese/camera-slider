@@ -6,6 +6,7 @@ class Bluetooth;
 
 #include "BluetoothCapabilitiesService.h"
 #include "BluetoothStatusService.h"
+#include "BluetoothTrackingService.h"
 
 class Bluetooth
 {
@@ -24,9 +25,15 @@ public:
         return m_StatusService;
     }
 
+    BluetoothTrackingService& trackingService()
+    {
+        return m_TrackingService;
+    }
+
 private:
     BluetoothCapabilitiesService m_CapabilitiesService;
     BluetoothStatusService m_StatusService;
+    BluetoothTrackingService m_TrackingService;
 
 private:
     // Non-copyable

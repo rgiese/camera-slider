@@ -4,6 +4,8 @@ enum class RequestType
 {
     UIButtonPressed,
     DesiredPosition,
+    DesiredMaximumSpeed,
+    DesiredMaximumAcceleration,
 };
 
 struct Request
@@ -12,12 +14,25 @@ struct Request
 
     union
     {
-        // UIButtonPressed
-        // - <nothing>
+        struct
+        {
+        } UIButtonPressed;
 
-        // DesiredPosition
-        int32_t DesiredPosition;
-    } Data;
+        struct
+        {
+            int32_t value;
+        } DesiredPosition;
+
+        struct
+        {
+            uint32_t value;
+        } DesiredMaximumSpeed;
+
+        struct
+        {
+            uint32_t value;
+        } DesiredMaximumAcceleration;
+    };
 };
 
 class RequestQueue

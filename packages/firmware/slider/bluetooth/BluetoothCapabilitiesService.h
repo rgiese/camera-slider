@@ -7,9 +7,9 @@ class BluetoothCapabilitiesService
 public:
     BluetoothCapabilitiesService();
 
+    void setMaximumPosition(int32_t const position);
     void setMaximumSpeed(uint32_t const stepsPerSec);
     void setMaximumAcceleration(uint32_t const stepsPerSecPerSec);
-    void setMaximumPosition(int32_t const position);
 
 private:
     friend class Bluetooth;
@@ -17,9 +17,9 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
+    BleCharacteristic m_MaximumPositionCharacteristic;
     BleCharacteristic m_MaximumSpeedCharacteristic;
     BleCharacteristic m_MaximumAccelerationCharacteristic;
-    BleCharacteristic m_MaximumPositionCharacteristic;
 
 private:
     // Non-copyable

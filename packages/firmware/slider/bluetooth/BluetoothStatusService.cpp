@@ -10,13 +10,22 @@ BluetoothStatusService::BluetoothStatusService()
                                        BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                                        BluetoothIds::Status::Characteristics::ReportedPosition,
                                        BluetoothIds::Status::Id)
-    , m_DesiredPositionCharacteristic("desiredPosition",
-                                      BleCharacteristicProperty::WRITE_WO_RSP,
-                                      BluetoothIds::Status::Characteristics::DesiredPosition,
-                                      BluetoothIds::Status::Id,
-                                      &BluetoothStatusService::onDesiredPositionChanged,
-                                      nullptr)
+    , m_ReportedVelocityCharacteristic("reportedVelocity",
+                                       BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                                       BluetoothIds::Status::Characteristics::ReportedVelocity,
+                                       BluetoothIds::Status::Id)
+    , m_ReportedMaximumSpeedCharacteristic("reportedMaximumSpeed",
+                                           BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                                           BluetoothIds::Status::Characteristics::ReportedMaximumSpeed,
+                                           BluetoothIds::Status::Id)
+    , m_ReportedMaximumAccelerationCharacteristic("reportedMaximumAcceleration",
+                                                  BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                                                  BluetoothIds::Status::Characteristics::ReportedMaximumAcceleration,
+                                                  BluetoothIds::Status::Id)
     , m_LastReportedPosition(-1)
+    , m_LastReportedVelocity(-1)
+    , m_LastReportedMaximumSpeed(static_cast<uint32_t>(-1))
+    , m_LastReportedMaximumAcceleration(static_cast<uint32_t>(-1))
 {
 }
 
@@ -24,7 +33,9 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 {
     BLE.addCharacteristic(m_StateCharacteristic);
     BLE.addCharacteristic(m_ReportedPositionCharacteristic);
-    BLE.addCharacteristic(m_DesiredPositionCharacteristic);
+    BLE.addCharacteristic(m_ReportedVelocityCharacteristic);
+    BLE.addCharacteristic(m_ReportedMaximumSpeedCharacteristic);
+    BLE.addCharacteristic(m_ReportedMaximumAccelerationCharacteristic);
 
     advertisingData.appendServiceUUID(BluetoothIds::Status::Id);
 }
@@ -43,20 +54,29 @@ void BluetoothStatusService::setReportedPosition(int32_t const position)
     }
 }
 
-void BluetoothStatusService::onDesiredPositionChanged(uint8_t const* const pData,
-                                                      size_t const cbData,
-                                                      BlePeerDevice const& peerDevice,
-                                                      void* pContext)
+void BluetoothStatusService::setReportedVelocity(int32_t const velocity)
 {
-    int32_t desiredPosition;
+    if (velocity != m_LastReportedVelocity)
     {
-        if (!pData || cbData != sizeof(desiredPosition))
-        {
-            return;
-        }
-
-        memcpy(&desiredPosition, pData, sizeof(desiredPosition));
+        m_ReportedVelocityCharacteristic.setValue(velocity);
+        m_LastReportedVelocity = velocity;
     }
+}
 
-    g_RequestQueue.push({Type : RequestType::DesiredPosition, Data : {DesiredPosition : desiredPosition}});
+void BluetoothStatusService::setReportedMaximumSpeed(uint32_t const maximumSpeed)
+{
+    if (maximumSpeed != m_LastReportedMaximumSpeed)
+    {
+        m_ReportedMaximumSpeedCharacteristic.setValue(maximumSpeed);
+        m_LastReportedMaximumSpeed = maximumSpeed;
+    }
+}
+
+void BluetoothStatusService::setReportedMaximumAcceleration(uint32_t const maximumAcceleration)
+{
+    if (maximumAcceleration != m_LastReportedMaximumAcceleration)
+    {
+        m_ReportedMaximumAccelerationCharacteristic.setValue(maximumAcceleration);
+        m_LastReportedMaximumAcceleration = maximumAcceleration;
+    }
 }

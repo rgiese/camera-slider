@@ -103,6 +103,9 @@ void stateMachineThreadFn(void*)
 
         // TEMPORARY: Update Bluetooth state
         g_Bluetooth.statusService().setReportedPosition(g_MotorController.getCurrentPosition());
+        g_Bluetooth.statusService().setReportedVelocity(g_MotorController.getVelocity());
+        g_Bluetooth.statusService().setReportedMaximumSpeed(g_MotorController.getMaximumSpeed());
+        g_Bluetooth.statusService().setReportedMaximumAcceleration(g_MotorController.getMaximumAcceleration());
 
         // Deliver interrupt-sourced events (creates Requests)
         g_UIButton.onLoop();

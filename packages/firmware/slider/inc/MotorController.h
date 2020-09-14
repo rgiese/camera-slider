@@ -41,15 +41,32 @@ public:
         return m_IsPositionCertain;
     }
 
+    int32_t getVelocity()
+    {
+        return speedFromTicUnits(m_Tic.getCurrentVelocity());
+    }
+
+    uint32_t getMaximumSpeed()
+    {
+        return speedFromTicUnits(m_Tic.getMaxSpeed());
+    }
+
+    uint32_t getMaximumAcceleration()
+    {
+        return accelerationFromTicUnits(m_Tic.getMaxAccel());
+    }
+
     bool isHomingActive()
     {
         // Not worth caching
         return m_Tic.getHomingActive();
     }
 
+
     // Setters
     void setTargetPosition(int32_t const targetPosition);
     void setMaxSpeed(uint32_t const stepsPerSecond);
+    void setMaxAcceleration(uint32_t const stepsPerSecondPerSecond);
 
     void goHome();
 
@@ -82,6 +99,12 @@ private:
     {
         // Return steps per second per 100 seconds
         return stepsPerSecPerSec * 100;
+    }
+
+    static int32_t velocityFromTicUnits(int32_t const stepsPer10KSec)
+    {
+        // Return steps per second
+        return stepsPer10KSec / 10000;
     }
 
     static uint32_t speedFromTicUnits(uint32_t const stepsPer10KSec)

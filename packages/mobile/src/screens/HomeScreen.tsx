@@ -32,7 +32,9 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
   return (
     <BaseView>
       <Text>{bluetoothStore.deviceState}</Text>
-      <Text>{bluetoothStore.reportedPosition}</Text>
+      <Text>
+        {bluetoothStore.reportedPosition} ({bluetoothStore.reportedVelocity})
+      </Text>
       <Slider
         maximumValue={10000}
         minimumValue={0}

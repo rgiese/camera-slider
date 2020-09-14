@@ -9,6 +9,9 @@ public:
 
     void setState(char const* const stateName);
     void setReportedPosition(int32_t const position);
+    void setReportedVelocity(int32_t const velocity);
+    void setReportedMaximumSpeed(uint32_t const maximimSpeed);
+    void setReportedMaximumAcceleration(uint32_t const maximumAcceleration);
 
 private:
     friend class Bluetooth;
@@ -16,17 +19,16 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
-    static void onDesiredPositionChanged(uint8_t const* const pData,
-                                         size_t const cbData,
-                                         BlePeerDevice const& peerDevice,
-                                         void* pContext);
-
-private:
     BleCharacteristic m_StateCharacteristic;
     BleCharacteristic m_ReportedPositionCharacteristic;
-    BleCharacteristic m_DesiredPositionCharacteristic;
+    BleCharacteristic m_ReportedVelocityCharacteristic;
+    BleCharacteristic m_ReportedMaximumSpeedCharacteristic;
+    BleCharacteristic m_ReportedMaximumAccelerationCharacteristic;
 
     int32_t m_LastReportedPosition;
+    int32_t m_LastReportedVelocity;
+    uint32_t m_LastReportedMaximumSpeed;
+    uint32_t m_LastReportedMaximumAcceleration;
 
 private:
     // Non-copyable

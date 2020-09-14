@@ -1,4 +1,9 @@
-import { Base64DecodeString, Base64DecodeUInt32, Base64EncodeUInt32 } from "../Base64";
+import {
+  Base64DecodeInt32,
+  Base64DecodeString,
+  Base64DecodeUInt32,
+  Base64EncodeUInt32,
+} from "../Base64";
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
@@ -17,6 +22,8 @@ export class BluetoothStore {
   @observable public deviceState = "";
 
   @observable public reportedPosition = 0;
+
+  @observable public reportedVelocity = 0;
 
   public error?: string;
 
@@ -120,6 +127,28 @@ export class BluetoothStore {
     }
   };
 
+  /* eslint-disable @typescript-eslint/no-invalid-this */
+  @action private readonly onReportedVelocityCharacteristicUpdated = (
+    error: BleError | null,
+    characteristic: Characteristic | null
+  ): void => {
+    if (error) {
+      this.setError(JSON.stringify(error));
+      return;
+    }
+
+    if (!characteristic) {
+      this.setError("Reported velocity characteristic: no characteristic provided");
+      return;
+    }
+
+    const encodedValue = characteristic.value;
+
+    if (encodedValue) {
+      this.reportedVelocity = Base64DecodeInt32(encodedValue);
+    }
+  };
+
   @action private setState(state: BluetoothStoreState): void {
     console.log(`BluetoothStore: ${this.state} -> ${state}`);
 
@@ -132,8 +161,8 @@ export class BluetoothStore {
     }
 
     await this.device.writeCharacteristicWithoutResponseForService(
-      BluetoothServices.Status.Id,
-      BluetoothServices.Status.Characteristics.DesiredPosition,
+      BluetoothServices.Tracking.Id,
+      BluetoothServices.Tracking.Characteristics.DesiredPosition,
       Base64EncodeUInt32(desiredPosition)
     );
   }
@@ -160,6 +189,14 @@ export class BluetoothStore {
 
     this.onReportedPositionCharacteristicUpdated(null, reportedPositionCharacteristic);
     reportedPositionCharacteristic.monitor(this.onReportedPositionCharacteristicUpdated);
+
+    const reportedVelocityCharacteristic = await device.readCharacteristicForService(
+      BluetoothServices.Status.Id,
+      BluetoothServices.Status.Characteristics.ReportedVelocity
+    );
+
+    this.onReportedVelocityCharacteristicUpdated(null, reportedVelocityCharacteristic);
+    reportedVelocityCharacteristic.monitor(this.onReportedVelocityCharacteristicUpdated);
   }
 
   private setError(error: string): void {

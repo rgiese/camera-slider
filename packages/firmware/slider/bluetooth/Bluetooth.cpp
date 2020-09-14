@@ -9,6 +9,7 @@ void Bluetooth::begin()
     BleAdvertisingData advertisingData;
     m_CapabilitiesService.begin(advertisingData);
     m_StatusService.begin(advertisingData);
+    m_TrackingService.begin(advertisingData);
 
     BLE.advertise(&advertisingData);
 }

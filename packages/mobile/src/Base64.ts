@@ -130,6 +130,16 @@ export function Base64DecodeUInt32(source: string): number {
     return 0;
   }
 
+  return Buffer.from(asByteArray).readUInt32LE();
+}
+
+export function Base64DecodeInt32(source: string): number {
+  const asByteArray = Base64Decode(source);
+
+  if (asByteArray.length != 4) {
+    return 0;
+  }
+
   return Buffer.from(asByteArray).readInt32LE();
 }
 

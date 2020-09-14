@@ -34,7 +34,15 @@ void MotorController::setTargetPosition(int32_t const targetPosition)
 
 void MotorController::setMaxSpeed(uint32_t const stepsPerSecond)
 {
-    m_Tic.setMaxSpeed(speedToTicUnits(stepsPerSecond));
+    m_Tic.setMaxSpeed(speedToTicUnits(std::min(stepsPerSecond, c_MaxSafeSpeed_StepsPerSec)));
+}
+
+void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
+{
+    m_Tic.setMaxAccel(
+        accelerationToTicUnits(std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec)));
+    m_Tic.setMaxDecel(
+        accelerationToTicUnits(std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec)));
 }
 
 void MotorController::goHome()

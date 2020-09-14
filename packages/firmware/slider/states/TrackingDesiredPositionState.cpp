@@ -29,7 +29,15 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             return true;
 
         case RequestType::DesiredPosition:
-            g_MotorController.setTargetPosition(request.Data.DesiredPosition);
+            g_MotorController.setTargetPosition(request.DesiredPosition.value);
+            return true;
+
+        case RequestType::DesiredMaximumSpeed:
+            g_MotorController.setMaxSpeed(request.DesiredMaximumSpeed.value);
+            return true;
+
+        case RequestType::DesiredMaximumAcceleration:
+            g_MotorController.setMaxAcceleration(request.DesiredMaximumAcceleration.value);
             return true;
 
         default:
