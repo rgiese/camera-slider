@@ -43,7 +43,7 @@ public:
 
     int32_t getVelocity()
     {
-        return speedFromTicUnits(m_Tic.getCurrentVelocity());
+        return velocityFromTicUnits(m_Tic.getCurrentVelocity());
     }
 
     uint32_t getMaximumSpeed()
