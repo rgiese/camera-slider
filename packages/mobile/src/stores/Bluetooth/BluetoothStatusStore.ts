@@ -1,9 +1,4 @@
-import {
-  Base64DecodeInt32,
-  Base64DecodeString,
-  Base64DecodeUInt32,
-  Base64EncodeUInt32,
-} from "./Base64";
+import { Base64DecodeInt32, Base64DecodeString, Base64DecodeUInt32 } from "./Base64";
 
 import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothConnection } from "./BluetoothConnection";
@@ -22,14 +17,6 @@ export class BluetoothStatusStore extends BluetoothCharacteristicsStoreBase {
     super(bluetoothConnection, BluetoothServices.Status.Id);
 
     bluetoothConnection.addCharacteristicsStore(this);
-  }
-
-  public async setDesiredPosition(desiredPosition: number): Promise<void> {
-    await this.bluetoothConnection.writeCharacteristicValue(
-      BluetoothServices.Tracking.Id,
-      BluetoothServices.Tracking.Characteristics.DesiredPosition,
-      Base64EncodeUInt32(desiredPosition)
-    );
   }
 
   public async onDeviceConnected(device: Device): Promise<void> {

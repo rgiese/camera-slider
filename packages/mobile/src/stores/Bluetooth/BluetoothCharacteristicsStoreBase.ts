@@ -8,9 +8,9 @@ type KeysOfType<T, TProp> = { [P in keyof T]: T[P] extends TProp ? P : never }[k
 type Base64DecoderFunction<T> = (source: string) => T;
 
 export abstract class BluetoothCharacteristicsStoreBase {
-  private readonly serviceUuid: string;
-
   protected readonly bluetoothConnection: BluetoothConnection;
+
+  private readonly serviceUuid: string;
 
   public constructor(bluetoothConnection: BluetoothConnection, serviceUuid: string) {
     this.bluetoothConnection = bluetoothConnection;
@@ -56,6 +56,14 @@ export abstract class BluetoothCharacteristicsStoreBase {
 
     // Monitor value
     deviceCharacteristic.monitor(onCharacteristicUpdated);
+  }
+
+  protected async writeCharacteristicValue(characteristicId: string, value: string): Promise<void> {
+    await this.bluetoothConnection.writeCharacteristicValue(
+      this.serviceUuid,
+      characteristicId,
+      value
+    );
   }
 
   public abstract async onDeviceConnected(device: Device): Promise<void>;

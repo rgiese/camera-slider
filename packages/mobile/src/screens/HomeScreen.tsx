@@ -41,7 +41,7 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
         maximumValue={10000}
         minimumValue={0}
         onValueChange={async (value: number): Promise<void> => {
-          await bluetoothStatusStore.setDesiredPosition(value);
+          await rootStore.bluetoothTrackingStore.setDesiredPosition(value);
         }}
         step={100}
       />
