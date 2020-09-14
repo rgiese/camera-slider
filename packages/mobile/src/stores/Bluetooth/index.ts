@@ -3,7 +3,7 @@ import {
   Base64DecodeString,
   Base64DecodeUInt32,
   Base64EncodeUInt32,
-} from "../Base64";
+} from "./Base64";
 import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 

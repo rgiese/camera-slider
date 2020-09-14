@@ -1,4 +1,4 @@
-import { BluetoothStore } from "./BluetoothStore";
+import { BluetoothStore } from "./Bluetooth";
 
 export class RootStore {
   public readonly bluetoothStore: BluetoothStore;
