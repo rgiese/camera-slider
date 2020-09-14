@@ -1,12 +1,8 @@
-import {
-  Base64DecodeInt32,
-  Base64DecodeString,
-  Base64DecodeUInt32,
-  Base64EncodeUInt32,
-} from "./Base64";
-import { BleError, BleManager, Characteristic, Device } from "react-native-ble-plx";
+import { BleManager, Device } from "react-native-ble-plx";
 import { action, computed, observable } from "mobx";
 
+import { Base64EncodeUInt32 } from "./Base64";
+import { BluetoothCharacteristicsStore } from "./Characteristics";
 import { BluetoothServices } from "@grumpycorp/camera-slider-shared";
 
 export type BluetoothStoreState =
@@ -16,14 +12,8 @@ export type BluetoothStoreState =
   | "connected"
   | "error";
 
-export class BluetoothStore {
+export class BluetoothStore extends BluetoothCharacteristicsStore {
   @observable public state: BluetoothStoreState = "initializing";
-
-  @observable public deviceState = "";
-
-  @observable public reportedPosition = 0;
-
-  @observable public reportedVelocity = 0;
 
   public error?: string;
 
@@ -32,6 +22,8 @@ export class BluetoothStore {
   private device?: Device;
 
   public constructor() {
+    super();
+
     // TODO: https://reactnative.dev/docs/permissionsandroid
     // to request permissions on app startup
     this.bleManager = new BleManager();
@@ -83,72 +75,6 @@ export class BluetoothStore {
     );
   }
 
-  /* eslint-disable @typescript-eslint/no-invalid-this */
-  @action private readonly onStatusCharacteristicUpdated = (
-    error: BleError | null,
-    characteristic: Characteristic | null
-  ): void => {
-    if (error) {
-      this.setError(JSON.stringify(error));
-      return;
-    }
-
-    if (!characteristic) {
-      this.setError("Status characteristic: no characteristic provided");
-      return;
-    }
-
-    const encodedValue = characteristic.value;
-
-    if (encodedValue) {
-      this.deviceState = Base64DecodeString(encodedValue);
-    }
-  };
-
-  /* eslint-disable @typescript-eslint/no-invalid-this */
-  @action private readonly onReportedPositionCharacteristicUpdated = (
-    error: BleError | null,
-    characteristic: Characteristic | null
-  ): void => {
-    if (error) {
-      this.setError(JSON.stringify(error));
-      return;
-    }
-
-    if (!characteristic) {
-      this.setError("Reported position characteristic: no characteristic provided");
-      return;
-    }
-
-    const encodedValue = characteristic.value;
-
-    if (encodedValue) {
-      this.reportedPosition = Base64DecodeUInt32(encodedValue);
-    }
-  };
-
-  /* eslint-disable @typescript-eslint/no-invalid-this */
-  @action private readonly onReportedVelocityCharacteristicUpdated = (
-    error: BleError | null,
-    characteristic: Characteristic | null
-  ): void => {
-    if (error) {
-      this.setError(JSON.stringify(error));
-      return;
-    }
-
-    if (!characteristic) {
-      this.setError("Reported velocity characteristic: no characteristic provided");
-      return;
-    }
-
-    const encodedValue = characteristic.value;
-
-    if (encodedValue) {
-      this.reportedVelocity = Base64DecodeInt32(encodedValue);
-    }
-  };
-
   @action private setState(state: BluetoothStoreState): void {
     console.log(`BluetoothStore: ${this.state} -> ${state}`);
 
@@ -167,39 +93,17 @@ export class BluetoothStore {
     );
   }
 
-  private async onDeviceConnected(device: Device): Promise<void> {
+  protected async onDeviceConnected(device: Device): Promise<void> {
     // Connect
     await device.connect();
 
     await device.discoverAllServicesAndCharacteristics();
 
     // Set up subscriptions and perform initial reads
-    const statusCharacteristic = await device.readCharacteristicForService(
-      BluetoothServices.Status.Id,
-      BluetoothServices.Status.Characteristics.State
-    );
-
-    this.onStatusCharacteristicUpdated(null, statusCharacteristic);
-    statusCharacteristic.monitor(this.onStatusCharacteristicUpdated);
-
-    const reportedPositionCharacteristic = await device.readCharacteristicForService(
-      BluetoothServices.Status.Id,
-      BluetoothServices.Status.Characteristics.ReportedPosition
-    );
-
-    this.onReportedPositionCharacteristicUpdated(null, reportedPositionCharacteristic);
-    reportedPositionCharacteristic.monitor(this.onReportedPositionCharacteristicUpdated);
-
-    const reportedVelocityCharacteristic = await device.readCharacteristicForService(
-      BluetoothServices.Status.Id,
-      BluetoothServices.Status.Characteristics.ReportedVelocity
-    );
-
-    this.onReportedVelocityCharacteristicUpdated(null, reportedVelocityCharacteristic);
-    reportedVelocityCharacteristic.monitor(this.onReportedVelocityCharacteristicUpdated);
+    await super.onDeviceConnected(device);
   }
 
-  private setError(error: string): void {
+  protected setError(error: string): void {
     console.log(`BluetoothStore error: ${error}`);
 
     this.error = error;
