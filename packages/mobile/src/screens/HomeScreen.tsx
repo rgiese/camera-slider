@@ -46,6 +46,8 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
     return <BaseView />;
   }
 
+  const canRequestChanges = bluetoothStatusStore.state === "trackingDesiredPosition";
+
   function humanizeState(state: SliderState): string {
     // fooBarBaz -> foo Bar Baz -> foo bar baz -> Foo bar baz
     const stateComponents = state.split(/(?=[A-Z])/);
@@ -64,19 +66,21 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
           />
           <List.Item
             description={
-              <Slider
-                maximumTrackTintColor={Colors.Position}
-                maximumValue={bluetoothCapabilitiesStore.maximumPosition}
-                minimumTrackTintColor={Colors.Position}
-                minimumValue={0}
-                onValueChange={async (value: number): Promise<void> => {
-                  await bluetoothTrackingStore.setDesiredPosition(value);
-                }}
-                step={bluetoothCapabilitiesStore.maximumPosition / styles.inlineSlider.width}
-                style={styles.inlineSlider}
-                thumbTintColor={Colors.Position}
-                value={bluetoothStatusStore.reportedPosition}
-              />
+              canRequestChanges && (
+                <Slider
+                  maximumTrackTintColor={Colors.Position}
+                  maximumValue={bluetoothCapabilitiesStore.maximumPosition}
+                  minimumTrackTintColor={Colors.Position}
+                  minimumValue={0}
+                  onValueChange={async (value: number): Promise<void> => {
+                    await bluetoothTrackingStore.setDesiredPosition(value);
+                  }}
+                  step={bluetoothCapabilitiesStore.maximumPosition / styles.inlineSlider.width}
+                  style={styles.inlineSlider}
+                  thumbTintColor={Colors.Position}
+                  value={bluetoothStatusStore.reportedPosition}
+                />
+              )
             }
             left={(): React.ReactNode => (
               <List.Icon color={Colors.Position} icon={Icons.Position} />
@@ -90,60 +94,66 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
               </Text>
             }
           />
-          <List.Item
-            description={
-              <Slider
-                maximumTrackTintColor={Colors.Speed}
-                maximumValue={bluetoothCapabilitiesStore.maximumSpeed}
-                minimumTrackTintColor={Colors.Speed}
-                minimumValue={0}
-                onValueChange={async (value: number): Promise<void> => {
-                  await bluetoothTrackingStore.setDesiredMaximumSpeed(value);
-                }}
-                step={bluetoothCapabilitiesStore.maximumSpeed / styles.inlineSlider.width}
-                style={styles.inlineSlider}
-                thumbTintColor={Colors.Speed}
-                value={bluetoothStatusStore.reportedMaximumSpeed}
+          {canRequestChanges && (
+            <>
+              <List.Item
+                description={
+                  <Slider
+                    maximumTrackTintColor={Colors.Speed}
+                    maximumValue={bluetoothCapabilitiesStore.maximumSpeed}
+                    minimumTrackTintColor={Colors.Speed}
+                    minimumValue={0}
+                    onValueChange={async (value: number): Promise<void> => {
+                      await bluetoothTrackingStore.setDesiredMaximumSpeed(value);
+                    }}
+                    step={bluetoothCapabilitiesStore.maximumSpeed / styles.inlineSlider.width}
+                    style={styles.inlineSlider}
+                    thumbTintColor={Colors.Speed}
+                    value={bluetoothStatusStore.reportedMaximumSpeed}
+                  />
+                }
+                left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon={Icons.Speed} />}
+                title={
+                  <Text>
+                    {`${bluetoothStatusStore.reportedVelocity} steps/sec `}
+                    <Text
+                      style={styles.maximaText}
+                    >{`(limit ${bluetoothStatusStore.reportedMaximumSpeed}, ${bluetoothCapabilitiesStore.maximumSpeed} max)`}</Text>
+                  </Text>
+                }
               />
-            }
-            left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon={Icons.Speed} />}
-            title={
-              <Text>
-                {`${bluetoothStatusStore.reportedVelocity} steps/sec `}
-                <Text
-                  style={styles.maximaText}
-                >{`(limit ${bluetoothStatusStore.reportedMaximumSpeed}, ${bluetoothCapabilitiesStore.maximumSpeed} max)`}</Text>
-              </Text>
-            }
-          />
-          <List.Item
-            description={
-              <Slider
-                maximumTrackTintColor={Colors.Acceleration}
-                maximumValue={bluetoothCapabilitiesStore.maximumAcceleration}
-                minimumTrackTintColor={Colors.Acceleration}
-                minimumValue={0}
-                onValueChange={async (value: number): Promise<void> => {
-                  await bluetoothTrackingStore.setDesiredMaximumAcceleration(value);
-                }}
-                step={bluetoothCapabilitiesStore.maximumAcceleration / styles.inlineSlider.width}
-                style={styles.inlineSlider}
-                thumbTintColor={Colors.Acceleration}
-                value={bluetoothStatusStore.reportedMaximumAcceleration}
+              <List.Item
+                description={
+                  <Slider
+                    maximumTrackTintColor={Colors.Acceleration}
+                    maximumValue={bluetoothCapabilitiesStore.maximumAcceleration}
+                    minimumTrackTintColor={Colors.Acceleration}
+                    minimumValue={0}
+                    onValueChange={async (value: number): Promise<void> => {
+                      await bluetoothTrackingStore.setDesiredMaximumAcceleration(value);
+                    }}
+                    step={
+                      bluetoothCapabilitiesStore.maximumAcceleration / styles.inlineSlider.width
+                    }
+                    style={styles.inlineSlider}
+                    thumbTintColor={Colors.Acceleration}
+                    value={bluetoothStatusStore.reportedMaximumAcceleration}
+                  />
+                }
+                left={(): React.ReactNode => (
+                  <List.Icon color={Colors.Acceleration} icon={Icons.Acceleration} />
+                )}
+                title={
+                  <Text>
+                    steps/sec^2{" "}
+                    <Text
+                      style={styles.maximaText}
+                    >{`(limit ${bluetoothStatusStore.reportedMaximumAcceleration}, ${bluetoothCapabilitiesStore.maximumAcceleration} max)`}</Text>
+                  </Text>
+                }
               />
-            }
-            left={(): React.ReactNode => (
-              <List.Icon color={Colors.Acceleration} icon={Icons.Acceleration} />
-            )}
-            title={
-              <Text>
-                steps/sec^2{" "}
-                <Text
-                  style={styles.maximaText}
-                >{`(limit ${bluetoothStatusStore.reportedMaximumAcceleration}, ${bluetoothCapabilitiesStore.maximumAcceleration} max)`}</Text>
-              </Text>
-            }
-          />
+            </>
+          )}
         </List.Section>
       </ScrollView>
     </BaseView>
