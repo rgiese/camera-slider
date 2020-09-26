@@ -61,9 +61,9 @@ HomeScreen.navigationOptions = ({
     return (
       <IconButton
         color={(screenProps as ScreenProps).theme.colors.text}
-        icon="account"
+        icon="cog"
         onPress={(): void => {
-          navigation.navigate(ScreenRoutes.Home); // TEMPORARY
+          navigation.navigate(ScreenRoutes.Settings);
         }}
       />
     );

@@ -13,11 +13,13 @@ import ConnectScreen from "./ConnectScreen";
 import HomeScreen from "./HomeScreen";
 import ScreenProps from "./ScreenProps";
 import ScreenRoutes from "./ScreenRoutes";
+import SettingsScreen from "./SettingsScreen";
 
 // App screens
 const AppNavigator = createStackNavigator(
   {
     [ScreenRoutes.Home]: { screen: HomeScreen },
+    [ScreenRoutes.Settings]: { screen: SettingsScreen },
   },
   {
     initialRouteName: ScreenRoutes.Home,
