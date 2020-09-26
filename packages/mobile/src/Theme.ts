@@ -11,4 +11,10 @@ const appTheme: Theme = {
   },
 };
 
+export const Colors = {
+  Position: "#f26739",
+  Speed: "#f52c68",
+  Acceleration: "#e0ca3e",
+};
+
 export default appTheme;
