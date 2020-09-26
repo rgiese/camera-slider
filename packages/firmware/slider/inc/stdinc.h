@@ -28,6 +28,6 @@
 // Features
 #include "inc/Display.h"
 #include "bluetooth/Bluetooth.h"
-#include "inc/MotorController.h"
+#include "motor/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"
