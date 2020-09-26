@@ -13,6 +13,10 @@ export class BluetoothStatusStore extends BluetoothCharacteristicsStoreBase {
 
   @observable public reportedVelocity = 0;
 
+  @observable public reportedMaximumSpeed = 0;
+
+  @observable public reportedMaximumAcceleration = 0;
+
   public constructor(bluetoothConnection: BluetoothConnection) {
     super(bluetoothConnection, BluetoothServices.Status.Id);
 
@@ -31,7 +35,7 @@ export class BluetoothStatusStore extends BluetoothCharacteristicsStoreBase {
       device,
       BluetoothServices.Status.Characteristics.ReportedPosition,
       "reportedPosition",
-      Base64DecodeUInt32
+      Base64DecodeInt32
     );
 
     await this.addCharacteristicListener<BluetoothStatusStore, number>(
@@ -39,6 +43,20 @@ export class BluetoothStatusStore extends BluetoothCharacteristicsStoreBase {
       BluetoothServices.Status.Characteristics.ReportedVelocity,
       "reportedVelocity",
       Base64DecodeInt32
+    );
+
+    await this.addCharacteristicListener<BluetoothStatusStore, number>(
+      device,
+      BluetoothServices.Status.Characteristics.ReportedMaximumSpeed,
+      "reportedMaximumSpeed",
+      Base64DecodeUInt32
+    );
+
+    await this.addCharacteristicListener<BluetoothStatusStore, number>(
+      device,
+      BluetoothServices.Status.Characteristics.ReportedMaximumAcceleration,
+      "reportedMaximumAcceleration",
+      Base64DecodeUInt32
     );
   }
 }

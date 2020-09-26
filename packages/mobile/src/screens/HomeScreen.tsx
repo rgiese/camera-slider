@@ -1,9 +1,9 @@
+import { Colors, Icons } from "../Theme";
 import { NavigationRoute, NavigationScreenProp } from "react-navigation";
 import { NavigationStackOptions, NavigationStackScreenComponent } from "react-navigation-stack";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 
 import BaseView from "../components/BaseView";
-import { Colors } from "../Theme";
 import { IconButton } from "react-native-paper";
 import { List } from "react-native-paper";
 import React from "react";
@@ -23,7 +23,10 @@ import { useRootStore } from "../stores/RootStoreContext";
 
 const styles = StyleSheet.create({
   inlineSlider: {
-    width: 250,
+    width: 300,
+  },
+  maximaText: {
+    color: Colors.Text.Dim,
   },
 });
 
@@ -32,6 +35,7 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
   const bluetoothConnection = rootStore.bluetoothConnection;
   const bluetoothCapabilitiesStore = rootStore.bluetoothCapabilitiesStore;
   const bluetoothStatusStore = rootStore.bluetoothStatusStore;
+  const bluetoothTrackingStore = rootStore.bluetoothTrackingStore;
 
   if (!bluetoothConnection.isConnected) {
     setImmediate(() => {
@@ -66,19 +70,79 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                 minimumTrackTintColor={Colors.Position}
                 minimumValue={0}
                 onValueChange={async (value: number): Promise<void> => {
-                  await rootStore.bluetoothTrackingStore.setDesiredPosition(value);
+                  await bluetoothTrackingStore.setDesiredPosition(value);
                 }}
-                step={100}
+                step={bluetoothCapabilitiesStore.maximumPosition / styles.inlineSlider.width}
                 style={styles.inlineSlider}
                 thumbTintColor={Colors.Position}
+                value={bluetoothStatusStore.reportedPosition}
               />
             }
-            left={(): React.ReactNode => <List.Icon color={Colors.Position} icon="map-marker" />}
-            title={`${bluetoothStatusStore.reportedPosition} steps`}
+            left={(): React.ReactNode => (
+              <List.Icon color={Colors.Position} icon={Icons.Position} />
+            )}
+            title={
+              <Text>
+                {`${bluetoothStatusStore.reportedPosition} steps `}
+                <Text
+                  style={styles.maximaText}
+                >{`(${bluetoothCapabilitiesStore.maximumPosition} max)`}</Text>
+              </Text>
+            }
           />
           <List.Item
-            left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon="speedometer" />}
-            title={`${bluetoothStatusStore.reportedVelocity} steps/sec`}
+            description={
+              <Slider
+                maximumTrackTintColor={Colors.Speed}
+                maximumValue={bluetoothCapabilitiesStore.maximumSpeed}
+                minimumTrackTintColor={Colors.Speed}
+                minimumValue={0}
+                onValueChange={async (value: number): Promise<void> => {
+                  await bluetoothTrackingStore.setDesiredMaximumSpeed(value);
+                }}
+                step={bluetoothCapabilitiesStore.maximumSpeed / styles.inlineSlider.width}
+                style={styles.inlineSlider}
+                thumbTintColor={Colors.Speed}
+                value={bluetoothStatusStore.reportedMaximumSpeed}
+              />
+            }
+            left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon={Icons.Speed} />}
+            title={
+              <Text>
+                {`${bluetoothStatusStore.reportedVelocity} steps/sec `}
+                <Text
+                  style={styles.maximaText}
+                >{`(limit ${bluetoothStatusStore.reportedMaximumSpeed}, ${bluetoothCapabilitiesStore.maximumSpeed} max)`}</Text>
+              </Text>
+            }
+          />
+          <List.Item
+            description={
+              <Slider
+                maximumTrackTintColor={Colors.Acceleration}
+                maximumValue={bluetoothCapabilitiesStore.maximumAcceleration}
+                minimumTrackTintColor={Colors.Acceleration}
+                minimumValue={0}
+                onValueChange={async (value: number): Promise<void> => {
+                  await bluetoothTrackingStore.setDesiredMaximumAcceleration(value);
+                }}
+                step={bluetoothCapabilitiesStore.maximumAcceleration / styles.inlineSlider.width}
+                style={styles.inlineSlider}
+                thumbTintColor={Colors.Acceleration}
+                value={bluetoothStatusStore.reportedMaximumAcceleration}
+              />
+            }
+            left={(): React.ReactNode => (
+              <List.Icon color={Colors.Acceleration} icon={Icons.Acceleration} />
+            )}
+            title={
+              <Text>
+                steps/sec^2{" "}
+                <Text
+                  style={styles.maximaText}
+                >{`(limit ${bluetoothStatusStore.reportedMaximumAcceleration}, ${bluetoothCapabilitiesStore.maximumAcceleration} max)`}</Text>
+              </Text>
+            }
           />
         </List.Section>
       </ScrollView>

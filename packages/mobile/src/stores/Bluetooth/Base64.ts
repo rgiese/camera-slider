@@ -60,9 +60,16 @@ export function Base64Encode(data: Uint8Array): string {
   return asString;
 }
 
-export function Base64EncodeUInt32(value: number): string {
+export function Base64EncodeInt32(value: number): string {
   const buffer = Buffer.allocUnsafe(4);
   buffer.writeInt32LE(value, 0);
+
+  return Base64Encode(new Uint8Array(buffer));
+}
+
+export function Base64EncodeUInt32(value: number): string {
+  const buffer = Buffer.allocUnsafe(4);
+  buffer.writeUInt32LE(value, 0);
 
   return Base64Encode(new Uint8Array(buffer));
 }

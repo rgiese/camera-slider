@@ -1,4 +1,5 @@
-import { Base64EncodeUInt32 } from "./Base64";
+import { Base64EncodeInt32, Base64EncodeUInt32 } from "./Base64";
+
 import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothConnection } from "./BluetoothConnection";
 import { BluetoothServices } from "@grumpycorp/camera-slider-shared";
@@ -12,7 +13,21 @@ export class BluetoothTrackingStore extends BluetoothCharacteristicsStoreBase {
   public async setDesiredPosition(desiredPosition: number): Promise<void> {
     await this.writeCharacteristicValue(
       BluetoothServices.Tracking.Characteristics.DesiredPosition,
-      Base64EncodeUInt32(desiredPosition)
+      Base64EncodeInt32(desiredPosition)
+    );
+  }
+
+  public async setDesiredMaximumSpeed(desiredMaximumSpeed: number): Promise<void> {
+    await this.writeCharacteristicValue(
+      BluetoothServices.Tracking.Characteristics.DesiredMaximumSpeed,
+      Base64EncodeUInt32(desiredMaximumSpeed)
+    );
+  }
+
+  public async setDesiredMaximumAcceleration(desiredMaximumAcceleration: number): Promise<void> {
+    await this.writeCharacteristicValue(
+      BluetoothServices.Tracking.Characteristics.DesiredMaximumAcceleration,
+      Base64EncodeUInt32(desiredMaximumAcceleration)
     );
   }
 

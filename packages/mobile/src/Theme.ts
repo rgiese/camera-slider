@@ -15,6 +15,15 @@ export const Colors = {
   Position: "#f26739",
   Speed: "#f52c68",
   Acceleration: "#e0ca3e",
+  Text: {
+    Dim: "#999",
+  },
+};
+
+export const Icons = {
+  Position: "map-marker",
+  Speed: "speedometer",
+  Acceleration: "trending-up",
 };
 
 export default appTheme;

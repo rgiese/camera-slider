@@ -1,5 +1,6 @@
+import { Colors, Icons } from "../Theme";
+
 import BaseView from "../components/BaseView";
-import { Colors } from "../Theme";
 import { List } from "react-native-paper";
 import { NavigationStackScreenComponent } from "react-navigation-stack";
 import React from "react";
@@ -17,16 +18,18 @@ const SettingsScreen: NavigationStackScreenComponent<{}> = (): React.ReactElemen
       <ScrollView>
         <List.Section title="Maximum values">
           <List.Item
-            left={(): React.ReactNode => <List.Icon color={Colors.Position} icon="map-marker" />}
+            left={(): React.ReactNode => (
+              <List.Icon color={Colors.Position} icon={Icons.Position} />
+            )}
             title={`${capabilitiesStore.maximumPosition} steps`}
           />
           <List.Item
-            left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon="speedometer" />}
+            left={(): React.ReactNode => <List.Icon color={Colors.Speed} icon={Icons.Speed} />}
             title={`${capabilitiesStore.maximumSpeed} steps/sec`}
           />
           <List.Item
             left={(): React.ReactNode => (
-              <List.Icon color={Colors.Acceleration} icon="trending-up" />
+              <List.Icon color={Colors.Acceleration} icon={Icons.Acceleration} />
             )}
             title={`${capabilitiesStore.maximumAcceleration} steps/sec^2`}
           />
