@@ -8,6 +8,8 @@
 // so we can make sure only one state object is operating at a time.
 //
 
+#include "generated/sliderStates.h"
+
 #include "AbstractState.h"
 #include "StateKeeper.h"
 

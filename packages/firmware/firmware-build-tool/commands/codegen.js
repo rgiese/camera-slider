@@ -2,7 +2,7 @@ const { Command, flags } = require("@oclif/command");
 const fs = require("fs");
 const path = require("path");
 
-const { BluetoothServices } = require("@grumpycorp/camera-slider-shared");
+const { BluetoothServices, SliderStateNames } = require("@grumpycorp/camera-slider-shared");
 
 class CodegenCommand extends Command {
   async run() {
@@ -23,10 +23,20 @@ class CodegenCommand extends Command {
       fs.mkdirSync(projectGeneratedRoot);
     }
 
-    //
     // Codegen Bluetooth constants
-    //
+    this.codegenBluetoothConstants(projectGeneratedRoot);
 
+    // Codegen Slider states
+    this.codegenSliderStates(projectGeneratedRoot);
+
+    // Codegen clang ignore file
+    fs.writeFileSync(
+      path.join(projectGeneratedRoot, ".clang-format"),
+      "DisableFormat: true\nSortIncludes: false\n"
+    );
+  }
+
+  codegenBluetoothConstants(projectGeneratedRoot) {
     let headerFileContent = "#pragma once\n// This is a generated file.\n";
     headerFileContent += `namespace BluetoothIds {\n`;
 
@@ -56,15 +66,38 @@ class CodegenCommand extends Command {
     headerFileContent += `} // BluetoothIds\n`;
 
     fs.writeFileSync(path.join(projectGeneratedRoot, "bluetoothIds.h"), headerFileContent);
+  }
 
-    //
-    // Codegen clang ignore file
-    //
+  codegenSliderStates(projectGeneratedRoot) {
+    let headerFileContent = "#pragma once\n// This is a generated file.\n";
 
-    fs.writeFileSync(
-      path.join(projectGeneratedRoot, ".clang-format"),
-      "DisableFormat: true\nSortIncludes: false\n"
-    );
+    const capitalize = str => {
+      return str.slice(0, 1).toUpperCase() + str.slice(1);
+    };
+
+    // Enum
+    headerFileContent += `enum class SliderState {\n`;
+
+    for (const sliderState of SliderStateNames) {
+      headerFileContent += `  ${capitalize(sliderState)},\n`;
+    }
+
+    headerFileContent += `};\n`;
+
+    // Enum->string mapping
+    headerFileContent += `inline char const* getSliderStateName(SliderState const state) {\n`;
+    headerFileContent += `  switch (state) {\n`;
+
+    for (const sliderState of SliderStateNames) {
+      const capitalState = capitalize(sliderState);
+      headerFileContent += `    case SliderState::${capitalState}: return "${sliderState}";\n`;
+    }
+
+    headerFileContent += `    default: return "<unknown>";\n`;
+    headerFileContent += `  }\n`;
+    headerFileContent += `}\n`;
+
+    fs.writeFileSync(path.join(projectGeneratedRoot, "sliderStates.h"), headerFileContent);
   }
 }
 

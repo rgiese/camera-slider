@@ -2,6 +2,7 @@
 #include "states.h"
 
 UnrecoverableErrorState::UnrecoverableErrorState(char const* format, ...)
+    : AbstractState(SliderState::UnrecoverableError)
 {
     va_list args;
     va_start(args, format);

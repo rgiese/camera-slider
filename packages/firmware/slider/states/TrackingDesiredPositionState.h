@@ -3,9 +3,9 @@
 class TrackingDesiredPositionState : public AbstractState
 {
 public:
-    char const* getName() override
+    TrackingDesiredPositionState()
+        : AbstractState(SliderState::TrackingDesiredPosition)
     {
-        return "trackingDesiredPosition";
     }
 
     void onEnteringState() override;

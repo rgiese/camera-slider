@@ -3,9 +3,9 @@
 class FindingForwardRangeState : public AbstractState
 {
 public:
-    char const* getName() override
+    FindingForwardRangeState()
+        : AbstractState(SliderState::FindingForwardRange)
     {
-        return "findingForwardRange";
     }
 
     void onEnteringState() override;

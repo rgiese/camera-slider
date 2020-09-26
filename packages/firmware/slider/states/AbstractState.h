@@ -3,11 +3,15 @@
 class AbstractState
 {
 public:
-    AbstractState(){};
+    AbstractState(SliderState const sliderState)
+        : m_SliderState(sliderState){};
+
     virtual ~AbstractState(){};
 
-    // Debugging tools (must implement)
-    virtual char const* getName() = 0;
+    SliderState getSliderState() const
+    {
+        return m_SliderState;
+    }
 
     // Request handler (return true if handled)
     virtual bool onRequest(Request const& request)
@@ -21,6 +25,9 @@ protected:
     virtual void onEnteringState(){};
     virtual void onLoop(){};
     virtual void onExitingState(){};
+
+private:
+    SliderState const m_SliderState;
 
 private:
     // Non-copyable

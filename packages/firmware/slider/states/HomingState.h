@@ -3,9 +3,9 @@
 class HomingState : public AbstractState
 {
 public:
-    char const* getName() override
+    HomingState()
+        : AbstractState(SliderState::Homing)
     {
-        return "homing";
     }
 
     void onEnteringState() override;

@@ -3,9 +3,9 @@
 class InitializingMotorState : public AbstractState
 {
 public:
-    char const* getName() override
+    InitializingMotorState()
+        : AbstractState(SliderState::InitializingMotor)
     {
-        return "initializingMotor";
     }
 
     void onEnteringState() override;

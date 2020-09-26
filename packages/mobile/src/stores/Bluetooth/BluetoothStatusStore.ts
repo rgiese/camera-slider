@@ -1,13 +1,13 @@
 import { Base64DecodeInt32, Base64DecodeString, Base64DecodeUInt32 } from "./Base64";
+import { BluetoothServices, SliderState } from "@grumpycorp/camera-slider-shared";
 
 import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothConnection } from "./BluetoothConnection";
-import { BluetoothServices } from "@grumpycorp/camera-slider-shared";
 import { Device } from "react-native-ble-plx";
 import { observable } from "mobx";
 
 export class BluetoothStatusStore extends BluetoothCharacteristicsStoreBase {
-  @observable public state = "";
+  @observable public state: SliderState = "initializingMotor";
 
   @observable public reportedPosition = 0;
 
