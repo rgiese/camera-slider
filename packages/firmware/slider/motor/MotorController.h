@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Tic.h>
+
 class MotorController
 {
 public:

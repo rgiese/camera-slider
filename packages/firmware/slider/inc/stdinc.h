@@ -20,11 +20,6 @@
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
 
-// Dependencies
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <Tic.h>
-
 // Features
 #include "inc/Display.h"
 #include "bluetooth/Bluetooth.h"
