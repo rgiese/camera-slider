@@ -1,6 +1,5 @@
-import { Button, List } from "react-native-paper";
-
 import BaseView from "../components/BaseView";
+import { List } from "react-native-paper";
 import { NavigationStackScreenComponent } from "react-navigation-stack";
 import React from "react";
 import { ScrollView } from "react-native";
@@ -28,14 +27,6 @@ const SettingsScreen: NavigationStackScreenComponent<{}> = (): React.ReactElemen
             left={(): React.ReactNode => <List.Icon icon="trending-up" />}
             title={`${capabilitiesStore.maximumAcceleration} steps/sec^2`}
           />
-          <Button
-            mode="outlined"
-            onPress={async (): Promise<void> => {
-              //await authStore.authProvider.requestLogout();
-            }}
-          >
-            Find maximum range
-          </Button>
         </List.Section>
       </ScrollView>
     </BaseView>
