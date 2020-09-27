@@ -8,6 +8,10 @@ public:
     }
 
 public:
+    void off()
+    {
+    }
+
     char const* SSID() const
     {
         return "MockWiFi";

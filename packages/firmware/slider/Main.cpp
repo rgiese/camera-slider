@@ -53,8 +53,9 @@ void setup()
 
     // Request connection to cloud (not blocking)
     {
-        Activity connectActivity("Connect");
-        Particle.connect();
+        // Activity connectActivity("Connect");
+        // Particle.connect();
+        WiFi.off();
     }
 
     // Kick off state machine
