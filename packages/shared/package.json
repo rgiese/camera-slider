@@ -11,9 +11,14 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
+    "prebuild": "npm-run-all codegen:*",
     "build": "tsc",
+    "codegen:flatbuffers": "node ./codegen-flatbuffers.js",
     "format:fix": "prettier --write {.,./src/**}/*.{css,graphql,html,js,jsx,json,md,scss,ts,tsx,webmanifest}",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "@types/flatbuffers": "^1.10.0"
   }
 }

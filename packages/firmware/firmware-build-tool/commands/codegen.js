@@ -1,4 +1,5 @@
 const { Command, flags } = require("@oclif/command");
+const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
@@ -18,10 +19,16 @@ class CodegenCommand extends Command {
     const projectRoot = path.join(packageRoot, flags.project);
     const projectGeneratedRoot = path.join(projectRoot, "generated");
 
+    const sharedPackageRoot = path.join(packageRoot, "../shared/");
+    const schemasRoot = path.join(sharedPackageRoot, "src/schema");
+
     // Make sure the output directory for generated files exists
     if (!fs.existsSync(projectGeneratedRoot)) {
       fs.mkdirSync(projectGeneratedRoot);
     }
+
+    // Codegen Flatbuffers
+    this.codegenFlatbuffers(schemasRoot, projectGeneratedRoot);
 
     // Codegen Bluetooth constants
     this.codegenBluetoothConstants(projectGeneratedRoot);
@@ -98,6 +105,54 @@ class CodegenCommand extends Command {
     headerFileContent += `}\n`;
 
     fs.writeFileSync(path.join(projectGeneratedRoot, "sliderStates.h"), headerFileContent);
+  }
+
+  codegenFlatbuffers(schemasRoot, projectGeneratedRoot) {
+    const grumpycorpRoot = process.env.GRUMPYCORP_ROOT;
+
+    if (!grumpycorpRoot) {
+      this.error("Environment variable GRUMPYCORP_ROOT must be defined. Exiting.");
+      return;
+    }
+
+    const flatbuffersRoot = path.join(grumpycorpRoot, "flatbuffers");
+
+    const fixIncludePathsInFile = fileName => {
+      // Modify include locations from "flatbuffers/{foo.h}" to "{foo.h}"
+      // because we don't get to set additional include roots with the Particle compiler
+      const fileContent = fs.readFileSync(fileName).toString();
+
+      const fixedUpFileContent = fileContent.replace('#include "flatbuffers/', '#include "');
+
+      fs.writeFileSync(fileName, fixedUpFileContent);
+    };
+
+    // Run codegen
+    ["firmware.fbs"].map(fbs => {
+      const flatbuffersSchema = path.join(schemasRoot, fbs);
+      this.log(`Processing ${flatbuffersSchema}`);
+
+      execSync(
+        `${flatbuffersRoot}/flatc --cpp --scoped-enums -o ${projectGeneratedRoot} ${flatbuffersSchema}`,
+        {
+          stdio: "inherit",
+        }
+      );
+
+      fixIncludePathsInFile(path.join(projectGeneratedRoot, fbs.replace(".fbs", "_generated.h")));
+    });
+
+    // Copy C++ headers
+    const flatbuffersIncludesSource = path.join(flatbuffersRoot, "include/flatbuffers");
+
+    ["flatbuffers.h", "base.h", "stl_emulation.h"].map(header => {
+      const source = path.join(flatbuffersIncludesSource, header);
+      const destination = path.join(projectGeneratedRoot, header);
+
+      this.log(`Rewriting ${source} -> ${destination}`);
+      fs.copyFileSync(source, destination);
+      fixIncludePathsInFile(destination);
+    });
   }
 }
 

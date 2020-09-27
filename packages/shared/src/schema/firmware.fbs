@@ -1,0 +1,31 @@
+namespace Flatbuffers.Firmware;
+
+enum MovementType : ubyte { Move, Wait }
+
+enum MovementProgramFlags : ubyte (bit_flags) { Repeat }
+
+struct Movement {
+  ///
+  /// We won't bother making a formal union out of this since that'll just end up taking more space
+  /// than what we could hope to save.
+  ///
+
+  type: MovementType;
+
+  _padding0: uint16;
+  _padding1: uint8;
+
+  desiredPosition: int32; // in steps
+  desiredSpeed: uint32; // in steps/sec, or delayTime in msec if type = Wait
+  desiredAcceleration: uint32; // in steps/sec^2
+}
+
+table MovementProgram {
+  flags: MovementProgramFlags;
+  multiplier_x100: int16;
+
+  movements: [Movement];
+}
+
+file_identifier "CSL1";
+root_type MovementProgram;
