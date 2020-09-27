@@ -1,3 +1,4 @@
+import { Button, List } from "react-native-paper";
 import { Colors, Icons } from "../Theme";
 import { NavigationRoute, NavigationScreenProp } from "react-navigation";
 import { NavigationStackOptions, NavigationStackScreenComponent } from "react-navigation-stack";
@@ -5,7 +6,6 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 
 import BaseView from "../components/BaseView";
 import { IconButton } from "react-native-paper";
-import { List } from "react-native-paper";
 import React from "react";
 import ScreenProps from "./ScreenProps";
 import ScreenRoutes from "./ScreenRoutes";
@@ -153,6 +153,22 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                 }
               />
             </>
+          )}
+        </List.Section>
+        <List.Section title="Testing">
+          {canRequestChanges && (
+            <List.Item
+              title={
+                <Button
+                  mode="contained"
+                  onPress={async (): Promise<void> => {
+                    await rootStore.bluetoothProgramStore.test();
+                  }}
+                >
+                  Test
+                </Button>
+              }
+            />
           )}
         </List.Section>
       </ScrollView>

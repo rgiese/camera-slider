@@ -18,6 +18,12 @@ export const BluetoothServices: BluetoothServices = {
       MaximumAcceleration: "e24e1773-60e9-4287-86a0-eddd7d7ce2fd",
     },
   },
+  Program: {
+    Id: "e2a99562-a5ae-4d6e-96e8-5a5fe2213290",
+    Characteristics: {
+      DesiredMovementProgram: "0eeb387c-5bc1-4c00-b9ee-066643d11a82",
+    },
+  },
   Status: {
     Id: "fcccbeb7-eb63-4726-9315-e198b1e5ec1c",
     Characteristics: {

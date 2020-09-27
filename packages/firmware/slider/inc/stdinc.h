@@ -20,6 +20,9 @@
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
 
+// Shared dependencies
+#include "generated/firmware_generated.h"
+
 // Features
 #include "inc/Display.h"
 #include "bluetooth/Bluetooth.h"
