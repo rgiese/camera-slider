@@ -2,6 +2,7 @@ export const SliderStateNames = [
   "findingForwardRange",
   "homing",
   "initializingMotor",
+  "runningMovementProgram",
   "trackingDesiredPosition",
   "unrecoverableError",
 ] as const;

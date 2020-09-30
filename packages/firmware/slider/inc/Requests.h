@@ -1,17 +1,21 @@
 #pragma once
 
+#include "MovementProgramOwner.h"
+
 enum class RequestType
 {
     UIButtonPressed,
     DesiredPosition,
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
+    DesiredMovementProgram,
 };
 
 struct Request
 {
     RequestType Type;
 
+    // Union-able types
     union
     {
         struct
@@ -33,6 +37,12 @@ struct Request
             uint32_t value;
         } DesiredMaximumAcceleration;
     };
+
+    // Non-union-able types
+    struct
+    {
+        std::shared_ptr<MovementProgramOwner> MovementProgram;
+    } DesiredMovementProgram;
 };
 
 class RequestQueue

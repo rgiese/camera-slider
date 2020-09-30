@@ -19,5 +19,6 @@ extern StateKeeper g_StateKeeper;
 
 #include "InitializingMotorState.h"
 #include "HomingState.h"
+#include "RunningMovementProgramState.h"
 #include "TrackingDesiredPositionState.h"
 #include "FindingForwardRangeState.h"

@@ -23,65 +23,16 @@ void BluetoothProgramService::onDesiredMovementProgramChanged(uint8_t const* con
                                                               BlePeerDevice const& peerDevice,
                                                               void* pContext)
 {
-    if (!pData || cbData < sizeof(uint32_t))
+    Request request = {Type : RequestType::DesiredMovementProgram};
     {
-        return;
-    }
+        request.DesiredMovementProgram.MovementProgram = MovementProgramOwner::Initialize(pData, cbData);
 
-    // Validate flatbuffer
-    flatbuffers::Verifier verifier(pData, cbData);
-    if (!VerifyMovementProgramBuffer(verifier))
-    {
-        Serial.println("!! Couldn't verify new program flatbuffer: ");
-        return;
-    }
-
-    // Dump flatbuffer (testing only)
-    MovementProgram const* movementProgram = GetMovementProgram(pData);
-
-    Serial.println("Movement program:");
-
-    {
-        auto const movementProgramFlags = movementProgram->flags();
-
-        if (static_cast<uint32_t>(movementProgramFlags) != 0)
+        if (!request.DesiredMovementProgram.MovementProgram)
         {
-            Serial.println("  Flags");
-
-            if (!!(movementProgramFlags & MovementProgramFlags::Repeat))
-            {
-                Serial.println("  - Repeat");
-            }
-        }
-
-        Serial.printlnf("  Rate: %.2f", static_cast<double>(movementProgram->rate_minus1_x100() - 1) / 100);
-    }
-
-    auto const pvMovements = movementProgram->movements();
-
-    if (pvMovements)
-    {
-        Serial.println("  Steps:");
-
-        for (auto const pMovement : *pvMovements)
-        {
-            switch (pMovement->type())
-            {
-                case MovementType::Move:
-                    Serial.printlnf("    Move: to %d steps, speed %d steps/sec, acceleration %d steps/sec^2",
-                                    pMovement->desiredPosition(),
-                                    pMovement->desiredSpeed(),
-                                    pMovement->desiredAcceleration());
-                    break;
-
-                case MovementType::Delay:
-                    Serial.printlnf("    Delay: %u msec", pMovement->delayTime());
-                    break;
-
-                default:
-                    Serial.printlnf("    UnknownMovementType(%u)", pMovement->type());
-                    break;
-            }
+            // Couldn't verify; don't queue request.
+            return;
         }
     }
+
+    g_RequestQueue.push(request);
 }

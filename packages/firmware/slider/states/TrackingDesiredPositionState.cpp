@@ -24,8 +24,8 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
     switch (request.Type)
     {
         case RequestType::UIButtonPressed:
-            // TEMPORARY: Testing
-            g_StateKeeper.RequestState(new FindingForwardRangeState());
+            // Safety return
+            g_MotorController.setTargetPosition(0);
             return true;
 
         case RequestType::DesiredPosition:
@@ -38,6 +38,10 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
 
         case RequestType::DesiredMaximumAcceleration:
             g_MotorController.setMaxAcceleration(request.DesiredMaximumAcceleration.value);
+            return true;
+
+        case RequestType::DesiredMovementProgram:
+            g_StateKeeper.RequestState(new RunningMovementProgramState(request.DesiredMovementProgram.MovementProgram));
             return true;
 
         default:
