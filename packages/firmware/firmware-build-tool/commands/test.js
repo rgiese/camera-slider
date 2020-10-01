@@ -41,12 +41,14 @@ class TestCommand extends Command {
     const sourceFiles = glob.sync(`${testsRoot}/**/*.cpp`);
     const testExecutable = path.join(outputRoot, "tests");
 
+    const compilerIncludes = `-I${projectRoot} -I${testsRoot} ${includes
+      .map(include => `-I${include}`)
+      .join(" ")}`;
+
+    const compilerOptions = `-DARDUINO=157 -DARDUINOSTL_M_H -lstdc++ -lm`;
+
     execSync(
-      `g++ -I${projectRoot} -I${testsRoot} ${includes
-        .map(include => `-I${include}`)
-        .join(" ")} ${sourceFiles.join(
-        " "
-      )} -DARDUINO=157 -DARDUINOSTL_M_H -lstdc++ -lm -o ${testExecutable}`,
+      `g++ ${compilerIncludes} ${sourceFiles.join(" ")} ${compilerOptions} -o ${testExecutable}`,
       {
         cwd: testsRoot,
         stdio: "inherit",
