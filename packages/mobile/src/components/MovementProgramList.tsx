@@ -1,7 +1,8 @@
-import { Alert, StyleSheet, Text } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 import { Colors, Icons } from "../Theme";
 import { IconButton, List, Switch } from "react-native-paper";
 
+import MovementParameter from "./MovementParameter";
 import { MovementProgram } from "@grumpycorp/camera-slider-shared";
 import React from "react";
 import Slider from "@react-native-community/slider";
@@ -92,11 +93,13 @@ function MovementProgramList({
                   disabled={index === 0}
                   icon="arrow-up"
                   onPress={(): void => swapMovements(index, index - 1)}
+                  size={16}
                 />
                 <IconButton
                   disabled={index === movementProgram.Movements.length - 1}
                   icon="arrow-down"
                   onPress={(): void => swapMovements(index, index + 1)}
+                  size={16}
                 />
               </>
             )}
@@ -107,21 +110,16 @@ function MovementProgramList({
               <>
                 {movement.Type === "Move" && (
                   <>
-                    <IconButton color={Colors.Position} icon={Icons.Position} />
-                    <Text>{movement.DesiredPosition}</Text>
-
-                    <IconButton color={Colors.Speed} icon={Icons.Speed} />
-                    <Text>{movement.DesiredSpeed}</Text>
-
-                    <IconButton color={Colors.Acceleration} icon={Icons.Acceleration} />
-                    <Text>{movement.DesiredPosition}</Text>
+                    <MovementParameter parameter="Position" value={movement.DesiredPosition ?? 0} />
+                    <MovementParameter parameter="Speed" value={movement.DesiredSpeed ?? 0} />
+                    <MovementParameter
+                      parameter="Acceleration"
+                      value={movement.DesiredAcceleration ?? 0}
+                    />
                   </>
                 )}
                 {movement.Type === "Delay" && (
-                  <>
-                    <IconButton color={Colors.Delay} icon={Icons.Delay} />
-                    <Text>{movement.DelayTime} msec</Text>
-                  </>
+                  <MovementParameter parameter="Delay" value={movement.DelayTime ?? 0} />
                 )}
               </>
             }
