@@ -1,16 +1,16 @@
-import { Button, List } from "react-native-paper";
+import { Button, IconButton, List } from "react-native-paper";
 import { Colors, Icons } from "../Theme";
+import { MovementProgram, SliderState } from "@grumpycorp/camera-slider-shared";
 import { NavigationRoute, NavigationScreenProp } from "react-navigation";
 import { NavigationStackOptions, NavigationStackScreenComponent } from "react-navigation-stack";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 import BaseView from "../components/BaseView";
-import { IconButton } from "react-native-paper";
-import React from "react";
+import MovementProgramList from "../components/MovementProgramList";
 import ScreenProps from "./ScreenProps";
 import ScreenRoutes from "./ScreenRoutes";
 import Slider from "@react-native-community/slider";
-import { SliderState } from "@grumpycorp/camera-slider-shared";
 import { observer } from "mobx-react";
 import { useRootStore } from "../stores/RootStoreContext";
 
@@ -47,6 +47,12 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
   }
 
   const canRequestChanges = bluetoothStatusStore.state === "trackingDesiredPosition";
+
+  const [movementProgram, setMovementProgram] = useState<MovementProgram>({
+    Rate: 100,
+    Repeats: false,
+    Movements: [],
+  });
 
   function humanizeState(state: SliderState): string {
     // fooBarBaz -> foo Bar Baz -> foo bar baz -> Foo bar baz
@@ -152,24 +158,58 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                   </Text>
                 }
               />
+              <List.Item
+                left={(): React.ReactNode => <List.Icon icon="playlist-plus" />}
+                title={
+                  <>
+                    <Button
+                      compact
+                      onPress={(): void =>
+                        setMovementProgram({
+                          ...movementProgram,
+                          Movements: [
+                            ...movementProgram.Movements,
+                            {
+                              Type: "Move",
+                              DesiredPosition: bluetoothStatusStore.reportedPosition,
+                              DesiredSpeed: bluetoothStatusStore.reportedMaximumSpeed,
+                              DesiredAcceleration: bluetoothStatusStore.reportedMaximumAcceleration,
+                            },
+                          ],
+                        })
+                      }
+                    >
+                      Add step
+                    </Button>
+
+                    <Button
+                      compact
+                      onPress={(): void =>
+                        setMovementProgram({
+                          ...movementProgram,
+                          Movements: [
+                            ...movementProgram.Movements,
+                            {
+                              Type: "Delay",
+                              DelayTime: 1000,
+                            },
+                          ],
+                        })
+                      }
+                    >
+                      Add delay
+                    </Button>
+                  </>
+                }
+              />
             </>
           )}
         </List.Section>
-        <List.Section title="Testing">
-          {canRequestChanges && (
-            <List.Item
-              title={
-                <Button
-                  mode="contained"
-                  onPress={async (): Promise<void> => {
-                    await rootStore.bluetoothProgramStore.test();
-                  }}
-                >
-                  Test
-                </Button>
-              }
-            />
-          )}
+        <List.Section title="Movement program">
+          <MovementProgramList
+            movementProgram={movementProgram}
+            setMovementProgram={setMovementProgram}
+          />
         </List.Section>
       </ScrollView>
     </BaseView>

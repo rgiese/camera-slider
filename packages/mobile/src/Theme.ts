@@ -15,6 +15,8 @@ export const Colors = {
   Position: "#f26739",
   Speed: "#f52c68",
   Acceleration: "#e0ca3e",
+  Rate: "#0cf2bd",
+  Repeat: "#00a67f",
   Text: {
     Dim: "#999",
   },
@@ -24,6 +26,12 @@ export const Icons = {
   Position: "map-marker",
   Speed: "speedometer",
   Acceleration: "trending-up",
+  Rate: "run-fast",
+  Repeat: "repeat",
+  Move: "ray-start-arrow",
+  Delay: "update",
+  Edit: "pencil",
+  Delete: "delete",
 };
 
 export default appTheme;
