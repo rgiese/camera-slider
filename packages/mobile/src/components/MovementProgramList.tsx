@@ -35,6 +35,16 @@ function MovementProgramList({
     ]);
   }
 
+  function swapMovements(indexA: number, indexB: number): void {
+    const updatedMovements = movementProgram.Movements.slice();
+
+    const originalA = updatedMovements[indexA];
+    updatedMovements[indexA] = updatedMovements[indexB];
+    updatedMovements[indexB] = originalA;
+
+    setMovementProgram({ ...movementProgram, Movements: updatedMovements });
+  }
+
   return (
     <>
       <List.Item
@@ -72,59 +82,51 @@ function MovementProgramList({
         title={`Rate: ${movementProgram?.Rate ?? `<none>`}`}
       />
       {movementProgram.Movements.map(
-        (movement, index): React.ReactNode => {
-          switch (movement.Type) {
-            case "Move":
-              return (
-                <List.Item
-                  description={
-                    <>
-                      <IconButton color={Colors.Position} icon={Icons.Position} />
-                      <Text>{movement.DesiredPosition}</Text>
-
-                      <IconButton color={Colors.Speed} icon={Icons.Speed} />
-                      <Text>{movement.DesiredSpeed}</Text>
-
-                      <IconButton color={Colors.Acceleration} icon={Icons.Acceleration} />
-                      <Text>{movement.DesiredPosition}</Text>
-                    </>
-                  }
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={index}
-                  left={(): React.ReactNode => <List.Icon icon={Icons.Move} />}
-                  right={(): React.ReactNode => (
-                    <>
-                      <IconButton icon={Icons.Edit} />
-                      <IconButton
-                        icon={Icons.Delete}
-                        onPress={(): void => maybeDeleteMove(index)}
-                      />
-                    </>
-                  )}
-                  title="Move"
+        (movement, index): React.ReactNode => (
+          <List.Item
+            // eslint-disable-next-line react/no-array-index-key
+            key={JSON.stringify(movement)}
+            left={(): React.ReactNode => (
+              <>
+                <IconButton
+                  disabled={index === 0}
+                  icon="arrow-up"
+                  onPress={(): void => swapMovements(index, index - 1)}
                 />
-              );
-            case "Delay":
-              return (
-                <List.Item
-                  description={`${movement.DelayTime} msec`}
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={index}
-                  left={(): React.ReactNode => <List.Icon icon={Icons.Delay} />}
-                  right={(): React.ReactNode => (
-                    <>
-                      <IconButton icon={Icons.Edit} />
-                      <IconButton
-                        icon={Icons.Delete}
-                        onPress={(): void => maybeDeleteMove(index)}
-                      />
-                    </>
-                  )}
-                  title="Delay"
+                <IconButton
+                  disabled={index === movementProgram.Movements.length - 1}
+                  icon="arrow-down"
+                  onPress={(): void => swapMovements(index, index + 1)}
                 />
-              );
-          }
-        }
+              </>
+            )}
+            right={(): React.ReactNode => (
+              <IconButton icon={Icons.Delete} onPress={(): void => maybeDeleteMove(index)} />
+            )}
+            title={
+              <>
+                {movement.Type === "Move" && (
+                  <>
+                    <IconButton color={Colors.Position} icon={Icons.Position} />
+                    <Text>{movement.DesiredPosition}</Text>
+
+                    <IconButton color={Colors.Speed} icon={Icons.Speed} />
+                    <Text>{movement.DesiredSpeed}</Text>
+
+                    <IconButton color={Colors.Acceleration} icon={Icons.Acceleration} />
+                    <Text>{movement.DesiredPosition}</Text>
+                  </>
+                )}
+                {movement.Type === "Delay" && (
+                  <>
+                    <IconButton color={Colors.Delay} icon={Icons.Delay} />
+                    <Text>{movement.DelayTime} msec</Text>
+                  </>
+                )}
+              </>
+            }
+          />
+        )
       )}
     </>
   );
