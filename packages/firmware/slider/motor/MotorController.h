@@ -33,8 +33,13 @@ public:
         return m_OperationState;
     }
 
-    int32_t getCurrentPosition() const
+    int32_t getCurrentPosition(bool const allowCachedValue = true)
     {
+        if (!allowCachedValue)
+        {
+            m_CurrentPosition = m_Tic.getCurrentPosition();
+        }
+
         return m_CurrentPosition;
     }
 

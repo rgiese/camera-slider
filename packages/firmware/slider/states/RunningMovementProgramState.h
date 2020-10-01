@@ -8,6 +8,8 @@ public:
     RunningMovementProgramState(std::shared_ptr<MovementProgramOwner> spMovementProgram)
         : AbstractState(SliderState::RunningMovementProgram)
         , m_spMovementProgram(spMovementProgram)
+        , m_idxCurrentStep(static_cast<size_t>(-1))
+        , m_DelayStart_msec(0)
     {
     }
 
@@ -17,5 +19,13 @@ public:
     bool onRequest(Request const& request) override;
 
 private:
+    void enterStep(size_t const idxStep);
+    void nextStep();
+    void exitProgram();
+
+private:
     std::shared_ptr<MovementProgramOwner> m_spMovementProgram;
+
+    size_t m_idxCurrentStep;
+    unsigned long m_DelayStart_msec;
 };

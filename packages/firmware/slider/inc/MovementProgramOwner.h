@@ -27,7 +27,7 @@ public:
         delete[] m_Flatbuffer;
     }
 
-    Flatbuffers::Firmware::MovementProgram const& operator->() const
+    Flatbuffers::Firmware::MovementProgram const& get() const
     {
         return *m_MovementProgram;
     }
