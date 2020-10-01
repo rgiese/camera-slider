@@ -49,3 +49,27 @@ void MotorController::goHome()
 {
     m_Tic.goHomeReverse();
 }
+
+void MotorController::safetyStop()
+{
+    // Save current values
+    int32_t const desiredPosition = m_Tic.getCurrentPosition();
+    uint32_t const desiredMaxAcceleration = getMaximumAcceleration();
+
+    // Apply safety stop
+    setMaxAcceleration(MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+    setTargetPosition(desiredPosition);
+
+    // Wait for safety stop to complete
+    while (m_Tic.getCurrentPosition() != desiredPosition)
+    {
+        if (m_Tic.getPositionUncertain())
+        {
+            // Stop waiting; let someone else deal with it
+            break;
+        }
+    }
+
+    // Restore previous values
+    setMaxAcceleration(desiredMaxAcceleration);
+}

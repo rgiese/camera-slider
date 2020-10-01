@@ -25,6 +25,7 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
     {
         case RequestType::UIButtonPressed:
             // Safety return
+            g_MotorController.safetyStop();
             g_MotorController.setTargetPosition(0);
             return true;
 

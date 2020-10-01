@@ -33,13 +33,8 @@ public:
         return m_OperationState;
     }
 
-    int32_t getCurrentPosition(bool const allowCachedValue = true)
+    int32_t getCurrentPosition() const
     {
-        if (!allowCachedValue)
-        {
-            m_CurrentPosition = m_Tic.getCurrentPosition();
-        }
-
         return m_CurrentPosition;
     }
 
@@ -76,6 +71,7 @@ public:
     void setMaxAcceleration(uint32_t const stepsPerSecondPerSecond);
 
     void goHome();
+    void safetyStop();
 
 public:
     //
