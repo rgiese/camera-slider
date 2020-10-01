@@ -159,10 +159,13 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                 }
               />
               <List.Item
-                left={(): React.ReactNode => <List.Icon icon="playlist-plus" />}
+                left={(): React.ReactNode => (
+                  <List.Icon color={Colors.Text.Dim} icon="playlist-plus" />
+                )}
                 title={
                   <>
                     <Button
+                      color={Colors.Position}
                       compact
                       onPress={(): void =>
                         setMovementProgram({
@@ -183,6 +186,7 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                     </Button>
 
                     <Button
+                      color={Colors.Delay}
                       compact
                       onPress={(): void =>
                         setMovementProgram({
