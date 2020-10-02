@@ -1,12 +1,13 @@
 import { Alert, StyleSheet } from "react-native";
+import { Button, IconButton, List, Switch } from "react-native-paper";
 import { Colors, Icons } from "../Theme";
-import { IconButton, List, Switch } from "react-native-paper";
 
 import MovementParameter from "./MovementParameter";
 import { MovementProgram } from "@grumpycorp/camera-slider-shared";
 import React from "react";
 import Slider from "@react-native-community/slider";
 import { observer } from "mobx-react";
+import { useRootStore } from "../stores/RootStoreContext";
 
 const styles = StyleSheet.create({
   inlineSlider: {
@@ -21,6 +22,9 @@ function MovementProgramList({
   movementProgram: MovementProgram;
   setMovementProgram: React.Dispatch<React.SetStateAction<MovementProgram>>;
 }): React.ReactElement {
+  const rootStore = useRootStore();
+  const bluetoothCapabilitiesStore = rootStore.bluetoothCapabilitiesStore;
+
   function maybeDeleteMove(moveIndex: number): void {
     Alert.alert(`Delete move?`, undefined, [
       { text: "Cancel", style: "cancel" },
@@ -84,46 +88,76 @@ function MovementProgramList({
       />
       {movementProgram.Movements.map(
         (movement, index): React.ReactNode => (
-          <List.Item
-            // eslint-disable-next-line react/no-array-index-key
-            key={JSON.stringify(movement)}
-            left={(): React.ReactNode => (
+          <React.Fragment key={JSON.stringify(movement)}>
+            <List.Item
+              right={(): React.ReactElement => (
+                <>
+                  <IconButton
+                    disabled={index === 0}
+                    icon="arrow-up"
+                    onPress={(): void => swapMovements(index, index - 1)}
+                  />
+                  <IconButton
+                    disabled={index === movementProgram.Movements.length - 1}
+                    icon="arrow-down"
+                    onPress={(): void => swapMovements(index, index + 1)}
+                  />
+                  <IconButton
+                    color={Colors.Text.Dim}
+                    icon={Icons.Delete}
+                    onPress={(): void => maybeDeleteMove(index)}
+                  />
+                </>
+              )}
+              title={
+                <Button color={Colors[movement.Type]} icon="play">
+                  {`Step ${index + 1}: ${movement.Type}`}
+                </Button>
+              }
+            />
+            {movement.Type === "Move" && (
               <>
-                <IconButton
-                  disabled={index === 0}
-                  icon="arrow-up"
-                  onPress={(): void => swapMovements(index, index - 1)}
-                  size={16}
+                <MovementParameter
+                  majorIncrement={100}
+                  maximumValue={bluetoothCapabilitiesStore.maximumPosition}
+                  minorIncrement={10}
+                  movementField="Position"
+                  movementIndex={index}
+                  movementProgram={movementProgram}
+                  setMovementProgram={setMovementProgram}
                 />
-                <IconButton
-                  disabled={index === movementProgram.Movements.length - 1}
-                  icon="arrow-down"
-                  onPress={(): void => swapMovements(index, index + 1)}
-                  size={16}
+                <MovementParameter
+                  majorIncrement={100}
+                  maximumValue={bluetoothCapabilitiesStore.maximumSpeed}
+                  minorIncrement={10}
+                  movementField="Speed"
+                  movementIndex={index}
+                  movementProgram={movementProgram}
+                  setMovementProgram={setMovementProgram}
+                />
+                <MovementParameter
+                  majorIncrement={100}
+                  maximumValue={bluetoothCapabilitiesStore.maximumAcceleration}
+                  minorIncrement={10}
+                  movementField="Acceleration"
+                  movementIndex={index}
+                  movementProgram={movementProgram}
+                  setMovementProgram={setMovementProgram}
                 />
               </>
             )}
-            right={(): React.ReactNode => (
-              <IconButton icon={Icons.Delete} onPress={(): void => maybeDeleteMove(index)} />
+            {movement.Type === "Delay" && (
+              <MovementParameter
+                majorIncrement={1000}
+                maximumValue={5000}
+                minorIncrement={100}
+                movementField="Delay"
+                movementIndex={index}
+                movementProgram={movementProgram}
+                setMovementProgram={setMovementProgram}
+              />
             )}
-            title={
-              <>
-                {movement.Type === "Move" && (
-                  <>
-                    <MovementParameter parameter="Position" value={movement.DesiredPosition ?? 0} />
-                    <MovementParameter parameter="Speed" value={movement.DesiredSpeed ?? 0} />
-                    <MovementParameter
-                      parameter="Acceleration"
-                      value={movement.DesiredAcceleration ?? 0}
-                    />
-                  </>
-                )}
-                {movement.Type === "Delay" && (
-                  <MovementParameter parameter="Delay" value={movement.DelayTime ?? 0} />
-                )}
-              </>
-            }
-          />
+          </React.Fragment>
         )
       )}
     </>

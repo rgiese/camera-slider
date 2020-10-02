@@ -17,6 +17,7 @@ export const Colors = {
   Acceleration: "#e0ca3e",
   Rate: "#0cf2bd",
   Repeat: "#00a67f",
+  Move: "#f26739",
   Delay: "#0cf2bd",
   Text: {
     Dim: "#999",
@@ -29,8 +30,8 @@ export const Icons = {
   Acceleration: "trending-up",
   Rate: "run-fast",
   Repeat: "repeat",
+  Move: "map-marker",
   Delay: "update",
-  Edit: "pencil",
   Delete: "delete",
 };
 
