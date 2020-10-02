@@ -69,7 +69,7 @@ public:
                 }
             }
 
-            Serial.printlnf("  Rate: %.2f", static_cast<double>(m_MovementProgram->rate_minus1_x100() - 1) / 100);
+            Serial.printlnf("  Rate: %u", m_MovementProgram->rate());
         }
 
         auto const pvMovements = m_MovementProgram->movements();
@@ -83,7 +83,7 @@ public:
                 switch (pMovement->type())
                 {
                     case Flatbuffers::Firmware::MovementType::Move:
-                        Serial.printlnf("    Move: to %d steps, speed %d steps/sec, acceleration %d steps/sec^2",
+                        Serial.printlnf("    Move: to %d steps, speed %u steps/sec, acceleration %u steps/sec^2",
                                         pMovement->desiredPosition(),
                                         pMovement->desiredSpeed(),
                                         pMovement->desiredAcceleration());

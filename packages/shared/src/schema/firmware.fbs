@@ -25,7 +25,7 @@ struct Movement {
 
 table MovementProgram {
   flags: MovementProgramFlags;
-  rate_minus1_x100: int16;
+  rate: uint16;
 
   movements: [Movement];
 }

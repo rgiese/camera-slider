@@ -55,9 +55,9 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
       );
     }
 
-    Flatbuffers.Firmware.MovementProgram.addRateMinus1X100(
+    Flatbuffers.Firmware.MovementProgram.addRate(
       flatbufferBuilder,
-      Math.round((movementProgram.Rate - 1) * 100)
+      Math.round(movementProgram.Rate)
     );
 
     Flatbuffers.Firmware.MovementProgram.addMovements(flatbufferBuilder, movementsVector);

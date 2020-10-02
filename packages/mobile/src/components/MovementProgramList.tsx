@@ -11,7 +11,7 @@ import { useRootStore } from "../stores/RootStoreContext";
 
 const styles = StyleSheet.create({
   inlineSlider: {
-    width: 300,
+    width: 250,
   },
 });
 
@@ -50,6 +50,19 @@ function MovementProgramList({
     setMovementProgram({ ...movementProgram, Movements: updatedMovements });
   }
 
+  const minimumRate = 10;
+  const maximumRate = 500;
+
+  const minorRateIncrement = 10;
+  const majorRateIncrement = 100;
+
+  function updateRate(rate: number): void {
+    setMovementProgram({
+      ...movementProgram,
+      Rate: Math.max(minimumRate, Math.min(rate, maximumRate)),
+    });
+  }
+
   return (
     <>
       <List.Item
@@ -71,12 +84,10 @@ function MovementProgramList({
         description={
           <Slider
             maximumTrackTintColor={Colors.Rate}
-            maximumValue={500}
+            maximumValue={maximumRate}
             minimumTrackTintColor={Colors.Rate}
-            minimumValue={1}
-            onValueChange={(value: number): void => {
-              setMovementProgram({ ...movementProgram, Rate: value });
-            }}
+            minimumValue={minimumRate}
+            onValueChange={(value: number): void => updateRate(value)}
             step={10}
             style={styles.inlineSlider}
             thumbTintColor={Colors.Rate}
@@ -84,6 +95,22 @@ function MovementProgramList({
           />
         }
         left={(): React.ReactNode => <List.Icon color={Colors.Rate} icon={Icons.Rate} />}
+        right={(): React.ReactNode => (
+          <>
+            <IconButton
+              icon="plus"
+              onLongPress={(): void => updateRate(movementProgram.Rate + majorRateIncrement)}
+              onPress={(): void => updateRate(movementProgram.Rate + minorRateIncrement)}
+              size={18}
+            />
+            <IconButton
+              icon="minus"
+              onLongPress={(): void => updateRate(movementProgram.Rate - majorRateIncrement)}
+              onPress={(): void => updateRate(movementProgram.Rate - minorRateIncrement)}
+              size={18}
+            />
+          </>
+        )}
         title={`Rate: ${movementProgram?.Rate ?? `<none>`}`}
       />
       {movementProgram.Movements.map(

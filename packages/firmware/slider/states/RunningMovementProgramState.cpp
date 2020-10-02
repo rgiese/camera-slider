@@ -23,20 +23,25 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
     // Prep for movement
     switch (movement.type())
     {
-        case MovementType::Move:
+        case MovementType::Move: {
             // Apply desired motor settings
-            g_MotorController.setMaxSpeed(movement.desiredSpeed());
-            g_MotorController.setMaxAcceleration(movement.desiredAcceleration());
+            double const rateMultiplier = m_spMovementProgram->get().rate() / 100.0f;
+
+            g_MotorController.setMaxSpeed(static_cast<uint32_t>(movement.desiredSpeed() * rateMultiplier));
+            g_MotorController.setMaxAcceleration(
+                static_cast<uint32_t>(movement.desiredAcceleration() * rateMultiplier));
 
             // Seek to position
             g_MotorController.setTargetPosition(movement.desiredPosition());
 
             break;
+        }
 
-        case MovementType::Delay:
+        case MovementType::Delay: {
             // Snap current time
             m_DelayStart_msec = millis();
             break;
+        }
 
         default:
             // Don't know what to do, abandon
@@ -91,17 +96,20 @@ void RunningMovementProgramState::onLoop()
 
     switch (movement.type())
     {
-        case MovementType::Move:
+        case MovementType::Move: {
             if (g_MotorController.getCurrentPosition() == movement.desiredPosition())
             {
                 return nextStep();
             }
             break;
+        }
 
         case MovementType::Delay: {
             unsigned long const timeDelayed_msec = millis() - m_DelayStart_msec;
 
-            if (timeDelayed_msec > movement.delayTime())
+            double const rateMultiplier = m_spMovementProgram->get().rate() / 100.0f;
+
+            if (timeDelayed_msec > static_cast<unsigned long>(movement.delayTime() / rateMultiplier))
             {
                 m_DelayStart_msec = 0;
                 return nextStep();
