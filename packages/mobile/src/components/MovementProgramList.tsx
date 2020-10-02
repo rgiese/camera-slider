@@ -88,7 +88,7 @@ function MovementProgramList({
       />
       {movementProgram.Movements.map(
         (movement, index): React.ReactNode => (
-          <React.Fragment key={JSON.stringify(movement)}>
+          <React.Fragment key={index.toString() + JSON.stringify(movement)}>
             <List.Item
               right={(): React.ReactElement => (
                 <>
