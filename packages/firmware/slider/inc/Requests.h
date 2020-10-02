@@ -9,6 +9,7 @@ enum class RequestType
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
     DesiredMovementProgram,
+    StopMovementProgram,
 };
 
 struct Request
@@ -36,6 +37,10 @@ struct Request
         {
             uint32_t value;
         } DesiredMaximumAcceleration;
+
+        struct
+        {
+        } StopMovementProgram;
     };
 
     // Non-union-able types

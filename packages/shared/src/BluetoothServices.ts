@@ -22,6 +22,7 @@ export const BluetoothServices: BluetoothServices = {
     Id: "e2a99562-a5ae-4d6e-96e8-5a5fe2213290",
     Characteristics: {
       DesiredMovementProgram: "0eeb387c-5bc1-4c00-b9ee-066643d11a82",
+      StopMovementProgram: "1f64ff50-d45b-4636-96c0-0c32da407cb3",
     },
   },
   Status: {

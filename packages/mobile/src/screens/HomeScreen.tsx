@@ -214,6 +214,38 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
             movementProgram={movementProgram}
             setMovementProgram={setMovementProgram}
           />
+          <List.Item
+            title={
+              <>
+                <Button
+                  color="white"
+                  disabled={
+                    !(
+                      bluetoothStatusStore.state === "runningMovementProgram" ||
+                      bluetoothStatusStore.state === "trackingDesiredPosition"
+                    )
+                  }
+                  icon="play"
+                  onPress={async (): Promise<void> =>
+                    rootStore.bluetoothProgramStore.runMovementProgram(movementProgram)
+                  }
+                >
+                  {bluetoothStatusStore.state === "runningMovementProgram" ? "Update" : "Run"}
+                </Button>
+                <Text>{"         " /* crummy spacer */}</Text>
+                <Button
+                  color="red"
+                  disabled={bluetoothStatusStore.state !== "runningMovementProgram"}
+                  icon="stop"
+                  onPress={async (): Promise<void> =>
+                    await rootStore.bluetoothProgramStore.stopMovementProgram()
+                  }
+                >
+                  Stop
+                </Button>
+              </>
+            }
+          />
         </List.Section>
       </ScrollView>
     </BaseView>

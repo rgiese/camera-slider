@@ -18,8 +18,14 @@ private:
                                                 BlePeerDevice const& peerDevice,
                                                 void* pContext);
 
+    static void onStopMovementProgramChanged(uint8_t const* const pData,
+                                             size_t const cbData,
+                                             BlePeerDevice const& peerDevice,
+                                             void* pContext);
+
 private:
     BleCharacteristic m_DesiredMovementProgram;
+    BleCharacteristic m_StopMovementProgram;
 
 private:
     // Non-copyable

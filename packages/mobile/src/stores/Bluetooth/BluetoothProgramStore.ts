@@ -15,30 +15,7 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
     super(bluetoothConnection, BluetoothServices.Program.Id);
   }
 
-  public async test(): Promise<void> {
-    const movementProgram: MovementProgram = {
-      Rate: 1,
-      Repeats: true,
-      Movements: [
-        {
-          Type: "Move",
-          DesiredPosition: 0,
-          DesiredSpeed: 1000,
-          DesiredAcceleration: 1000,
-        },
-        {
-          Type: "Move",
-          DesiredPosition: 2000,
-          DesiredSpeed: 1000,
-          DesiredAcceleration: 1000,
-        },
-        {
-          Type: "Delay",
-          DelayTime: 1000,
-        },
-      ],
-    };
-
+  public async runMovementProgram(movementProgram: MovementProgram): Promise<void> {
     // Create buffer
     const flatbufferBuilder: flatbuffers.Builder = new flatbuffers.Builder(64); // ...initial guess at size, FIX ME
 
@@ -101,6 +78,13 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
     await this.writeCharacteristicValue(
       BluetoothServices.Program.Characteristics.DesiredMovementProgram,
       Base64Encode(movementProgramBytes)
+    );
+  }
+
+  public async stopMovementProgram(): Promise<void> {
+    await this.writeCharacteristicValue(
+      BluetoothServices.Program.Characteristics.StopMovementProgram,
+      ""
     );
   }
 
