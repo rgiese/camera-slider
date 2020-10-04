@@ -22,7 +22,7 @@ public:
         unsigned long const endTime_msec = millis();
         unsigned long const duration_msec = endTime_msec - m_StartTime_msec;
 
-        if (duration_msec > m_MinimumTimeToReport_msec)
+        if (!m_MinimumTimeToReport_msec || duration_msec > m_MinimumTimeToReport_msec)
         {
             WITH_LOCK(Serial)
             {
