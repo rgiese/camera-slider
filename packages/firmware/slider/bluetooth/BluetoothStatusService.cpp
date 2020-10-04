@@ -26,7 +26,6 @@ BluetoothStatusService::BluetoothStatusService()
     , m_RateLimitedValuesReported()
     , m_RateLimitedValuesSent()
     , m_LastUpdateTime_msec(0)
-    , m_LastUpdatedCharacteristic(RateLimitedCharacteristic__count)
 {
 }
 
@@ -47,7 +46,7 @@ void BluetoothStatusService::setState(char const* const stateName)
     m_StateCharacteristic.setValue(stateName);
 }
 
-void BluetoothStatusService::onLoop()
+void BluetoothStatusService::onStateMachineThreadLoop()
 {
     // Update reported values from motor controller
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedPosition] = g_MotorController.getCurrentPosition();
@@ -55,32 +54,30 @@ void BluetoothStatusService::onLoop()
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] = g_MotorController.getMaximumSpeed();
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] =
         g_MotorController.getMaximumAcceleration();
+}
 
-    // Check whether we should update
-    // - Perform rotating/rolling update to distribute interrupt-driven disruptions evenly across time slices
-    constexpr uint32_t maxTimeSinceLastFullUpdate_msec = 250;
-
-    constexpr uint32_t maxTimeSinceLastRollingUpdate_msec =
-        maxTimeSinceLastFullUpdate_msec / RateLimitedCharacteristic__count;
+void BluetoothStatusService::onMainThreadLoop()
+{
+    // Check whether we should send updates
+    constexpr uint32_t maxTimeSinceLastFullUpdate_msec = 200;
 
     uint32_t currentTime_msec = millis();
 
-    if (currentTime_msec - m_LastUpdateTime_msec < maxTimeSinceLastRollingUpdate_msec)
+    if (currentTime_msec - m_LastUpdateTime_msec < maxTimeSinceLastFullUpdate_msec)
     {
         return;
     }
 
-    // Update
-    uint32_t const idxCharacteristicToUpdate = (m_LastUpdatedCharacteristic + 1) % RateLimitedCharacteristic__count;
-
-    if (m_RateLimitedValuesReported[idxCharacteristicToUpdate] != m_RateLimitedValuesSent[idxCharacteristicToUpdate])
+    // Send updates
+    for (size_t idxCharacteristic = 0; idxCharacteristic < countof(m_RateLimitedCharacteristics); ++idxCharacteristic)
     {
-        m_RateLimitedValuesSent[idxCharacteristicToUpdate] = m_RateLimitedValuesReported[idxCharacteristicToUpdate];
-        m_RateLimitedCharacteristics[idxCharacteristicToUpdate].setValue(
-            m_RateLimitedValuesSent[idxCharacteristicToUpdate]);
+        if (m_RateLimitedValuesReported[idxCharacteristic] != m_RateLimitedValuesSent[idxCharacteristic])
+        {
+            m_RateLimitedValuesSent[idxCharacteristic] = m_RateLimitedValuesReported[idxCharacteristic];
+            m_RateLimitedCharacteristics[idxCharacteristic].setValue(m_RateLimitedValuesSent[idxCharacteristic]);
+        }
     }
 
     // Commit
     m_LastUpdateTime_msec = currentTime_msec;
-    m_LastUpdatedCharacteristic = static_cast<RateLimitedCharacteristic>(idxCharacteristicToUpdate);
 }

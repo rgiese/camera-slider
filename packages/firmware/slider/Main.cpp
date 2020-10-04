@@ -79,6 +79,15 @@ void loop()
 {
     delay(100);
 
+    {
+        Activity mainLoopActivity("mainThreadLoop", 10);
+
+        {
+            Activity mainLoopSectionActivity("bluetoothState", 10);
+            g_Bluetooth.statusService().onMainThreadLoop();
+        }
+    }
+
     if (Particle.connected())
     {
         Particle.process();
@@ -101,7 +110,7 @@ void stateMachineThreadFn(void*)
     for (uint16_t loopCounter = 0; /* forever */; ++loopCounter)
     {
         {
-            Activity mainLoopActivity("mainLoop", 10);
+            Activity mainLoopActivity("stateThreadLoop", 10);
 
             {
                 Activity mainLoopSectionActivity("motorController", 10);
@@ -110,7 +119,7 @@ void stateMachineThreadFn(void*)
 
             {
                 Activity mainLoopSectionActivity("bluetoothState", 10);
-                g_Bluetooth.statusService().onLoop();
+                g_Bluetooth.statusService().onStateMachineThreadLoop();
             }
 
             // Deliver interrupt-sourced events (creates Requests)

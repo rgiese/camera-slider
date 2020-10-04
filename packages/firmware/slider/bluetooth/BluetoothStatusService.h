@@ -8,7 +8,8 @@ public:
     BluetoothStatusService();
 
     void setState(char const* const stateName);
-    void onLoop();
+    void onStateMachineThreadLoop();
+    void onMainThreadLoop();
 
 private:
     friend class Bluetooth;
@@ -34,7 +35,6 @@ private:
     uint32_t m_RateLimitedValuesSent[RateLimitedCharacteristic__count];
 
     uint32_t m_LastUpdateTime_msec;
-    RateLimitedCharacteristic m_LastUpdatedCharacteristic;
 
 private:
     // Non-copyable
