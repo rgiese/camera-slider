@@ -237,9 +237,10 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                   color="red"
                   disabled={bluetoothStatusStore.state !== "runningMovementProgram"}
                   icon="stop"
-                  onPress={async (): Promise<void> =>
-                    await rootStore.bluetoothProgramStore.stopMovementProgram()
-                  }
+                  onPress={(): void => {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                    rootStore.bluetoothProgramStore.stopMovementProgram();
+                  }}
                 >
                   Stop
                 </Button>
