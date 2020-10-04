@@ -182,8 +182,6 @@ bool MotorController::tryInitialize()
         uint32_t const maxSpeed = speedToTicUnits(c_DefaultSpeed_StepsPerSec);
 
         m_Tic.setMaxSpeed(maxSpeed);
-
-        g_Bluetooth.statusService().setReportedMaximumSpeed(c_DefaultSpeed_StepsPerSec);
     }
 
     {

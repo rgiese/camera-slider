@@ -8,10 +8,7 @@ public:
     BluetoothStatusService();
 
     void setState(char const* const stateName);
-    void setReportedPosition(int32_t const position);
-    void setReportedVelocity(int32_t const velocity);
-    void setReportedMaximumSpeed(uint32_t const maximimSpeed);
-    void setReportedMaximumAcceleration(uint32_t const maximumAcceleration);
+    void onLoop();
 
 private:
     friend class Bluetooth;
@@ -19,16 +16,25 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
-    BleCharacteristic m_StateCharacteristic;
-    BleCharacteristic m_ReportedPositionCharacteristic;
-    BleCharacteristic m_ReportedVelocityCharacteristic;
-    BleCharacteristic m_ReportedMaximumSpeedCharacteristic;
-    BleCharacteristic m_ReportedMaximumAccelerationCharacteristic;
+    enum RateLimitedCharacteristic
+    {
+        // Must match initializer order in constructor
+        RateLimitedCharacteristic_ReportedPosition,
+        RateLimitedCharacteristic_ReportedVelocity,
+        RateLimitedCharacteristic_ReportedMaximumSpeed,
+        RateLimitedCharacteristic_ReportedMaximumAcceleration,
+        RateLimitedCharacteristic__count
+    };
 
-    int32_t m_LastReportedPosition;
-    int32_t m_LastReportedVelocity;
-    uint32_t m_LastReportedMaximumSpeed;
-    uint32_t m_LastReportedMaximumAcceleration;
+private:
+    BleCharacteristic m_StateCharacteristic;
+
+    BleCharacteristic m_RateLimitedCharacteristics[RateLimitedCharacteristic__count];
+    uint32_t m_RateLimitedValuesReported[RateLimitedCharacteristic__count];
+    uint32_t m_RateLimitedValuesSent[RateLimitedCharacteristic__count];
+
+    uint32_t m_LastUpdateTime_msec;
+    RateLimitedCharacteristic m_LastUpdatedCharacteristic;
 
 private:
     // Non-copyable

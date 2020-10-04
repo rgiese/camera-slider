@@ -100,28 +100,45 @@ void stateMachineThreadFn(void*)
 
     for (uint16_t loopCounter = 0; /* forever */; ++loopCounter)
     {
-        g_MotorController.onLoop();
-
-        // TEMPORARY: Update Bluetooth state
-        g_Bluetooth.statusService().setReportedPosition(g_MotorController.getCurrentPosition());
-        g_Bluetooth.statusService().setReportedVelocity(g_MotorController.getVelocity());
-        g_Bluetooth.statusService().setReportedMaximumSpeed(g_MotorController.getMaximumSpeed());
-        g_Bluetooth.statusService().setReportedMaximumAcceleration(g_MotorController.getMaximumAcceleration());
-
-        // Deliver interrupt-sourced events (creates Requests)
-        g_UIButton.onLoop();
-
-        // Advance state machine (moves state, delivers Requests)
-        g_StateKeeper.onLoop();
-
-        // Print debug stats
-        if (loopCounter % 200 == 0)
         {
-            g_MotorController.dumpState();
+            Activity mainLoopActivity("mainLoop", 10);
+
+            {
+                Activity mainLoopSectionActivity("motorController", 10);
+                g_MotorController.onLoop();
+            }
+
+            {
+                Activity mainLoopSectionActivity("bluetoothState", 10);
+                g_Bluetooth.statusService().onLoop();
+            }
+
+            // Deliver interrupt-sourced events (creates Requests)
+            {
+                Activity mainLoopSectionActivity("uiButton", 10);
+                g_UIButton.onLoop();
+            }
+
+            // Advance state machine (moves state, delivers Requests)
+            {
+                Activity mainLoopSectionActivity("stateKeeper", 10);
+                g_StateKeeper.onLoop();
+            }
+
+            // Print debug stats
+            if (loopCounter % 200 == 0)
+            {
+                Activity mainLoopSectionActivity("debugStats", 10);
+
+                if (Serial.isConnected())
+                {
+                    g_MotorController.dumpState();
+                }
+            }
         }
 
         // Loop delay (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
-        os_thread_delay_until(&previousWakeTime, 100 /* msec */);
+        os_thread_delay_until(&previousWakeTime, 25 /* msec */);
     }
 }
 

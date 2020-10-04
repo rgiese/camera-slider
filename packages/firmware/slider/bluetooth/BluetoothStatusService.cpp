@@ -6,36 +6,38 @@ BluetoothStatusService::BluetoothStatusService()
                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                             BluetoothIds::Status::Characteristics::State,
                             BluetoothIds::Status::Id)
-    , m_ReportedPositionCharacteristic("reportedPosition",
-                                       BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                       BluetoothIds::Status::Characteristics::ReportedPosition,
-                                       BluetoothIds::Status::Id)
-    , m_ReportedVelocityCharacteristic("reportedVelocity",
-                                       BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                       BluetoothIds::Status::Characteristics::ReportedVelocity,
-                                       BluetoothIds::Status::Id)
-    , m_ReportedMaximumSpeedCharacteristic("reportedMaximumSpeed",
-                                           BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                           BluetoothIds::Status::Characteristics::ReportedMaximumSpeed,
-                                           BluetoothIds::Status::Id)
-    , m_ReportedMaximumAccelerationCharacteristic("reportedMaximumAcceleration",
-                                                  BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                                  BluetoothIds::Status::Characteristics::ReportedMaximumAcceleration,
-                                                  BluetoothIds::Status::Id)
-    , m_LastReportedPosition(-1)
-    , m_LastReportedVelocity(-1)
-    , m_LastReportedMaximumSpeed(static_cast<uint32_t>(-1))
-    , m_LastReportedMaximumAcceleration(static_cast<uint32_t>(-1))
+    , m_RateLimitedCharacteristics(
+          {BleCharacteristic("reportedPosition",
+                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                             BluetoothIds::Status::Characteristics::ReportedPosition,
+                             BluetoothIds::Status::Id),
+           BleCharacteristic("reportedVelocity",
+                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                             BluetoothIds::Status::Characteristics::ReportedVelocity,
+                             BluetoothIds::Status::Id),
+           BleCharacteristic("reportedMaximumSpeed",
+                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                             BluetoothIds::Status::Characteristics::ReportedMaximumSpeed,
+                             BluetoothIds::Status::Id),
+           BleCharacteristic("reportedMaximumAcceleration",
+                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                             BluetoothIds::Status::Characteristics::ReportedMaximumAcceleration,
+                             BluetoothIds::Status::Id)})
+    , m_RateLimitedValuesReported()
+    , m_RateLimitedValuesSent()
+    , m_LastUpdateTime_msec(0)
+    , m_LastUpdatedCharacteristic(RateLimitedCharacteristic__count)
 {
 }
 
 void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 {
     BLE.addCharacteristic(m_StateCharacteristic);
-    BLE.addCharacteristic(m_ReportedPositionCharacteristic);
-    BLE.addCharacteristic(m_ReportedVelocityCharacteristic);
-    BLE.addCharacteristic(m_ReportedMaximumSpeedCharacteristic);
-    BLE.addCharacteristic(m_ReportedMaximumAccelerationCharacteristic);
+
+    for (size_t idx = 0; idx < countof(m_RateLimitedCharacteristics); ++idx)
+    {
+        BLE.addCharacteristic(m_RateLimitedCharacteristics[idx]);
+    }
 
     advertisingData.appendServiceUUID(BluetoothIds::Status::Id);
 }
@@ -45,38 +47,40 @@ void BluetoothStatusService::setState(char const* const stateName)
     m_StateCharacteristic.setValue(stateName);
 }
 
-void BluetoothStatusService::setReportedPosition(int32_t const position)
+void BluetoothStatusService::onLoop()
 {
-    if (position != m_LastReportedPosition)
-    {
-        m_ReportedPositionCharacteristic.setValue(position);
-        m_LastReportedPosition = position;
-    }
-}
+    // Update reported values from motor controller
+    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedPosition] = g_MotorController.getCurrentPosition();
+    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedVelocity] = g_MotorController.getVelocity();
+    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] = g_MotorController.getMaximumSpeed();
+    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] =
+        g_MotorController.getMaximumAcceleration();
 
-void BluetoothStatusService::setReportedVelocity(int32_t const velocity)
-{
-    if (velocity != m_LastReportedVelocity)
-    {
-        m_ReportedVelocityCharacteristic.setValue(velocity);
-        m_LastReportedVelocity = velocity;
-    }
-}
+    // Check whether we should update
+    // - Perform rotating/rolling update to distribute interrupt-driven disruptions evenly across time slices
+    constexpr uint32_t maxTimeSinceLastFullUpdate_msec = 250;
 
-void BluetoothStatusService::setReportedMaximumSpeed(uint32_t const maximumSpeed)
-{
-    if (maximumSpeed != m_LastReportedMaximumSpeed)
-    {
-        m_ReportedMaximumSpeedCharacteristic.setValue(maximumSpeed);
-        m_LastReportedMaximumSpeed = maximumSpeed;
-    }
-}
+    constexpr uint32_t maxTimeSinceLastRollingUpdate_msec =
+        maxTimeSinceLastFullUpdate_msec / RateLimitedCharacteristic__count;
 
-void BluetoothStatusService::setReportedMaximumAcceleration(uint32_t const maximumAcceleration)
-{
-    if (maximumAcceleration != m_LastReportedMaximumAcceleration)
+    uint32_t currentTime_msec = millis();
+
+    if (currentTime_msec - m_LastUpdateTime_msec < maxTimeSinceLastRollingUpdate_msec)
     {
-        m_ReportedMaximumAccelerationCharacteristic.setValue(maximumAcceleration);
-        m_LastReportedMaximumAcceleration = maximumAcceleration;
+        return;
     }
+
+    // Update
+    uint32_t const idxCharacteristicToUpdate = (m_LastUpdatedCharacteristic + 1) % RateLimitedCharacteristic__count;
+
+    if (m_RateLimitedValuesReported[idxCharacteristicToUpdate] != m_RateLimitedValuesSent[idxCharacteristicToUpdate])
+    {
+        m_RateLimitedValuesSent[idxCharacteristicToUpdate] = m_RateLimitedValuesReported[idxCharacteristicToUpdate];
+        m_RateLimitedCharacteristics[idxCharacteristicToUpdate].setValue(
+            m_RateLimitedValuesSent[idxCharacteristicToUpdate]);
+    }
+
+    // Commit
+    m_LastUpdateTime_msec = currentTime_msec;
+    m_LastUpdatedCharacteristic = static_cast<RateLimitedCharacteristic>(idxCharacteristicToUpdate);
 }
