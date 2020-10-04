@@ -5,6 +5,8 @@ using namespace Flatbuffers::Firmware;
 
 void RunningMovementProgramState::onEnteringState()
 {
+    g_Display.set("Running program");
+
     m_spMovementProgram->dump();
 
     if (!m_spMovementProgram->get().movements()->size())
@@ -50,32 +52,6 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
 
     // Commit movement
     m_idxCurrentStep = idxStep;
-
-    // Update display
-    {
-        char rgDisplayMessage[64];
-
-        auto const getMovementTypeName = [](MovementType const movementType) {
-            switch (movementType)
-            {
-                case MovementType::Move:
-                    return "move";
-                case MovementType::Delay:
-                    return "delay";
-                default:
-                    return "<other>";
-            }
-        };
-
-        snprintf(rgDisplayMessage,
-                 countof(rgDisplayMessage),
-                 "Running movement step %u of %u (%s)",
-                 static_cast<uint32_t>(idxStep),
-                 static_cast<uint32_t>(m_spMovementProgram->get().movements()->size()),
-                 getMovementTypeName(movement.type()));
-
-        g_Display.set(rgDisplayMessage);
-    }
 }
 
 void RunningMovementProgramState::onLoop()
