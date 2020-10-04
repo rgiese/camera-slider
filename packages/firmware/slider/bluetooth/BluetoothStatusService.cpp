@@ -59,7 +59,7 @@ void BluetoothStatusService::onStateMachineThreadLoop()
 void BluetoothStatusService::onMainThreadLoop()
 {
     // Check whether we should send updates
-    constexpr uint32_t maxTimeSinceLastFullUpdate_msec = 200;
+    constexpr uint32_t maxTimeSinceLastFullUpdate_msec = 100;
 
     uint32_t currentTime_msec = millis();
 
