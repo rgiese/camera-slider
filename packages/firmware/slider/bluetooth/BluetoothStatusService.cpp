@@ -52,7 +52,7 @@ void BluetoothStatusService::onStateMachineThreadLoop()
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedPosition] = g_MotorController.getCurrentPosition();
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedVelocity] = g_MotorController.getVelocity();
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] = g_MotorController.getMaximumSpeed();
-    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] =
+    m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumAcceleration] =
         g_MotorController.getMaximumAcceleration();
 }
 
