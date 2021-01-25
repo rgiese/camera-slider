@@ -1,8 +1,7 @@
 #pragma once
 
-#define __in
-#define __out
-#define __out_opt
+#define _In_
+#define _Out_ 
 
 #define RETURN_IF_FALSE(x) \
     if (!(x))              \

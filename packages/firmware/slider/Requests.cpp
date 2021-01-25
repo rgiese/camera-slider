@@ -9,7 +9,7 @@ void RequestQueue::push(Request const& request)
     m_Queue.push(request);
 }
 
-bool RequestQueue::try_pop(__out Request& front)
+bool RequestQueue::try_pop(_Out_ Request& front)
 {
     std::lock_guard<std::mutex> guard(m_Mutex);
 

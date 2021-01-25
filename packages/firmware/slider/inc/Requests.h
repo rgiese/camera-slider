@@ -50,23 +50,23 @@ struct Request
     } DesiredMovementProgram;
 };
 
-class RequestQueue
-{
-public:
-    RequestQueue() = default;
+    class RequestQueue
+    {
+    public:
+        RequestQueue() = default;
 
-    void push(Request const& request);
+        void push(Request const& request);
 
-    bool try_pop(__out Request& front);
+        bool try_pop(_Out_ Request& front);
 
-private:
-    std::mutex m_Mutex;
-    std::queue<Request> m_Queue;
+    private:
+        std::mutex m_Mutex;
+        std::queue<Request> m_Queue;
 
-private:
-    // Non-copyable
-    RequestQueue(RequestQueue const&) = delete;
-    RequestQueue& operator=(RequestQueue const&) = delete;
-};
+    private:
+        // Non-copyable
+        RequestQueue(RequestQueue const&) = delete;
+        RequestQueue& operator=(RequestQueue const&) = delete;
+    };
 
-extern RequestQueue g_RequestQueue;
+    extern RequestQueue g_RequestQueue;
