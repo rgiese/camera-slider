@@ -35,10 +35,18 @@ class BuildCommand extends Command {
     // Find source files
     this.log(`Building ${projectRoot}...`);
 
+    const ignoreGlob = ["**/tests/**/*"].concat(flags.excludes);
+
+    if (flags.excludes) {
+      this.log(`  [Ignoring ${ignoreGlob}]`);
+    }
+
     let projectFilesObject = {};
 
     glob
-      .sync(`${projectRoot}/**/*.{c,cpp,h,hpp,properties}`, { ignore: "**/tests/**/*" })
+      .sync(`${projectRoot}/**/*.{c,cpp,h,hpp,properties}`, {
+        ignore: ignoreGlob,
+      })
       .forEach(fileName => {
         const relativePath = path.relative(projectRoot, fileName).replace(/\\/g, "/");
         this.log(`  ${relativePath}`);
@@ -65,7 +73,9 @@ class BuildCommand extends Command {
         this.log(`Processing include glob ${includeGlob}...`);
 
         glob
-          .sync(`${packageRoot}/${includeGlob}`, { ignore: "**/tests/**/*" })
+          .sync(`${packageRoot}/${includeGlob}`, {
+            ignore: ["**/tests/**/*"].concat(flags.excludes),
+          })
           .forEach(fileName => {
             const relativePath = path.relative(packageRoot, fileName).replace(/\\/g, "/");
 
@@ -153,6 +163,7 @@ Provide name of project directory with -p
 BuildCommand.flags = {
   project: flags.string({ char: "p", description: "Project to build" }),
   includes: flags.string({ char: "i", description: "Include glob", multiple: true }),
+  excludes: flags.string({ char: "x", description: "Exclude glob", multiple: true }),
   includeRoots: flags.string({
     char: "r",
     description: "Include directories to be treated as roots",
