@@ -24,6 +24,8 @@
 #include "generated/firmware_generated.h"
 
 // Features
+#include "inc/MovementProgram.h"
+#include "inc/MovementProgramStore.h"
 #include "inc/Display.h"
 #include "bluetooth/Bluetooth.h"
 #include "motor/MotorController.h"

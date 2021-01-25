@@ -41,8 +41,8 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             g_MotorController.setMaxAcceleration(request.DesiredMaximumAcceleration.value);
             return true;
 
-        case RequestType::DesiredMovementProgram:
-            g_StateKeeper.RequestState(new RunningMovementProgramState(request.DesiredMovementProgram.MovementProgram));
+        case RequestType::UpdatedMovementProgram:
+            g_StateKeeper.RequestState(new RunningMovementProgramState());
             return true;
 
         default:

@@ -1,15 +1,14 @@
 #include "../inc/stdinc.h"
 #include "states.h"
 
-using namespace Flatbuffers::Firmware;
-
 void RunningMovementProgramState::onEnteringState()
 {
     g_Display.set("Running program");
 
-    m_spMovementProgram->dump();
+    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    movementProgram.dump();
 
-    if (!m_spMovementProgram->get().movements()->size())
+    if (!movementProgram.Movements.size())
     {
         // Empty program -> exit state
         return exitProgram();
@@ -20,26 +19,25 @@ void RunningMovementProgramState::onEnteringState()
 
 void RunningMovementProgramState::enterStep(size_t const idxStep)
 {
-    Movement const& movement = *m_spMovementProgram->get().movements()->Get(idxStep);
+    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram::Movement const& movement = movementProgram.Movements.at(idxStep);
 
     // Prep for movement
-    switch (movement.type())
+    switch (movement.Type)
     {
-        case MovementType::Move: {
+        case Flatbuffers::Firmware::MovementType::Move: {
             // Apply desired motor settings
-            double const rateMultiplier = m_spMovementProgram->get().rate() / 100.0f;
-
-            g_MotorController.setMaxSpeed(static_cast<uint32_t>(movement.desiredSpeed() * rateMultiplier));
+            g_MotorController.setMaxSpeed(static_cast<uint32_t>(movement.DesiredSpeed * movementProgram.Rate));
             g_MotorController.setMaxAcceleration(
-                static_cast<uint32_t>(movement.desiredAcceleration() * rateMultiplier));
+                static_cast<uint32_t>(movement.DesiredAcceleration * movementProgram.Rate));
 
             // Seek to position
-            g_MotorController.setTargetPosition(movement.desiredPosition());
+            g_MotorController.setTargetPosition(movement.DesiredPosition);
 
             break;
         }
 
-        case MovementType::Delay: {
+        case Flatbuffers::Firmware::MovementType::Delay: {
             // Snap current time
             m_DelayStart_msec = millis();
             break;
@@ -68,24 +66,23 @@ void RunningMovementProgramState::onLoop()
     }
 
     // Check if movement is completed
-    Movement const& movement = *m_spMovementProgram->get().movements()->Get(m_idxCurrentStep);
+    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram::Movement const& movement = movementProgram.Movements.at(m_idxCurrentStep);
 
-    switch (movement.type())
+    switch (movement.Type)
     {
-        case MovementType::Move: {
-            if (g_MotorController.getCurrentPosition() == movement.desiredPosition())
+        case Flatbuffers::Firmware::MovementType::Move: {
+            if (g_MotorController.getCurrentPosition() == movement.DesiredPosition)
             {
                 return nextStep();
             }
             break;
         }
 
-        case MovementType::Delay: {
+        case Flatbuffers::Firmware::MovementType::Delay: {
             unsigned long const timeDelayed_msec = millis() - m_DelayStart_msec;
 
-            double const rateMultiplier = m_spMovementProgram->get().rate() / 100.0f;
-
-            if (timeDelayed_msec > static_cast<unsigned long>(movement.delayTime() / rateMultiplier))
+            if (timeDelayed_msec > static_cast<unsigned long>(movement.DelayTime * movementProgram.Rate))
             {
                 m_DelayStart_msec = 0;
                 return nextStep();
@@ -101,14 +98,14 @@ void RunningMovementProgramState::onLoop()
 
 void RunningMovementProgramState::nextStep()
 {
-    size_t const cMovements = m_spMovementProgram->get().movements()->size();
+    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
 
-    if (m_idxCurrentStep >= (cMovements - 1))
+    if ((m_idxCurrentStep + 1) >= movementProgram.Movements.size())
     {
         // Reached end of movement list
-        bool const isRepeatRequested = !!(m_spMovementProgram->get().flags() & MovementProgramFlags::Repeat);
+        bool const isRepeatRequested = !!(movementProgram.Flags & Flatbuffers::Firmware::MovementProgramFlags::Repeat);
 
-        if (isRepeatRequested && cMovements > 1)
+        if (isRepeatRequested && movementProgram.Movements.size() > 1)
         {
             // Repeat (provided we had more than one step)
             return enterStep(0);
@@ -138,21 +135,16 @@ bool RunningMovementProgramState::onRequest(Request const& request)
         case RequestType::UIButtonPressed:
         case RequestType::StopMovementProgram:
             // Safety stop, return to tracking control
-            Serial.printlnf("!! Safety stop seek to %d", g_MotorController.getCurrentPosition());
+            Serial.printlnf("!! Safety stop seek to %ld", g_MotorController.getCurrentPosition());
             g_MotorController.safetyStop();
             g_StateKeeper.RequestState(new TrackingDesiredPositionState());
             return true;
 
-        case RequestType::DesiredMovementProgram: {
-            std::shared_ptr<MovementProgramOwner> updatedMovementProgram =
-                request.DesiredMovementProgram.MovementProgram;
+        case RequestType::UpdatedMovementProgram: {
+            bool const canAdoptInPlace =
+                m_idxCurrentStep < g_MovementProgramStore.getMovementProgram().Movements.size();
 
-            bool const shouldAdoptInPlace =
-                m_spMovementProgram->get().movements()->size() <= updatedMovementProgram->get().movements()->size();
-
-            m_spMovementProgram = updatedMovementProgram;
-
-            if (shouldAdoptInPlace)
+            if (canAdoptInPlace)
             {
                 // Reboot step to update
                 enterStep(m_idxCurrentStep);

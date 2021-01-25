@@ -1,15 +1,13 @@
 #pragma once
 
-#include "MovementProgramOwner.h"
-
 enum class RequestType
 {
     UIButtonPressed,
     DesiredPosition,
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
-    DesiredMovementProgram,
     StopMovementProgram,
+    UpdatedMovementProgram,
 };
 
 struct Request
@@ -40,33 +38,31 @@ struct Request
 
         struct
         {
+        } UpdatedMovementProgram;
+
+        struct
+        {
         } StopMovementProgram;
     };
-
-    // Non-union-able types
-    struct
-    {
-        std::shared_ptr<MovementProgramOwner> MovementProgram;
-    } DesiredMovementProgram;
 };
 
-    class RequestQueue
-    {
-    public:
-        RequestQueue() = default;
+class RequestQueue
+{
+public:
+    RequestQueue() = default;
 
-        void push(Request const& request);
+    void push(Request const& request);
 
-        bool try_pop(_Out_ Request& front);
+    bool try_pop(_Out_ Request& front);
 
-    private:
-        std::mutex m_Mutex;
-        std::queue<Request> m_Queue;
+private:
+    std::mutex m_Mutex;
+    std::queue<Request> m_Queue;
 
-    private:
-        // Non-copyable
-        RequestQueue(RequestQueue const&) = delete;
-        RequestQueue& operator=(RequestQueue const&) = delete;
-    };
+private:
+    // Non-copyable
+    RequestQueue(RequestQueue const&) = delete;
+    RequestQueue& operator=(RequestQueue const&) = delete;
+};
 
-    extern RequestQueue g_RequestQueue;
+extern RequestQueue g_RequestQueue;
