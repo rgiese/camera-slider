@@ -19,6 +19,8 @@ struct MovementProgram
                                    size_t const cbData,
                                    _Out_ MovementProgram& movementProgram);
 
+    void toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder);
+
     Flatbuffers::Firmware::MovementProgramFlags Flags = Flatbuffers::Firmware::MovementProgramFlags::NONE;
     float Rate = 1;
     std::vector<Movement> Movements = {};

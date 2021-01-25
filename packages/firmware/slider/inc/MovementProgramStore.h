@@ -10,6 +10,12 @@ public:
         return m_MovementProgram;
     }
 
+    uint32_t getMovementProgramVersion()
+
+    {
+        return m_MovementProgramVersion;
+    }
+
     void setMovementProgram(MovementProgram const& movementProgram);
 
 private:
@@ -19,6 +25,7 @@ private:
 
 private:
     MovementProgram m_MovementProgram;
+    uint32_t m_MovementProgramVersion = 0;
 };
 
 extern MovementProgramStore g_MovementProgramStore;

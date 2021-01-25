@@ -28,8 +28,22 @@ private:
     };
 
 private:
+    //
+    // Non-rate-limited characteristics (updated immediately)
+    //
     BleCharacteristic m_StateCharacteristic;
 
+    //
+    // Rate-limited characteristics
+    //
+
+    // Non-trivial values
+    BleCharacteristic m_RateLimitedReportedMovementProgram;
+    MovementProgram m_MovementProgramReported;
+    uint32_t m_MovementProgramVersionReported;
+    uint32_t m_MovementProgramVersionSent;
+
+    // uint32_t values
     BleCharacteristic m_RateLimitedCharacteristics[RateLimitedCharacteristic__count];
     uint32_t m_RateLimitedValuesReported[RateLimitedCharacteristic__count];
     uint32_t m_RateLimitedValuesSent[RateLimitedCharacteristic__count];

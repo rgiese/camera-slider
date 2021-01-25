@@ -33,6 +33,7 @@ export const BluetoothServices: BluetoothServices = {
       ReportedVelocity: "6d933277-dd04-4430-8ea6-3a2267c33364",
       ReportedMaximumSpeed: "73e3d2aa-a863-4f3d-9e85-c1cdd5a857e9",
       ReportedMaximumAcceleration: "f76b0acd-eb2b-4230-8006-92ccd637658f",
+      ReportedMovementProgram: "24aadf24-5835-4ed5-9a6f-3c07a00a8b88",
     },
   },
   Tracking: {

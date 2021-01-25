@@ -48,6 +48,27 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
     return true;
 }
 
+void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder)
+{
+    std::vector<Flatbuffers::Firmware::Movement> movements;
+    {
+        for (auto const& movement : Movements)
+        {
+            movements.emplace_back(movement.Type,
+                                   0 /* padding */,
+                                   movement.DelayTime,
+                                   movement.DesiredPosition,
+                                   movement.DesiredSpeed,
+                                   movement.DesiredAcceleration);
+        }
+    }
+
+    auto const movementProgramRoot = Flatbuffers::Firmware::CreateMovementProgramDirect(
+        flatbufferBuilder, Flags, static_cast<uint32_t>(Rate * 100.f), &movements);
+
+    Flatbuffers::Firmware::FinishMovementProgramBuffer(flatbufferBuilder, movementProgramRoot);
+}
+
 void MovementProgram::dump() const
 {
     Serial.println("Movement program:");

@@ -6,6 +6,13 @@ BluetoothStatusService::BluetoothStatusService()
                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                             BluetoothIds::Status::Characteristics::State,
                             BluetoothIds::Status::Id)
+    , m_RateLimitedReportedMovementProgram("reportedMovementProgram",
+                                           BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                                           BluetoothIds::Status::Characteristics::ReportedMovementProgram,
+                                           BluetoothIds::Status::Id)
+    , m_MovementProgramReported()
+    , m_MovementProgramVersionReported(static_cast<uint32_t>(-1))
+    , m_MovementProgramVersionSent(static_cast<uint32_t>(-1))
     , m_RateLimitedCharacteristics(
           {BleCharacteristic("reportedPosition",
                              BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
@@ -33,6 +40,8 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 {
     BLE.addCharacteristic(m_StateCharacteristic);
 
+    BLE.addCharacteristic(m_RateLimitedReportedMovementProgram);
+
     for (size_t idx = 0; idx < countof(m_RateLimitedCharacteristics); ++idx)
     {
         BLE.addCharacteristic(m_RateLimitedCharacteristics[idx]);
@@ -54,6 +63,11 @@ void BluetoothStatusService::onStateMachineThreadLoop()
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumSpeed] = g_MotorController.getMaximumSpeed();
     m_RateLimitedValuesReported[RateLimitedCharacteristic_ReportedMaximumAcceleration] =
         g_MotorController.getMaximumAcceleration();
+
+    if (m_MovementProgramVersionReported != g_MovementProgramStore.getMovementProgramVersion())
+    {
+        m_MovementProgramVersionReported = g_MovementProgramStore.getMovementProgramVersion();
+    }
 }
 
 void BluetoothStatusService::onMainThreadLoop()
@@ -76,6 +90,19 @@ void BluetoothStatusService::onMainThreadLoop()
             m_RateLimitedValuesSent[idxCharacteristic] = m_RateLimitedValuesReported[idxCharacteristic];
             m_RateLimitedCharacteristics[idxCharacteristic].setValue(m_RateLimitedValuesSent[idxCharacteristic]);
         }
+    }
+
+    if (m_MovementProgramVersionReported != m_MovementProgramVersionSent)
+    {
+        flatbuffers::FlatBufferBuilder flatbufferBuilder(512);
+        {
+            m_MovementProgramReported.toFlatbufferData(flatbufferBuilder);
+        }
+
+        m_RateLimitedReportedMovementProgram.setValue(flatbufferBuilder.GetBufferPointer(),
+                                                      flatbufferBuilder.GetSize());
+
+        m_MovementProgramVersionSent = m_MovementProgramVersionReported;
     }
 
     // Commit
