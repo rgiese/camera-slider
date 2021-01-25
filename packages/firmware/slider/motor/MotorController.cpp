@@ -39,10 +39,13 @@ void MotorController::setMaxSpeed(uint32_t const stepsPerSecond)
 
 void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
 {
-    m_Tic.setMaxAccel(
-        accelerationToTicUnits(std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec)));
-    m_Tic.setMaxDecel(
-        accelerationToTicUnits(std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec)));
+    uint32_t const safeStepsPerSecondPerSecond =
+        std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec);
+
+    uint32_t const ticStepsPerSecondPerSecond = accelerationToTicUnits(safeStepsPerSecondPerSecond);
+
+    m_Tic.setMaxAccel(ticStepsPerSecondPerSecond);
+    m_Tic.setMaxDecel(ticStepsPerSecondPerSecond);
 }
 
 void MotorController::goHome()
