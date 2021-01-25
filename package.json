@@ -11,6 +11,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "lerna run --concurrency 1 build --stream",
+    "deploy-firmware:local": "lerna run firmware:flash --stream",
     "deploy-firmware:prod": "lerna run deploy-firmware:prod --stream",
     "dev-build:firmware": "lerna run build --scope \"@grumpycorp/camera-slider-firmware\" --stream",
     "clean-mobile": "lerna run clean-mobile --stream",
