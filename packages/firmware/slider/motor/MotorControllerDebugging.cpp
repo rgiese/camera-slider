@@ -102,8 +102,8 @@ void MotorController::dumpState()
         int32_t const maxAcceleration = m_Tic.getMaxAccel();
         int32_t const maxDeceleration = m_Tic.getMaxDecel();
 
-        Serial.printlnf("  Max speed: %d steps/sec", speedFromTicUnits(maxSpeed));
-        Serial.printlnf("  Max acceleration: %d steps/sec^2, max deceleration: %d steps/sec^2",
+        Serial.printlnf("  Max speed: %lu steps/sec", speedFromTicUnits(maxSpeed));
+        Serial.printlnf("  Max acceleration: %lu steps/sec^2, max deceleration: %lu steps/sec^2",
                         accelerationFromTicUnits(maxAcceleration),
                         accelerationFromTicUnits(maxDeceleration));
 
@@ -144,7 +144,7 @@ void MotorController::dumpState()
         int32_t const targetVelocity = m_Tic.getTargetVelocity();
 
         Serial.printlnf(
-            "  Target position: %d, target velocity: %d", targetPosition, speedFromTicUnits(targetVelocity));
+            "  Target position: %lu, target velocity: %lu", targetPosition, speedFromTicUnits(targetVelocity));
     }
 
     // Motor state: execution
@@ -153,7 +153,7 @@ void MotorController::dumpState()
         int32_t const currentPosition = m_Tic.getCurrentPosition();
         int32_t const currentVelocity = m_Tic.getCurrentVelocity();
 
-        Serial.printlnf("  Current position (%s): %d, current velocity: %d",
+        Serial.printlnf("  Current position (%s): %ld, current velocity: %ld",
                         isPositionUncertain ? "uncertain" : "certain",
                         currentPosition,
                         speedFromTicUnits(currentVelocity));

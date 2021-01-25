@@ -37,7 +37,7 @@ void FindingForwardRangeState::onLoop()
     if (!g_MotorController.isPositionCertain())
     {
         // Position now uncertain -> report latest certain position as max range
-        Serial.printlnf("!! Max forward position: %d", m_LatestCertainPosition);
+        Serial.printlnf("!! Max forward position: %ld", m_LatestCertainPosition);
 
         // Re-home motor reverse
         return g_StateKeeper.RequestState(new HomingState());
