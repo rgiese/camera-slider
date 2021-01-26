@@ -6,6 +6,7 @@ enum class RequestType
     DesiredPosition,
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
+    StartMovementProgram,
     StopMovementProgram,
     UpdatedMovementProgram,
 };
@@ -39,6 +40,11 @@ struct Request
         struct
         {
         } UpdatedMovementProgram;
+
+        struct
+        {
+            uint32_t atStep;
+        } StartMovementProgram;
 
         struct
         {

@@ -1,3 +1,4 @@
+import { Base64Encode, Base64EncodeUInt32 } from "./Base64";
 import {
   BluetoothServices,
   Flatbuffers,
@@ -5,7 +6,6 @@ import {
   flatbuffers,
 } from "@grumpycorp/camera-slider-shared";
 
-import { Base64Encode } from "./Base64";
 import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothConnection } from "./BluetoothConnection";
 import { Device } from "react-native-ble-plx";
@@ -15,7 +15,7 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
     super(bluetoothConnection, BluetoothServices.Program.Id);
   }
 
-  public async runMovementProgram(movementProgram: MovementProgram): Promise<void> {
+  public async setDesiredMovementProgram(movementProgram: MovementProgram): Promise<void> {
     // Create buffer
     const flatbufferBuilder: flatbuffers.Builder = new flatbuffers.Builder(64); // ...initial guess at size, FIX ME
 
@@ -78,6 +78,13 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
     await this.writeCharacteristicValue(
       BluetoothServices.Program.Characteristics.DesiredMovementProgram,
       Base64Encode(movementProgramBytes)
+    );
+  }
+
+  public async startMovementProgram(atStep: number): Promise<void> {
+    await this.writeCharacteristicValue(
+      BluetoothServices.Program.Characteristics.StartMovementProgram,
+      Base64EncodeUInt32(atStep)
     );
   }
 

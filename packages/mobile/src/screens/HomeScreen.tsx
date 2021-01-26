@@ -226,9 +226,15 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
                     )
                   }
                   icon="play"
-                  onPress={async (): Promise<void> =>
-                    rootStore.bluetoothProgramStore.runMovementProgram(movementProgram)
-                  }
+                  onPress={async (): Promise<void> => {
+                    await rootStore.bluetoothProgramStore.setDesiredMovementProgram(
+                      movementProgram
+                    );
+
+                    if (bluetoothStatusStore.state === "trackingDesiredPosition") {
+                      await rootStore.bluetoothProgramStore.startMovementProgram(0);
+                    }
+                  }}
                 >
                   {bluetoothStatusStore.state === "runningMovementProgram" ? "Update" : "Run"}
                 </Button>

@@ -8,6 +8,12 @@ BluetoothProgramService::BluetoothProgramService()
                                BluetoothIds::Program::Id,
                                &BluetoothProgramService::onDesiredMovementProgramChanged,
                                nullptr)
+    , m_StartMovementProgram("startMovementProgram",
+                             BleCharacteristicProperty::WRITE_WO_RSP,
+                             BluetoothIds::Program::Characteristics::StartMovementProgram,
+                             BluetoothIds::Program::Id,
+                             &BluetoothProgramService::onStartMovementProgramChanged,
+                             nullptr)
     , m_StopMovementProgram("stopMovementProgram",
                             BleCharacteristicProperty::WRITE_WO_RSP,
                             BluetoothIds::Program::Characteristics::StopMovementProgram,
@@ -20,6 +26,7 @@ BluetoothProgramService::BluetoothProgramService()
 void BluetoothProgramService::begin(BleAdvertisingData& advertisingData)
 {
     BLE.addCharacteristic(m_DesiredMovementProgram);
+    BLE.addCharacteristic(m_StartMovementProgram);
     BLE.addCharacteristic(m_StopMovementProgram);
 }
 
@@ -34,6 +41,22 @@ void BluetoothProgramService::onDesiredMovementProgramChanged(uint8_t const* con
     {
         g_MovementProgramStore.setMovementProgram(movementProgram);
     }
+}
+
+void BluetoothProgramService::onStartMovementProgramChanged(uint8_t const* const pData,
+                                                            size_t const cbData,
+                                                            BlePeerDevice const& peerDevice,
+                                                            void* pContext)
+{
+    Request request = {Type : RequestType::StartMovementProgram};
+    {
+        if (pData || cbData == sizeof(request.StartMovementProgram.atStep))
+        {
+            memcpy(&request.StartMovementProgram.atStep, pData, sizeof(request.StartMovementProgram.atStep));
+        }
+    }
+
+    g_RequestQueue.push(request);
 }
 
 void BluetoothProgramService::onStopMovementProgramChanged(uint8_t const* const pData,

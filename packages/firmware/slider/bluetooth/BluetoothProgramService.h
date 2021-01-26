@@ -18,6 +18,11 @@ private:
                                                 BlePeerDevice const& peerDevice,
                                                 void* pContext);
 
+    static void onStartMovementProgramChanged(uint8_t const* const pData,
+                                              size_t const cbData,
+                                              BlePeerDevice const& peerDevice,
+                                              void* pContext);
+
     static void onStopMovementProgramChanged(uint8_t const* const pData,
                                              size_t const cbData,
                                              BlePeerDevice const& peerDevice,
@@ -25,6 +30,7 @@ private:
 
 private:
     BleCharacteristic m_DesiredMovementProgram;
+    BleCharacteristic m_StartMovementProgram;
     BleCharacteristic m_StopMovementProgram;
 
 private:

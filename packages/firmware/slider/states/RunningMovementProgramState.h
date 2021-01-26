@@ -3,8 +3,9 @@
 class RunningMovementProgramState : public AbstractState
 {
 public:
-    RunningMovementProgramState()
+    RunningMovementProgramState(uint32_t const desiredInitialStep)
         : AbstractState(SliderState::RunningMovementProgram)
+        , m_idxInitialStep(desiredInitialStep)
         , m_idxCurrentStep(static_cast<size_t>(-1))
         , m_DelayStart_msec(0)
     {
@@ -21,6 +22,8 @@ private:
     void exitProgram();
 
 private:
+    uint32_t const m_idxInitialStep;
+
     size_t m_idxCurrentStep;
     unsigned long m_DelayStart_msec;
 };

@@ -14,7 +14,7 @@ void RunningMovementProgramState::onEnteringState()
         return exitProgram();
     }
 
-    enterStep(0);
+    enterStep(m_idxInitialStep < movementProgram.Movements.size() ? m_idxInitialStep : 0);
 }
 
 void RunningMovementProgramState::enterStep(size_t const idxStep)
@@ -140,23 +140,31 @@ bool RunningMovementProgramState::onRequest(Request const& request)
             g_StateKeeper.RequestState(new TrackingDesiredPositionState());
             return true;
 
-        case RequestType::UpdatedMovementProgram: {
-            bool const canAdoptInPlace =
-                m_idxCurrentStep < g_MovementProgramStore.getMovementProgram().Movements.size();
+        case RequestType::StartMovementProgram:
+            if (request.StartMovementProgram.atStep != m_idxCurrentStep &&
+                request.StartMovementProgram.atStep < g_MovementProgramStore.getMovementProgram().Movements.size())
+            {
+                enterStep(request.StartMovementProgram.atStep);
+            }
+            return true;
 
-            if (canAdoptInPlace)
+        case RequestType::UpdatedMovementProgram:
+            if (m_idxCurrentStep < g_MovementProgramStore.getMovementProgram().Movements.size())
             {
                 // Reboot step to update
                 enterStep(m_idxCurrentStep);
             }
-            else
+            else if (!g_MovementProgramStore.getMovementProgram().Movements.empty())
             {
                 // Reboot entire program
-                onEnteringState();
+                enterStep(0);
             }
-
+            else
+            {
+                // Nothing left to execute
+                exitProgram();
+            }
             return true;
-        }
 
         default:
             return false;
