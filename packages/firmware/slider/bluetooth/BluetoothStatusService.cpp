@@ -66,6 +66,7 @@ void BluetoothStatusService::onStateMachineThreadLoop()
 
     if (m_MovementProgramVersionReported != g_MovementProgramStore.getMovementProgramVersion())
     {
+        m_MovementProgramReported = g_MovementProgramStore.getMovementProgram();
         m_MovementProgramVersionReported = g_MovementProgramStore.getMovementProgramVersion();
     }
 }
