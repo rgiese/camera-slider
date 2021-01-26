@@ -17,7 +17,7 @@ export class BluetoothProgramStore extends BluetoothCharacteristicsStoreBase {
 
   public async setDesiredMovementProgram(movementProgram: MovementProgram): Promise<void> {
     // Create buffer
-    const flatbufferBuilder: flatbuffers.Builder = new flatbuffers.Builder(64); // ...initial guess at size, FIX ME
+    const flatbufferBuilder: flatbuffers.Builder = new flatbuffers.Builder(128); // ...initial guess at size, FIX ME
 
     // Create movements array
     Flatbuffers.Firmware.MovementProgram.startMovementsVector(

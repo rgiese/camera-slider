@@ -27,7 +27,7 @@ function MovementParameter({
 }: {
   movementProgram: MovementProgram;
   movementIndex: number;
-  setMovementProgram: React.Dispatch<React.SetStateAction<MovementProgram>>;
+  setMovementProgram: (updatedMovementProgram: MovementProgram) => void;
   movementField: "Position" | "Speed" | "Acceleration" | "Delay";
   maximumValue: number;
 

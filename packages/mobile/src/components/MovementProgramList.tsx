@@ -20,7 +20,7 @@ function MovementProgramList({
   setMovementProgram,
 }: {
   movementProgram: MovementProgram;
-  setMovementProgram: React.Dispatch<React.SetStateAction<MovementProgram>>;
+  setMovementProgram: (updatedMovementProgram: MovementProgram) => void;
 }): React.ReactElement {
   const rootStore = useRootStore();
   const bluetoothCapabilitiesStore = rootStore.bluetoothCapabilitiesStore;

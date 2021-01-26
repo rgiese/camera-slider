@@ -3,14 +3,15 @@ import { Colors, Icons } from "../Theme";
 import { MovementProgram, SliderState } from "@grumpycorp/camera-slider-shared";
 import { NavigationRoute, NavigationScreenProp } from "react-navigation";
 import { NavigationStackOptions, NavigationStackScreenComponent } from "react-navigation-stack";
-import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 import BaseView from "../components/BaseView";
 import MovementProgramList from "../components/MovementProgramList";
+import React from "react";
 import ScreenProps from "./ScreenProps";
 import ScreenRoutes from "./ScreenRoutes";
 import Slider from "@react-native-community/slider";
+import cloneDeep from "clone-deep";
 import { observer } from "mobx-react";
 import { useRootStore } from "../stores/RootStoreContext";
 
@@ -34,6 +35,7 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
   const rootStore = useRootStore();
   const bluetoothConnection = rootStore.bluetoothConnection;
   const bluetoothCapabilitiesStore = rootStore.bluetoothCapabilitiesStore;
+  const bluetoothProgramStore = rootStore.bluetoothProgramStore;
   const bluetoothStatusStore = rootStore.bluetoothStatusStore;
   const bluetoothTrackingStore = rootStore.bluetoothTrackingStore;
 
@@ -48,18 +50,19 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
 
   const canRequestChanges = bluetoothStatusStore.state === "trackingDesiredPosition";
 
-  const [movementProgram, setMovementProgram] = useState<MovementProgram>({
-    Rate: 100,
-    Repeats: false,
-    Movements: [],
-  });
-
   function humanizeState(state: SliderState): string {
     // fooBarBaz -> foo Bar Baz -> foo bar baz -> Foo bar baz
     const stateComponents = state.split(/(?=[A-Z])/);
     const lowerCaseState = stateComponents.map(component => component.toLowerCase()).join(" ");
 
     return lowerCaseState.slice(0, 1).toUpperCase() + lowerCaseState.slice(1);
+  }
+
+  // Deep clone so we don't manipulate MobX-owned state
+  const movementProgram = cloneDeep(bluetoothStatusStore.reportedMovementProgram);
+
+  async function setMovementProgram(updatedMovementProgram: MovementProgram): Promise<void> {
+    await bluetoothProgramStore.setDesiredMovementProgram(updatedMovementProgram);
   }
 
   return (
@@ -219,34 +222,22 @@ const HomeScreen: NavigationStackScreenComponent<{}> = ({ navigation }): React.R
               <>
                 <Button
                   color="white"
-                  disabled={
-                    !(
-                      bluetoothStatusStore.state === "runningMovementProgram" ||
-                      bluetoothStatusStore.state === "trackingDesiredPosition"
-                    )
-                  }
+                  disabled={bluetoothStatusStore.state !== "trackingDesiredPosition"}
                   icon="play"
-                  onPress={async (): Promise<void> => {
-                    await rootStore.bluetoothProgramStore.setDesiredMovementProgram(
-                      movementProgram
-                    );
-
-                    if (bluetoothStatusStore.state === "trackingDesiredPosition") {
-                      await rootStore.bluetoothProgramStore.startMovementProgram(0);
-                    }
-                  }}
+                  onPress={async (): Promise<void> =>
+                    rootStore.bluetoothProgramStore.startMovementProgram(0)
+                  }
                 >
-                  {bluetoothStatusStore.state === "runningMovementProgram" ? "Update" : "Run"}
+                  Run
                 </Button>
                 <Text>{"         " /* crummy spacer */}</Text>
                 <Button
                   color="red"
                   disabled={bluetoothStatusStore.state !== "runningMovementProgram"}
                   icon="stop"
-                  onPress={(): void => {
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    rootStore.bluetoothProgramStore.stopMovementProgram();
-                  }}
+                  onPress={async (): Promise<void> =>
+                    rootStore.bluetoothProgramStore.stopMovementProgram()
+                  }
                 >
                   Stop
                 </Button>
