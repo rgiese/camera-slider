@@ -26,5 +26,5 @@ struct MovementProgram
     std::vector<Movement> Movements = {};
 
     // Debugging tools
-    void dump() const;
+    void dump(char const* const szPrefix) const;
 };

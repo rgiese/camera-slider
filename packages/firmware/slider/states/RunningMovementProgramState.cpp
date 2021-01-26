@@ -6,7 +6,7 @@ void RunningMovementProgramState::onEnteringState()
     g_Display.set("Running program");
 
     MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
-    movementProgram.dump();
+    movementProgram.dump("running");
 
     if (!movementProgram.Movements.size())
     {

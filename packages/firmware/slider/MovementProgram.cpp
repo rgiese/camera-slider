@@ -69,9 +69,9 @@ void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbuffe
     Flatbuffers::Firmware::FinishMovementProgramBuffer(flatbufferBuilder, movementProgramRoot);
 }
 
-void MovementProgram::dump() const
+void MovementProgram::dump(char const* const szPrefix) const
 {
-    Serial.println("Movement program:");
+    Serial.printlnf("Movement program (%s):", szPrefix);
 
     {
         if (static_cast<uint32_t>(Flags) != 0)

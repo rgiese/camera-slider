@@ -36,11 +36,17 @@ void BluetoothProgramService::onDesiredMovementProgramChanged(uint8_t const* con
                                                               void* pContext)
 {
     MovementProgram movementProgram;
-
-    if (MovementProgram::fromFlatbufferData(pData, cbData, movementProgram))
     {
-        g_MovementProgramStore.setMovementProgram(movementProgram);
+        if (!MovementProgram::fromFlatbufferData(pData, cbData, movementProgram))
+        {
+            Serial.println("!! Desired movement program failed to parse.");
+            return;
+        }
+
+        movementProgram.dump("desired");
     }
+
+    g_MovementProgramStore.setMovementProgram(movementProgram);
 }
 
 void BluetoothProgramService::onStartMovementProgramChanged(uint8_t const* const pData,
