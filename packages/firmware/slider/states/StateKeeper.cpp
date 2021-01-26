@@ -44,7 +44,9 @@ void StateKeeper::onLoop()
 
         if (!wasProcessed)
         {
-            Serial.printlnf("!! Request type %u dropped (rejected).", static_cast<int>(request.Type));
+            Serial.printlnf("!! Request type %u dropped (rejected) by current state %s.",
+                            static_cast<int>(request.Type),
+                            getSliderStateName(m_CurrentState->getSliderState()));
         }
     }
 }
