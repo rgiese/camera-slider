@@ -19,7 +19,6 @@
 
 // Core definitions
 #include "inc/CoreDefs.h"
-#include "inc/BitFlag.h"
 #include "inc/Activity.h"
 
 // Shared dependencies

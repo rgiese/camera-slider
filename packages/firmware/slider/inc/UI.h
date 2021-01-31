@@ -13,6 +13,18 @@ private:
     UI& operator=(UI const&) = delete;
 
 private:
+    //
+    // LCD
+    //
+
+    static constexpr pin_t LCDBrightnessPin = D8;
+    static constexpr pin_t LCDResetPin = D7;
+
+private:
+    //
+    // Encoders
+    //
+
     TwoWire& m_Wire;
 
     enum class EncoderFunction : uint8_t
@@ -26,6 +38,14 @@ private:
     };
 
     std::array<Encoder, static_cast<uint8_t>(EncoderFunction::__count)> m_Encoders;
+    std::array<Encoder::Color, static_cast<uint8_t>(EncoderFunction::__count)> m_FunctionColors;
+
+    static constexpr pin_t EncoderInterruptPin = D4;
+
+    Encoder& encoder(EncoderFunction const encoderFunction)
+    {
+        return m_Encoders[static_cast<uint8_t>(encoderFunction)];
+    };
 };
 
 extern UI g_UI;
