@@ -12,12 +12,14 @@
 #include <stdarg.h>
 #include <math.h>
 
+#include <array>
 #include <memory>
 #include <mutex>
 #include <queue>
 
 // Core definitions
 #include "inc/CoreDefs.h"
+#include "inc/BitFlag.h"
 #include "inc/Activity.h"
 
 // Shared dependencies
@@ -27,7 +29,9 @@
 #include "inc/MovementProgram.h"
 #include "inc/MovementProgramStore.h"
 #include "inc/Display.h"
+#include "inc/Encoder.h"
 #include "bluetooth/Bluetooth.h"
 #include "motor/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"
+#include "inc/UI.h"

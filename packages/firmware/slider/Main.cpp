@@ -34,6 +34,8 @@ void setup()
     Serial.println("Slider started.");
 
     // Configure display
+    g_UI.begin();
+
     g_Display.begin();
     g_Display.set("Starting...");
 
