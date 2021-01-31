@@ -12,15 +12,7 @@ PRODUCT_VERSION(1);  // Increment for each release
 // Declarations
 //
 
-void onUIButtonPressed();
 void stateMachineThreadFn(void*);
-
-//
-// Globals
-//
-
-Button g_UIButton(D2, &onUIButtonPressed);
-
 
 //
 // Setup
@@ -123,10 +115,7 @@ void stateMachineThreadFn(void*)
             }
 
             // Deliver interrupt-sourced events (creates Requests)
-            {
-                Activity mainLoopSectionActivity("uiButton", 10);
-                g_UIButton.onLoop();
-            }
+            {}
 
             // Advance state machine (moves state, delivers Requests)
             {
@@ -149,14 +138,4 @@ void stateMachineThreadFn(void*)
         // Loop delay (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
         os_thread_delay_until(&previousWakeTime, 25 /* msec */);
     }
-}
-
-
-//
-// Helpers
-//
-
-void onUIButtonPressed()
-{
-    g_RequestQueue.push({Type : RequestType::UIButtonPressed});
 }
