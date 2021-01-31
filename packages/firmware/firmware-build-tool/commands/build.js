@@ -35,7 +35,7 @@ class BuildCommand extends Command {
     // Find source files
     this.log(`Building ${projectRoot}...`);
 
-    const ignoreGlob = ["**/tests/**/*"].concat(flags.excludes);
+    const ignoreGlob = ["**/tests/**/*"].concat(flags.excludes ?? []);
 
     if (flags.excludes) {
       this.log(`  [Ignoring ${ignoreGlob}]`);
@@ -74,7 +74,7 @@ class BuildCommand extends Command {
 
         glob
           .sync(`${packageRoot}/${includeGlob}`, {
-            ignore: ["**/tests/**/*"].concat(flags.excludes),
+            ignore: ["**/tests/**/*"].concat(flags.excludes ?? []),
           })
           .forEach(fileName => {
             const relativePath = path.relative(packageRoot, fileName).replace(/\\/g, "/");
