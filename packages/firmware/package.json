@@ -17,7 +17,7 @@
     "prebuild": "node -r esm firmware-build-tool/run.js codegen -p slider",
     "build": "node -r esm firmware-build-tool/run.js build -p slider -r \"external/Adafruit{_BusIO,-GFX-Library,_HX8357_Library}\" -r \"external/tic-arduino\" -i \"external/Adafruit{_BusIO,-GFX-Library,_HX8357_Library}/*.{c,cpp,h}\" -i \"external/tic-arduino/*.{cpp,h}\"",
     "deploy-firmware:prod": "node -r esm firmware-build-tool/run.js upload -p slider -m Main.cpp",
-    "test": "node -r esm firmware-build-tool/run.js test -p slider -i \"slider/tests/mocks/platform\" -i \"external/Adafruit{_BusIO,-GFX-Library}\" -i \"external/tic-arduino\"",
+    "test": "node -r esm firmware-build-tool/run.js test -p slider -i \"slider/tests/mocks/platform\" -i \"external/Adafruit{_BusIO,-GFX-Library,_HX8357_Library}\" -i \"external/tic-arduino\"",
     "format:check": "cross-var prettier --check $npm_package_config_prettierglob & clang-format --glob=**/*.{cpp,h}",
     "format:fix": "cross-var prettier --write $npm_package_config_prettierglob & clang-format --glob=**/*.{cpp,h} -i",
     "firmware:flash": "node -r esm firmware-build-tool/run.js flash -p slider",

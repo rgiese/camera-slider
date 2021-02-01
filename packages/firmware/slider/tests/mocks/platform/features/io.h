@@ -17,6 +17,12 @@ typedef enum PinMode
     PIN_MODE_NONE = 0xFF
 } PinMode;
 
+enum PinState
+{
+    LOW = 0,
+    HIGH = 1
+};
+
 // c.f. Particle's device-os/wiring_globals/src/spark_wiring_gpio.cpp
 inline void pinMode(pin_t _pin, PinMode _setMode)
 {

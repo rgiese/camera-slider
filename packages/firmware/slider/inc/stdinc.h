@@ -33,4 +33,5 @@
 #include "motor/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"
+#include "inc/LCD.h"
 #include "inc/UI.h"

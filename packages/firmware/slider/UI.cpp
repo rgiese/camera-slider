@@ -3,7 +3,8 @@
 UI g_UI;
 
 UI::UI()
-    : m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
+    : m_LCD()
+    , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({
           Encoder(m_Wire, 0x14),  // Position
           Encoder(m_Wire, 0x13),  // Speed
@@ -23,9 +24,7 @@ UI::UI()
 
 void UI::begin()
 {
-    // Configure control outputs for LCD
-    analogWrite(LCDBrightnessPin, 255);
-    digitalWrite(LCDResetPin, HIGH);
+    m_LCD.begin();
 
     // Configure interrupt pin for encoders
     pinMode(EncoderInterruptPin, INPUT_PULLUP);

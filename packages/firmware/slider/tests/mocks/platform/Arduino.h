@@ -2,6 +2,7 @@
 
 typedef uint8_t byte;
 typedef uint16_t pin_t;
+typedef bool boolean;
 
 // These headers are in the current directory which is an include root since some dependencies include them as e.g.
 // <Wire.h>

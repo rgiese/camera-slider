@@ -1,5 +1,6 @@
 #pragma once
 
+
 class UI
 {
 public:
@@ -17,8 +18,7 @@ private:
     // LCD
     //
 
-    static constexpr pin_t LCDBrightnessPin = D8;
-    static constexpr pin_t LCDResetPin = D7;
+    LCD m_LCD;
 
 private:
     //
