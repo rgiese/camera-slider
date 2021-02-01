@@ -1,9 +1,12 @@
 [submodule "packages/firmware/external/Adafruit-GFX-Library"]
 	path = packages/firmware/external/Adafruit-GFX-Library
-	url = https://github.com/adafruit/Adafruit-GFX-Library.git
+	url = https://github.com/rgiese/Adafruit-GFX-Library.git
 [submodule "packages/firmware/external/Adafruit_BusIO"]
 	path = packages/firmware/external/Adafruit_BusIO
 	url = https://github.com/adafruit/Adafruit_BusIO.git
 [submodule "packages/firmware/external/tic-arduino"]
 	path = packages/firmware/external/tic-arduino
 	url = https://github.com/rgiese/tic-arduino.git
+[submodule "packages/firmware/external/Adafruit_HX8357_Library"]
+	path = packages/firmware/external/Adafruit_HX8357_Library
+	url = https://github.com/adafruit/Adafruit_HX8357_Library.git
