@@ -11,6 +11,7 @@
 #define D5 5
 #define D6 6
 #define D7 7
+#define D8 8
 
 // Analog pins
 #define A0 10
