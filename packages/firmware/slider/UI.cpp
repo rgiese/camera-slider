@@ -31,9 +31,6 @@ void UI::begin()
     pinMode(EncoderInterruptPin, INPUT_PULLUP);
 
     // Configure I2C-based encoders
-    m_Wire.setSpeed(CLOCK_SPEED_400KHZ);
-    m_Wire.begin();
-
     for (auto& encoder : m_Encoders)
     {
         encoder.begin();

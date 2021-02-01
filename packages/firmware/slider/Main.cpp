@@ -33,6 +33,13 @@ void setup()
     Serial.begin();
     Serial.println("Slider started.");
 
+    // Configure buses
+    Wire.setSpeed(CLOCK_SPEED_100KHZ);  // Motor controller
+    Wire.begin();
+
+    Wire1.setSpeed(CLOCK_SPEED_400KHZ);  // Encoders
+    Wire1.begin();
+
     // Configure display
     g_UI.begin();
 
