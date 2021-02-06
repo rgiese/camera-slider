@@ -3,8 +3,58 @@
 #include <atomic>
 #include <functional>
 
+//
+// Note: Observables are intended to be created once and should not be deleted during the lifetime of the program
+//       since we're not bothering to track them with shared_/weak_ptrs in our ObservableStore.
+//
+
+class ObservableBase
+{
+public:
+    virtual void deliver() = 0;
+
+protected:
+    ObservableBase();
+};
+
+class ObservableStore
+{
+public:
+    static ObservableStore& sharedInstance()
+    {
+        static ObservableStore globalStore;
+        return globalStore;
+    }
+
+    void deliverAll()
+    {
+        for (ObservableBase* observable : m_Observables)
+        {
+            observable->deliver();
+        }
+    }
+
+private:
+    ObservableStore() = default;
+
+    // Non-copyable
+    ObservableStore(ObservableStore const&) = delete;
+    ObservableStore& operator=(ObservableStore const&) = delete;
+
+private:
+    std::vector<ObservableBase*> m_Observables;
+
+private:
+    friend class ObservableBase;
+
+    void registerObservable(ObservableBase* observable)
+    {
+        m_Observables.push_back(observable);
+    }
+};
+
 template <typename T>
-class Observable
+class Observable : public ObservableBase
 {
 public:
     Observable() = default;
@@ -14,7 +64,7 @@ public:
     {
         std::lock_guard<std::mutex> guard(m_Mutex);
 
-        if (!(m_Value == value)) // Allow T to implement just '=='
+        if (!(m_Value == value))  // Allow T to implement just '=='
         {
             m_Value = value;
             m_IsDirty = true;
@@ -40,7 +90,7 @@ public:
         m_Observers.push_back(c);
     }
 
-    void deliver()
+    void deliver() override
     {
         T valueToDeliver;
         {

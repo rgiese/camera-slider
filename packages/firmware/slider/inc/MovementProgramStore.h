@@ -9,11 +9,6 @@ public:
 
     void setMovementProgram(MovementProgram const& movementProgram);
 
-    void deliverObservables()
-    {
-        CurrentMovementProgram.deliver();
-    }
-
 private:
     // Non-copyable
     MovementProgramStore(MovementProgramStore const&) = delete;

@@ -45,16 +45,6 @@ public:
         return m_Tic.getHomingActive();
     }
 
-    void deliverObservables()
-    {
-        OperationState.deliver();
-        IsPositionCertain.deliver();
-        CurrentPosition.deliver();
-        CurrentVelocity.deliver();
-        MaximumSpeed.deliver();
-        MaximumAcceleration.deliver();
-    }
-
     // Setters
     void setTargetPosition(int32_t const targetPosition);
     void setMaxSpeed(uint32_t const stepsPerSecond);
