@@ -13,26 +13,7 @@ void LCD::begin()
     m_LCD.begin(32 * 1000 * 1000);  // 32Mhz is the Particle Gen3 maximum
     m_LCD.setRotation(3);
 
-    auto const startTime = millis();
-
-    {
-        // A (much) faster version of m_LCD.fillScreen(HX8357_BLACK)
-        m_LCD.startWrite();
-        m_LCD.setAddrWindow(0, 0, HX8357_TFTHEIGHT, HX8357_TFTWIDTH);  // switching width/height due to rotation
-
-        uint16_t blackColumn[HX8357_TFTHEIGHT];
-        memset(blackColumn, 0, sizeof(blackColumn));
-
-        for (uint16_t idxColumn = 0; idxColumn < HX8357_TFTWIDTH; ++idxColumn)
-        {
-            SPI.transfer(blackColumn, NULL, sizeof(blackColumn), NULL);
-        }
-
-        m_LCD.endWrite();
-    }
-
-    auto const endTime = millis();
-    auto const blankTime = endTime - startTime;
+    blitColorRegion(0, 0, m_LCD.width(), m_LCD.height(), HX8357_BLACK);
 
     m_LCD.setCursor(0, 0);
     m_LCD.setTextColor(HX8357_WHITE);
@@ -41,13 +22,33 @@ void LCD::begin()
     m_LCD.setTextColor(HX8357_YELLOW);
     m_LCD.setTextSize(2);
     m_LCD.println(1234.56);
-    m_LCD.print("Time to blank: ");
-    m_LCD.println(blankTime);
     m_LCD.setTextColor(HX8357_RED);
     m_LCD.setTextSize(3);
     m_LCD.println(0xDEADBEEF, HEX);
-    m_LCD.println();
     m_LCD.setTextColor(HX8357_GREEN);
     m_LCD.setTextSize(5);
     m_LCD.println("Groop");
+}
+
+void LCD::blitColorRegion(
+    uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, uint16_t const color)
+{
+    // A (much) faster version of m_LCD.fillScreen
+    std::array<uint16_t, HX8357_TFTHEIGHT> pixelBuffer;  // about the maximum we're willing to pay in stack space
+    pixelBuffer.fill(color);
+
+    m_LCD.startWrite();
+    m_LCD.setAddrWindow(x, y, width, height);
+
+    size_t cPixelsRemaining = width * height;
+
+    while (cPixelsRemaining)
+    {
+        size_t const cPixelsToSend = std::min(cPixelsRemaining, pixelBuffer.size());
+        SPI.transfer(pixelBuffer.data(), NULL, cPixelsToSend * sizeof(uint16_t), NULL);
+
+        cPixelsRemaining -= cPixelsToSend;
+    }
+
+    m_LCD.endWrite();
 }
