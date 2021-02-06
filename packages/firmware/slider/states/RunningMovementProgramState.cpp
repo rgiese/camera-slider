@@ -142,7 +142,8 @@ bool RunningMovementProgramState::onRequest(Request const& request)
 
         case RequestType::StartMovementProgram:
             if (request.StartMovementProgram.atStep != m_idxCurrentStep &&
-                request.StartMovementProgram.atStep < g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
+                request.StartMovementProgram.atStep <
+                    g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
             {
                 enterStep(request.StartMovementProgram.atStep);
             }
