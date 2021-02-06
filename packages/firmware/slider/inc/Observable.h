@@ -8,13 +8,17 @@
 //       since we're not bothering to track them with shared_/weak_ptrs in our ObservableStore.
 //
 
+class ObservableStore;
+
 class ObservableBase
 {
-public:
-    virtual void deliver() = 0;
-
 protected:
     ObservableBase();
+
+protected:
+    friend class ObservableStore;
+
+    virtual void deliver() = 0;
 };
 
 class ObservableStore
@@ -90,6 +94,20 @@ public:
         m_Observers.push_back(c);
     }
 
+private:
+    // Non-copyable
+    Observable<T>(Observable<T> const&) = delete;
+    Observable<T>& operator=(Observable<T> const&) = delete;
+
+private:
+    std::vector<Callback> m_Observers;
+
+    std::mutex m_Mutex;
+
+    T m_Value;
+    bool m_IsDirty;
+
+protected:
     void deliver() override
     {
         T valueToDeliver;
@@ -111,17 +129,4 @@ public:
             observer(valueToDeliver);
         }
     }
-
-private:
-    // Non-copyable
-    Observable<T>(Observable<T> const&) = delete;
-    Observable<T>& operator=(Observable<T> const&) = delete;
-
-private:
-    std::vector<Callback> m_Observers;
-
-    std::mutex m_Mutex;
-
-    T m_Value;
-    bool m_IsDirty;
 };
