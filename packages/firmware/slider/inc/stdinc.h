@@ -21,6 +21,7 @@
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
 #include "inc/Observable.h"
+#include "inc/RGBColor.h"
 
 // Shared dependencies
 #include "generated/firmware_generated.h"

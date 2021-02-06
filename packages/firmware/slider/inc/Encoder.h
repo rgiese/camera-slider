@@ -11,14 +11,8 @@ public:
 
     void begin();
 
-    struct Color
-    {
-        uint8_t Red;
-        uint8_t Green;
-        uint8_t Blue;
-    };
 
-    void setColor(Color const& color);
+    void setColor(RGBColor const& color);
 
 private:
     TwoWire& m_Wire;

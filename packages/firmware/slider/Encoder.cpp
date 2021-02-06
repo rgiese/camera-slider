@@ -50,7 +50,7 @@ void Encoder::begin()
     }
 }
 
-void Encoder::setColor(Encoder::Color const& color)
+void Encoder::setColor(RGBColor const& color)
 {
     AutoTransmission autoTransmission(m_Wire, m_Address);
 

@@ -13,11 +13,11 @@ UI::UI()
           Encoder(m_Wire, 0x11),  // Rate
       })
     , m_FunctionColors({
-          Encoder::Color{0xf2, 0x67, 0x39},  // Position
-          Encoder::Color{0xf5, 0x2c, 0x68},  // Speed
-          Encoder::Color{0xe0, 0xca, 0x3e},  // Acceleration
-          Encoder::Color{0xff, 0xff, 0xff},  // Step
-          Encoder::Color{0x0c, 0xf2, 0xbd},  // Rate
+          RGBColor{0xf2, 0x67, 0x39},  // Position
+          RGBColor{0xf5, 0x2c, 0x68},  // Speed
+          RGBColor{0xe0, 0xca, 0x3e},  // Acceleration
+          RGBColor{0xff, 0xff, 0xff},  // Step
+          RGBColor{0x0c, 0xf2, 0xbd},  // Rate
       })
 {
 }
@@ -42,6 +42,6 @@ void UI::begin()
 
     // Set up observers
     g_MotorController.CurrentPosition.attach([this](int32_t const position) {
-        m_LCD.updateNumericStatusValue(0, 280, color(EncoderFunction::Position), position);
+        m_LCD.updateNumericStatusValue(0, 280, colorFor(EncoderFunction::Position), position);
     });
 }

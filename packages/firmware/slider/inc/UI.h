@@ -27,6 +27,8 @@ private:
 
     TwoWire& m_Wire;
 
+    static constexpr pin_t EncoderInterruptPin = D4;
+
     enum class EncoderFunction : uint8_t
     {
         Position,
@@ -38,16 +40,14 @@ private:
     };
 
     std::array<Encoder, static_cast<uint8_t>(EncoderFunction::__count)> m_Encoders;
-    std::array<Encoder::Color, static_cast<uint8_t>(EncoderFunction::__count)> m_FunctionColors;
+    std::array<RGBColor, static_cast<uint8_t>(EncoderFunction::__count)> m_FunctionColors;
 
-    static constexpr pin_t EncoderInterruptPin = D4;
-
-    Encoder& encoder(EncoderFunction const encoderFunction)
+    Encoder& encoderFor(EncoderFunction const encoderFunction)
     {
         return m_Encoders[static_cast<uint8_t>(encoderFunction)];
     };
 
-    Encoder::Color const& color(EncoderFunction const encoderFunction)
+    RGBColor const& colorFor(EncoderFunction const encoderFunction)
     {
         return m_FunctionColors[static_cast<uint8_t>(encoderFunction)];
     };
