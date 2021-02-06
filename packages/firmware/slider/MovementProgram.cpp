@@ -48,7 +48,7 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
     return true;
 }
 
-void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder)
+void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder) const
 {
     std::vector<Flatbuffers::Firmware::Movement> movements;
     {
