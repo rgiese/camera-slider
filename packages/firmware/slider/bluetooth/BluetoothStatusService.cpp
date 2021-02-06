@@ -43,6 +43,9 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 
     advertisingData.appendServiceUUID(BluetoothIds::Status::Id);
 
+    g_StateKeeper.CurrentSliderState.attach(
+        [this](SliderState const sliderState) { m_StateCharacteristic.setValue(getSliderStateName(sliderState)); });
+
     g_MotorController.CurrentPosition.attach([this](int32_t const position) { m_ReportedPosition.setValue(position); });
 
     g_MotorController.CurrentVelocity.attach([this](int32_t const velocity) { m_ReportedVelocity.setValue(velocity); });
@@ -52,11 +55,6 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 
     g_MotorController.MaximumAcceleration.attach(
         [this](uint32_t const maximumAcceleration) { m_ReportedMaximumAcceleration.setValue(maximumAcceleration); });
-}
-
-void BluetoothStatusService::setState(char const* const stateName)
-{
-    m_StateCharacteristic.setValue(stateName);
 }
 
 void BluetoothStatusService::onStateMachineThreadLoop()

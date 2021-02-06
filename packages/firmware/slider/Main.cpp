@@ -85,6 +85,7 @@ void loop()
 
         {
             Activity mainLoopSectionActivity("deliverObservables", 10);
+            g_StateKeeper.deliverObservables();
             g_MotorController.deliverObservables();
         }
 

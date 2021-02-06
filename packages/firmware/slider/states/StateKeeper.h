@@ -18,6 +18,13 @@ public:
         m_NextState.reset(nextState);
     }
 
+    Observable<SliderState> CurrentSliderState;
+
+    void deliverObservables()
+    {
+        CurrentSliderState.deliver();
+    }
+
 private:
     std::unique_ptr<AbstractState> m_CurrentState;
     std::unique_ptr<AbstractState> m_NextState;

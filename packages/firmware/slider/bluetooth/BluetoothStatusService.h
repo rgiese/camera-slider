@@ -7,7 +7,6 @@ class BluetoothStatusService
 public:
     BluetoothStatusService();
 
-    void setState(char const* const stateName);
     void onStateMachineThreadLoop();
     void onMainThreadLoop();
 
@@ -17,20 +16,12 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
-    //
-    // Immediately updated characteristics
-    //
-    BleCharacteristic m_StateCharacteristic;
-
-    //
-    // Deferred characteristics
-    //
-
     BleCharacteristic m_RateLimitedReportedMovementProgram;
     MovementProgram m_MovementProgramReported;
     uint32_t m_MovementProgramVersionReported;
     uint32_t m_MovementProgramVersionSent;
 
+    BleCharacteristic m_StateCharacteristic;
     BleCharacteristic m_ReportedPosition;
     BleCharacteristic m_ReportedVelocity;
     BleCharacteristic m_ReportedMaximumSpeed;

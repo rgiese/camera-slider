@@ -26,7 +26,7 @@ public:
         return m_Value;
     }
 
-    T get() const // use when auto-casting is ambiguous
+    T get() const  // use when auto-casting is ambiguous
     {
         return m_Value;
     }
