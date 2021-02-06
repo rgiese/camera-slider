@@ -84,6 +84,11 @@ void loop()
         Activity mainLoopActivity("mainThreadLoop", 10);
 
         {
+            Activity mainLoopSectionActivity("deliverObservables", 10);
+            g_MotorController.deliverObservables();
+        }
+
+        {
             Activity mainLoopSectionActivity("bluetoothState", 10);
             g_Bluetooth.statusService().onMainThreadLoop();
         }

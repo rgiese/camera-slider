@@ -8,12 +8,12 @@ void TrackingDesiredPositionState::onEnteringState()
 
 void TrackingDesiredPositionState::onLoop()
 {
-    if (g_MotorController.getOperationState() != TicOperationState::Normal)
+    if (g_MotorController.OperationState != TicOperationState::Normal)
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (!g_MotorController.isPositionCertain())
+    if (!g_MotorController.IsPositionCertain)
     {
         return g_StateKeeper.RequestState(new HomingState());
     }

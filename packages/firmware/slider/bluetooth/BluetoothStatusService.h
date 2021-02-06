@@ -17,38 +17,24 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
-    enum RateLimitedCharacteristic
-    {
-        // Must match initializer order in constructor
-        RateLimitedCharacteristic_ReportedPosition,
-        RateLimitedCharacteristic_ReportedVelocity,
-        RateLimitedCharacteristic_ReportedMaximumSpeed,
-        RateLimitedCharacteristic_ReportedMaximumAcceleration,
-        RateLimitedCharacteristic__count
-    };
-
-private:
     //
-    // Non-rate-limited characteristics (updated immediately)
+    // Immediately updated characteristics
     //
     BleCharacteristic m_StateCharacteristic;
 
     //
-    // Rate-limited characteristics
+    // Deferred characteristics
     //
 
-    // Non-trivial values
     BleCharacteristic m_RateLimitedReportedMovementProgram;
     MovementProgram m_MovementProgramReported;
     uint32_t m_MovementProgramVersionReported;
     uint32_t m_MovementProgramVersionSent;
 
-    // uint32_t values
-    BleCharacteristic m_RateLimitedCharacteristics[RateLimitedCharacteristic__count];
-    uint32_t m_RateLimitedValuesReported[RateLimitedCharacteristic__count];
-    uint32_t m_RateLimitedValuesSent[RateLimitedCharacteristic__count];
-
-    uint32_t m_LastUpdateTime_msec;
+    BleCharacteristic m_ReportedPosition;
+    BleCharacteristic m_ReportedVelocity;
+    BleCharacteristic m_ReportedMaximumSpeed;
+    BleCharacteristic m_ReportedMaximumAcceleration;
 
 private:
     // Non-copyable

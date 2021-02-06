@@ -24,39 +24,20 @@ public:
     bool tryInitialize();
 
     //
+    // Observable state (refreshed in onLoop())
+    //
+
+    //
     // For general use
     //
 
     // Getters
-    TicOperationState getOperationState() const
-    {
-        return m_OperationState;
-    }
-
-    int32_t getCurrentPosition() const
-    {
-        return m_CurrentPosition;
-    }
-
-    bool isPositionCertain() const
-    {
-        return m_IsPositionCertain;
-    }
-
-    int32_t getVelocity()
-    {
-        return velocityFromTicUnits(m_Tic.getCurrentVelocity());
-    }
-
-    uint32_t getMaximumSpeed()
-    {
-        return speedFromTicUnits(m_Tic.getMaxSpeed());
-    }
-
-    uint32_t getMaximumAcceleration()
-    {
-        return accelerationFromTicUnits(m_Tic.getMaxAccel());
-    }
+    Observable<TicOperationState> OperationState;
+    Observable<bool> IsPositionCertain;
+    Observable<int32_t> CurrentPosition;
+    Observable<int32_t> CurrentVelocity;
+    Observable<uint32_t> MaximumSpeed;
+    Observable<uint32_t> MaximumAcceleration;
 
     bool isHomingActive()
     {
@@ -64,6 +45,15 @@ public:
         return m_Tic.getHomingActive();
     }
 
+    void deliverObservables()
+    {
+        OperationState.deliver();
+        IsPositionCertain.deliver();
+        CurrentPosition.deliver();
+        CurrentVelocity.deliver();
+        MaximumSpeed.deliver();
+        MaximumAcceleration.deliver();
+    }
 
     // Setters
     void setTargetPosition(int32_t const targetPosition);
@@ -87,11 +77,6 @@ public:
 
 private:
     TicI2C m_Tic;
-
-    // Refreshed in onLoop():
-    TicOperationState m_OperationState;
-    int32_t m_CurrentPosition;
-    bool m_IsPositionCertain;
 
 private:
     static uint32_t accelerationFromTicUnits(uint32_t const stepsPerSecPer100Sec)

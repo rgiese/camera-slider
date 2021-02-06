@@ -55,12 +55,12 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
 void RunningMovementProgramState::onLoop()
 {
     // Motor checks
-    if (g_MotorController.getOperationState() != TicOperationState::Normal)
+    if (g_MotorController.OperationState != TicOperationState::Normal)
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
 
-    if (!g_MotorController.isPositionCertain())
+    if (!g_MotorController.IsPositionCertain)
     {
         return g_StateKeeper.RequestState(new HomingState());
     }
@@ -72,7 +72,7 @@ void RunningMovementProgramState::onLoop()
     switch (movement.Type)
     {
         case Flatbuffers::Firmware::MovementType::Move: {
-            if (g_MotorController.getCurrentPosition() == movement.DesiredPosition)
+            if (g_MotorController.CurrentPosition == movement.DesiredPosition)
             {
                 return nextStep();
             }
@@ -135,7 +135,7 @@ bool RunningMovementProgramState::onRequest(Request const& request)
         case RequestType::UIButtonPressed:
         case RequestType::StopMovementProgram:
             // Safety stop, return to tracking control
-            Serial.printlnf("!! Safety stop seek to %ld", g_MotorController.getCurrentPosition());
+            Serial.printlnf("!! Safety stop seek to %ld", g_MotorController.CurrentPosition.get());
             g_MotorController.safetyStop();
             g_StateKeeper.RequestState(new TrackingDesiredPositionState());
             return true;

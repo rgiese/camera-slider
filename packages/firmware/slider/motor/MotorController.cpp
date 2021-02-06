@@ -17,10 +17,13 @@ void MotorController::onLoop()
     // Reset watchdog on motor controller
     m_Tic.resetCommandTimeout();
 
-    // Refresh latest values
-    m_OperationState = m_Tic.getOperationState();
-    m_CurrentPosition = m_Tic.getCurrentPosition();
-    m_IsPositionCertain = !m_Tic.getPositionUncertain();
+    // Refresh observables
+    OperationState.update(m_Tic.getOperationState());
+    IsPositionCertain.update(!m_Tic.getPositionUncertain());
+    CurrentPosition.update(m_Tic.getCurrentPosition());
+    CurrentVelocity.update(velocityFromTicUnits(m_Tic.getCurrentVelocity()));
+    MaximumSpeed.update(speedFromTicUnits(m_Tic.getMaxSpeed()));
+    MaximumAcceleration.update(accelerationFromTicUnits(m_Tic.getMaxAccel()));
 }
 
 //
@@ -57,7 +60,7 @@ void MotorController::safetyStop()
 {
     // Save current values
     int32_t const desiredPosition = m_Tic.getCurrentPosition();
-    uint32_t const desiredMaxAcceleration = getMaximumAcceleration();
+    uint32_t const desiredMaxAcceleration = MaximumAcceleration;
 
     // Apply safety stop
     setMaxAcceleration(MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
