@@ -39,4 +39,9 @@ void UI::begin()
     {
         m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
     }
+
+    // Set up observers
+    g_MotorController.CurrentPosition.attach([this](int32_t const position) {
+        m_LCD.updateNumericStatusValue(0, 280, color(EncoderFunction::Position), position);
+    });
 }

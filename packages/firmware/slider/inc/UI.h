@@ -46,6 +46,11 @@ private:
     {
         return m_Encoders[static_cast<uint8_t>(encoderFunction)];
     };
+
+    Encoder::Color const& color(EncoderFunction const encoderFunction)
+    {
+        return m_FunctionColors[static_cast<uint8_t>(encoderFunction)];
+    };
 };
 
 extern UI g_UI;

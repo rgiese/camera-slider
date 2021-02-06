@@ -13,29 +13,24 @@ void LCD::begin()
     m_LCD.begin(32 * 1000 * 1000);  // 32Mhz is the Particle Gen3 maximum
     m_LCD.setRotation(3);
 
-    blitColorRegion(0, 0, m_LCD.width(), m_LCD.height(), HX8357_BLACK);
+    blitColorRegion(0, 0, m_LCD.width(), m_LCD.height(), Encoder::Color());
+}
 
-    m_LCD.setCursor(0, 0);
-    m_LCD.setTextColor(HX8357_WHITE);
-    m_LCD.setTextSize(1);
-    m_LCD.println("Hello World!");
-    m_LCD.setTextColor(HX8357_YELLOW);
-    m_LCD.setTextSize(2);
-    m_LCD.println(1234.56);
-    m_LCD.setTextColor(HX8357_RED);
-    m_LCD.setTextSize(3);
-    m_LCD.println(0xDEADBEEF, HEX);
-    m_LCD.setTextColor(HX8357_GREEN);
-    m_LCD.setTextSize(5);
-    m_LCD.println("Groop");
+uint16_t LCD::lcdColorFromEncoderColor(Encoder::Color const color)
+{
+    uint8_t const red5Bits = color.Red >> 3;
+    uint8_t const green6Bits = color.Green >> 2;
+    uint8_t const blue5Bits = color.Blue >> 3;
+
+    return (red5Bits << (5 + 6)) | (green6Bits << 5) | blue5Bits;
 }
 
 void LCD::blitColorRegion(
-    uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, uint16_t const color)
+    uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, Encoder::Color const color)
 {
     // A (much) faster version of m_LCD.fillScreen
     std::array<uint16_t, HX8357_TFTHEIGHT> pixelBuffer;  // about the maximum we're willing to pay in stack space
-    pixelBuffer.fill(color);
+    pixelBuffer.fill(lcdColorFromEncoderColor(color));
 
     m_LCD.startWrite();
     m_LCD.setAddrWindow(x, y, width, height);
@@ -51,4 +46,12 @@ void LCD::blitColorRegion(
     }
 
     m_LCD.endWrite();
+}
+
+void LCD::updateNumericStatusValue(uint16_t const x, uint16_t const y, Encoder::Color const color, int32_t const value)
+{
+    m_LCD.setCursor(x, y);
+    m_LCD.setTextColor(lcdColorFromEncoderColor(color));
+    m_LCD.setTextSize(3);
+    m_LCD.print(value);
 }
