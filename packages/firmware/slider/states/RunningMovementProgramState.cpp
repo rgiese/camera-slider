@@ -5,7 +5,7 @@ void RunningMovementProgramState::onEnteringState()
 {
     g_Display.set("Running program");
 
-    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
     movementProgram.dump("running");
 
     if (!movementProgram.Movements.size())
@@ -19,7 +19,7 @@ void RunningMovementProgramState::onEnteringState()
 
 void RunningMovementProgramState::enterStep(size_t const idxStep)
 {
-    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
     MovementProgram::Movement const& movement = movementProgram.Movements.at(idxStep);
 
     // Prep for movement
@@ -66,7 +66,7 @@ void RunningMovementProgramState::onLoop()
     }
 
     // Check if movement is completed
-    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
     MovementProgram::Movement const& movement = movementProgram.Movements.at(m_idxCurrentStep);
 
     switch (movement.Type)
@@ -98,7 +98,7 @@ void RunningMovementProgramState::onLoop()
 
 void RunningMovementProgramState::nextStep()
 {
-    MovementProgram const& movementProgram = g_MovementProgramStore.getMovementProgram();
+    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
 
     if ((m_idxCurrentStep + 1) >= movementProgram.Movements.size())
     {
@@ -142,19 +142,19 @@ bool RunningMovementProgramState::onRequest(Request const& request)
 
         case RequestType::StartMovementProgram:
             if (request.StartMovementProgram.atStep != m_idxCurrentStep &&
-                request.StartMovementProgram.atStep < g_MovementProgramStore.getMovementProgram().Movements.size())
+                request.StartMovementProgram.atStep < g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
             {
                 enterStep(request.StartMovementProgram.atStep);
             }
             return true;
 
         case RequestType::UpdatedMovementProgram:
-            if (m_idxCurrentStep < g_MovementProgramStore.getMovementProgram().Movements.size())
+            if (m_idxCurrentStep < g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
             {
                 // Reboot step to update
                 enterStep(m_idxCurrentStep);
             }
-            else if (!g_MovementProgramStore.getMovementProgram().Movements.empty())
+            else if (!g_MovementProgramStore.CurrentMovementProgram.get().Movements.empty())
             {
                 // Reboot entire program
                 enterStep(0);

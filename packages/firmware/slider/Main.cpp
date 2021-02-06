@@ -86,12 +86,8 @@ void loop()
         {
             Activity mainLoopSectionActivity("deliverObservables", 10);
             g_StateKeeper.deliverObservables();
+            g_MovementProgramStore.deliverObservables();
             g_MotorController.deliverObservables();
-        }
-
-        {
-            Activity mainLoopSectionActivity("bluetoothState", 10);
-            g_Bluetooth.statusService().onMainThreadLoop();
         }
     }
 
@@ -122,11 +118,6 @@ void stateMachineThreadFn(void*)
             {
                 Activity mainLoopSectionActivity("motorController", 10);
                 g_MotorController.onLoop();
-            }
-
-            {
-                Activity mainLoopSectionActivity("bluetoothState", 10);
-                g_Bluetooth.statusService().onStateMachineThreadLoop();
             }
 
             // Deliver interrupt-sourced events (creates Requests)

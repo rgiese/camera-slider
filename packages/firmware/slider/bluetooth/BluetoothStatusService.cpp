@@ -6,13 +6,6 @@ BluetoothStatusService::BluetoothStatusService()
                             BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                             BluetoothIds::Status::Characteristics::State,
                             BluetoothIds::Status::Id)
-    , m_RateLimitedReportedMovementProgram("reportedMovementProgram",
-                                           BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
-                                           BluetoothIds::Status::Characteristics::ReportedMovementProgram,
-                                           BluetoothIds::Status::Id)
-    , m_MovementProgramReported()
-    , m_MovementProgramVersionReported(static_cast<uint32_t>(-1))
-    , m_MovementProgramVersionSent(static_cast<uint32_t>(-1))
     , m_ReportedPosition("reportedPosition",
                          BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                          BluetoothIds::Status::Characteristics::ReportedPosition,
@@ -29,17 +22,21 @@ BluetoothStatusService::BluetoothStatusService()
                                     BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
                                     BluetoothIds::Status::Characteristics::ReportedMaximumAcceleration,
                                     BluetoothIds::Status::Id)
+    , m_ReportedMovementProgram("reportedMovementProgram",
+                                BleCharacteristicProperty::READ | BleCharacteristicProperty::NOTIFY,
+                                BluetoothIds::Status::Characteristics::ReportedMovementProgram,
+                                BluetoothIds::Status::Id)
 {
 }
 
 void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 {
     BLE.addCharacteristic(m_StateCharacteristic);
-    BLE.addCharacteristic(m_RateLimitedReportedMovementProgram);
     BLE.addCharacteristic(m_ReportedPosition);
     BLE.addCharacteristic(m_ReportedVelocity);
     BLE.addCharacteristic(m_ReportedMaximumSpeed);
     BLE.addCharacteristic(m_ReportedMaximumAcceleration);
+    BLE.addCharacteristic(m_ReportedMovementProgram);
 
     advertisingData.appendServiceUUID(BluetoothIds::Status::Id);
 
@@ -55,29 +52,13 @@ void BluetoothStatusService::begin(BleAdvertisingData& advertisingData)
 
     g_MotorController.MaximumAcceleration.attach(
         [this](uint32_t const maximumAcceleration) { m_ReportedMaximumAcceleration.setValue(maximumAcceleration); });
-}
 
-void BluetoothStatusService::onStateMachineThreadLoop()
-{
-    if (m_MovementProgramVersionReported != g_MovementProgramStore.getMovementProgramVersion())
-    {
-        m_MovementProgramReported = g_MovementProgramStore.getMovementProgram();
-        m_MovementProgramVersionReported = g_MovementProgramStore.getMovementProgramVersion();
-    }
-}
-
-void BluetoothStatusService::onMainThreadLoop()
-{
-    if (m_MovementProgramVersionReported != m_MovementProgramVersionSent)
-    {
+    g_MovementProgramStore.CurrentMovementProgram.attach([this](MovementProgram const& movementProgram) {
         flatbuffers::FlatBufferBuilder flatbufferBuilder(512);
         {
-            m_MovementProgramReported.toFlatbufferData(flatbufferBuilder);
+            movementProgram.toFlatbufferData(flatbufferBuilder);
         }
 
-        m_RateLimitedReportedMovementProgram.setValue(flatbufferBuilder.GetBufferPointer(),
-                                                      flatbufferBuilder.GetSize());
-
-        m_MovementProgramVersionSent = m_MovementProgramVersionReported;
-    }
+        m_ReportedMovementProgram.setValue(flatbufferBuilder.GetBufferPointer(), flatbufferBuilder.GetSize());
+    });
 }

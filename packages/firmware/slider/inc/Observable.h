@@ -10,23 +10,23 @@ public:
     Observable() = default;
 
     // Observed side
-    void update(T const value)
+    void update(T const& value)
     {
         std::lock_guard<std::mutex> guard(m_Mutex);
 
-        if (m_Value != value)
+        if (!(m_Value == value)) // Allow T to implement just '=='
         {
             m_Value = value;
             m_IsDirty = true;
         }
     }
 
-    operator T() const
+    operator T const &() const
     {
         return m_Value;
     }
 
-    T get() const  // use when auto-casting is ambiguous
+    T const& get() const  // use when auto-casting is ambiguous
     {
         return m_Value;
     }
