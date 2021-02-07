@@ -12,10 +12,18 @@ UI::UI()
       })
     // LCD
     , m_LCD()
-    , m_PositionText(m_LCD, LCD::Rect{X : 0, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Position))
-    , m_SpeedText(m_LCD, LCD::Rect{X : 140, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Speed))
-    , m_AccelerationText(
-          m_LCD, LCD::Rect{X : 300, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Acceleration))
+    , m_PositionText(m_LCD,
+                     LCD::Rect{X : 0, Y : 280, Width : 100, Height : 40},
+                     colorFor(EncoderFunction::Position),
+                     {0x44, 0x44, 0x44})
+    , m_SpeedText(m_LCD,
+                  LCD::Rect{X : 140, Y : 280, Width : 100, Height : 40},
+                  colorFor(EncoderFunction::Speed),
+                  {0x44, 0x44, 0x44})
+    , m_AccelerationText(m_LCD,
+                         LCD::Rect{X : 300, Y : 280, Width : 100, Height : 40},
+                         colorFor(EncoderFunction::Acceleration),
+                         {0x44, 0x44, 0x44})
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({

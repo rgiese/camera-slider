@@ -2,6 +2,7 @@
 
 LCD::LCD()
     : m_LCD(D14, D15, D7)
+    , m_MonochromeCanvas(128, 64)
 {
 }
 
@@ -39,12 +40,68 @@ void LCD::blitColorRegion(
     m_LCD.endWrite();
 }
 
+void LCD::blitMonochromeCanvas(uint16_t const x,
+                               uint16_t const y,
+                               uint16_t const width,
+                               uint16_t const height,
+                               RGBColor const foregroundColor,
+                               RGBColor const backgroundColor)
+{
+    constexpr size_t cMaxPixelsInBuffer = 480;  // ...about the maximum we're willing to pay in stack space
+    std::array<uint16_t, cMaxPixelsInBuffer> pixelBuffer;
+
+    m_LCD.startWrite();
+    m_LCD.setAddrWindow(x, y, width, height);
+
+    size_t cPixelsInBuffer = 0;
+
+    uint16_t const foregroundColorValue = __bswap_16(foregroundColor.to565Color());
+    uint16_t const backgroundColorValue = __bswap_16(backgroundColor.to565Color());
+
+    for (uint16_t sourceY = 0; sourceY < height; ++sourceY)
+    {
+        for (uint16_t sourceX = 0; sourceX < width; ++sourceX)
+        {
+            pixelBuffer[cPixelsInBuffer] =
+                m_MonochromeCanvas.getPixel(sourceX, sourceY) ? foregroundColorValue : backgroundColorValue;
+            ++cPixelsInBuffer;
+
+            if (cPixelsInBuffer == pixelBuffer.size())
+            {
+                SPI.transfer(pixelBuffer.data(), NULL, cPixelsInBuffer * sizeof(uint16_t), NULL);
+                cPixelsInBuffer = 0;
+            }
+        }
+    }
+
+    if (cPixelsInBuffer)
+    {
+        SPI.transfer(pixelBuffer.data(), NULL, cPixelsInBuffer * sizeof(uint16_t), NULL);
+    }
+
+    m_LCD.endWrite();
+}
+
 void LCD::StaticText::setText(std::string const& text) const
 {
-    m_Parent.m_LCD.setCursor(m_Rect.X, m_Rect.Y);
-    m_Parent.m_LCD.setTextColor(m_Color.to565Color());
-    m_Parent.m_LCD.setTextSize(3);
-    m_Parent.m_LCD.print(text.c_str());
+    // Write to backbuffer
+    GFXcanvas1& monochromeCanvas = m_Parent.m_MonochromeCanvas;
+    {
+        if (monochromeCanvas.width() < m_Rect.Width || monochromeCanvas.height() < m_Rect.Height)
+        {
+            // Consider tiling later
+            return;
+        }
 
-    Serial.printlnf("... Static: %s at %d, %d, color %x", text.c_str(), m_Rect.X, m_Rect.Y, m_Color.to565Color());
+        monochromeCanvas.fillScreen(0);
+
+        monochromeCanvas.setCursor(0, 0);  // The blitting operation below will position X/Y
+        monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
+        monochromeCanvas.setTextSize(3);
+        monochromeCanvas.print(text.c_str());
+    }
+
+    // Write backbuffer to device
+    m_Parent.blitMonochromeCanvas(
+        m_Rect.X, m_Rect.Y, m_Rect.Width, m_Rect.Height, m_ForegroundColor, m_BackgroundColor);
 }

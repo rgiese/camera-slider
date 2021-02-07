@@ -27,3 +27,8 @@ constexpr T const& clamp(T const& value, T const& low, T const& high)
 {
     return (value < low) ? low : (high < value) ? high : value;
 }
+
+static constexpr uint16_t __bswap_16(uint16_t const value)
+{
+    return (value >> 8) | (value << 8);
+}
