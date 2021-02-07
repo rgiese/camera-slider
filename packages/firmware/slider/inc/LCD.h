@@ -13,12 +13,20 @@ public:
         uint16_t Height;
     };
 
+    enum class Alignment : uint8_t
+    {
+        Left,
+        Center,
+        Right
+    };
+
     class StaticText
     {
     public:
-        StaticText(LCD& parent, Rect rect, RGBColor foregroundColor, RGBColor backgroundColor)
+        StaticText(LCD& parent, Rect rect, Alignment alignment, RGBColor foregroundColor, RGBColor backgroundColor)
             : m_Parent(parent)
             , m_Rect(rect)
+            , m_Alignment(alignment)
             , m_ForegroundColor(foregroundColor)
             , m_BackgroundColor(backgroundColor){};
 
@@ -27,6 +35,7 @@ public:
     private:
         LCD& m_Parent;
         Rect m_Rect;
+        Alignment m_Alignment;
         RGBColor m_ForegroundColor;
         RGBColor m_BackgroundColor;
     };

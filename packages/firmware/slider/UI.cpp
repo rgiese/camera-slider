@@ -19,6 +19,7 @@ UI::UI()
                          Width : LCDConstants::PositionSpeedAcceleration_Width,
                          Height : LCDConstants::PositionSpeedAcceleration_Height
                      },
+                     LCD::Alignment::Center,
                      colorFor(EncoderFunction::Position),
                      {0x44, 0x44, 0x44})
     , m_SpeedText(m_LCD,
@@ -28,6 +29,7 @@ UI::UI()
                       Width : LCDConstants::PositionSpeedAcceleration_Width,
                       Height : LCDConstants::PositionSpeedAcceleration_Height
                   },
+                  LCD::Alignment::Center,
                   colorFor(EncoderFunction::Speed),
                   {0x44, 0x44, 0x44})
     , m_AccelerationText(m_LCD,
@@ -37,6 +39,7 @@ UI::UI()
                              Width : LCDConstants::PositionSpeedAcceleration_Width,
                              Height : LCDConstants::PositionSpeedAcceleration_Height
                          },
+                         LCD::Alignment::Center,
                          colorFor(EncoderFunction::Acceleration),
                          {0x44, 0x44, 0x44})
     // Encoders

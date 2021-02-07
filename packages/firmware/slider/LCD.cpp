@@ -94,9 +94,32 @@ void LCD::StaticText::setText(std::string const& text) const
 
         monochromeCanvas.fillScreen(0);
 
-        monochromeCanvas.setCursor(0, 0);  // The blitting operation below will position X/Y
         monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
         monochromeCanvas.setTextSize(3);
+
+        int16_t measuredX;
+        int16_t measuredY;
+        uint16_t measuredWidth;
+        uint16_t measuredHeight;
+        {
+            monochromeCanvas.getTextBounds(text.c_str(), 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
+        }
+
+        switch (m_Alignment)
+        {
+            case Alignment::Left:
+                monochromeCanvas.setCursor(0, 0);
+                break;
+
+            case Alignment::Center:
+                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2, 0);
+                break;
+
+            case Alignment::Right:
+                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth, 0);
+                break;
+        }
+
         monochromeCanvas.print(text.c_str());
     }
 
