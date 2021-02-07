@@ -195,7 +195,7 @@ bool MotorController::tryInitialize()
     {
         g_Bluetooth.capabilitiesService().setMaximumSpeed(c_MaxSafeSpeed_StepsPerSec);
         g_Bluetooth.capabilitiesService().setMaximumAcceleration(c_MaxSafeAcceleration_StepsPerSecPerSec);
-        g_Bluetooth.capabilitiesService().setMaximumPosition(10000);
+        g_Bluetooth.capabilitiesService().setMaximumPosition(c_MaxSafePosition_Steps);
     }
 
     // Energize
