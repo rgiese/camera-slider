@@ -23,10 +23,16 @@ public:
     class StaticText
     {
     public:
-        StaticText(LCD& parent, Rect rect, Alignment alignment, RGBColor foregroundColor, RGBColor backgroundColor)
+        StaticText(LCD& parent,
+                   Rect rect,
+                   Alignment alignment,
+                   GFXfont const* font,
+                   RGBColor foregroundColor,
+                   RGBColor backgroundColor)
             : m_Parent(parent)
             , m_Rect(rect)
             , m_Alignment(alignment)
+            , m_Font(font)
             , m_ForegroundColor(foregroundColor)
             , m_BackgroundColor(backgroundColor){};
 
@@ -34,10 +40,11 @@ public:
 
     private:
         LCD& m_Parent;
-        Rect m_Rect;
-        Alignment m_Alignment;
-        RGBColor m_ForegroundColor;
-        RGBColor m_BackgroundColor;
+        Rect const m_Rect;
+        Alignment const m_Alignment;
+        GFXfont const* const m_Font;
+        RGBColor const m_ForegroundColor;
+        RGBColor const m_BackgroundColor;
     };
 
 public:

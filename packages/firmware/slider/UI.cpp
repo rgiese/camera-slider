@@ -1,5 +1,7 @@
 #include "inc/stdinc.h"
 
+#include <Fonts/FreeSans18pt7b.h>
+
 UI g_UI;
 
 UI::UI()
@@ -12,6 +14,7 @@ UI::UI()
       })
     // LCD
     , m_LCD()
+    , m_PositionSpeedAcceleration_Font(&FreeSans18pt7b)
     , m_PositionText(m_LCD,
                      LCD::Rect{
                          X : 0,
@@ -20,8 +23,9 @@ UI::UI()
                          Height : LCDConstants::PositionSpeedAcceleration_Height
                      },
                      LCD::Alignment::Center,
+                     m_PositionSpeedAcceleration_Font,
                      colorFor(EncoderFunction::Position),
-                     {0x44, 0x44, 0x44})
+                     RGBColor())
     , m_SpeedText(m_LCD,
                   LCD::Rect{
                       X : (LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width) / 2,
@@ -30,8 +34,9 @@ UI::UI()
                       Height : LCDConstants::PositionSpeedAcceleration_Height
                   },
                   LCD::Alignment::Center,
+                  m_PositionSpeedAcceleration_Font,
                   colorFor(EncoderFunction::Speed),
-                  {0x44, 0x44, 0x44})
+                  RGBColor())
     , m_AccelerationText(m_LCD,
                          LCD::Rect{
                              X : LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width,
@@ -40,8 +45,9 @@ UI::UI()
                              Height : LCDConstants::PositionSpeedAcceleration_Height
                          },
                          LCD::Alignment::Center,
+                         m_PositionSpeedAcceleration_Font,
                          colorFor(EncoderFunction::Acceleration),
-                         {0x44, 0x44, 0x44})
+                         RGBColor())
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({

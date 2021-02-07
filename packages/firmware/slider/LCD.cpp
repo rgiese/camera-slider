@@ -95,7 +95,8 @@ void LCD::StaticText::setText(std::string const& text) const
         monochromeCanvas.fillScreen(0);
 
         monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
-        monochromeCanvas.setTextSize(3);
+        monochromeCanvas.setFont(m_Font);
+        monochromeCanvas.setTextSize(1);
 
         int16_t measuredX;
         int16_t measuredY;
@@ -108,15 +109,15 @@ void LCD::StaticText::setText(std::string const& text) const
         switch (m_Alignment)
         {
             case Alignment::Left:
-                monochromeCanvas.setCursor(0, 0);
+                monochromeCanvas.setCursor(0, -measuredY);
                 break;
 
             case Alignment::Center:
-                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2, 0);
+                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2, -measuredY);
                 break;
 
             case Alignment::Right:
-                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth, 0);
+                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth, -measuredY);
                 break;
         }
 
