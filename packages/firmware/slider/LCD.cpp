@@ -21,7 +21,7 @@ void LCD::blitColorRegion(
     uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, RGBColor const color)
 {
     // A (much) faster version of m_LCD.fillScreen
-    std::array<uint16_t, HX8357_TFTHEIGHT> pixelBuffer;  // about the maximum we're willing to pay in stack space
+    std::array<uint16_t, DisplayWidth> pixelBuffer;  // about the maximum we're willing to pay in stack space
     pixelBuffer.fill(color.to565Color());
 
     m_LCD.startWrite();
@@ -47,8 +47,7 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
                                RGBColor const foregroundColor,
                                RGBColor const backgroundColor)
 {
-    constexpr size_t cMaxPixelsInBuffer = 480;  // ...about the maximum we're willing to pay in stack space
-    std::array<uint16_t, cMaxPixelsInBuffer> pixelBuffer;
+    std::array<uint16_t, DisplayWidth> pixelBuffer;  // ...about the maximum we're willing to pay in stack space
 
     m_LCD.startWrite();
     m_LCD.setAddrWindow(x, y, width, height);

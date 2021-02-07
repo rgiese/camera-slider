@@ -42,6 +42,13 @@ private:
 
     LCD m_LCD;
 
+    struct LCDConstants
+    {
+        static constexpr uint16_t PositionSpeedAcceleration_Width = 128;
+        static constexpr uint16_t PositionSpeedAcceleration_Height = 40;
+        static constexpr uint16_t PositionSpeedAcceleration_Y = LCD::DisplayHeight - PositionSpeedAcceleration_Height;
+    };
+
     LCD::StaticText m_PositionText;
     LCD::StaticText m_SpeedText;
     LCD::StaticText m_AccelerationText;

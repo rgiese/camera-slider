@@ -36,6 +36,9 @@ public:
 
     void begin();
 
+    static constexpr uint16_t DisplayWidth = HX8357_TFTHEIGHT;  // (rotated)
+    static constexpr uint16_t DisplayHeight = HX8357_TFTWIDTH;
+
 private:
     // Non-copyable
     LCD(LCD const&) = delete;
