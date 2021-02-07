@@ -15,19 +15,8 @@ private:
 
 private:
     //
-    // LCD
+    // Shared LCD/Encoder
     //
-
-    LCD m_LCD;
-
-private:
-    //
-    // Encoders
-    //
-
-    TwoWire& m_Wire;
-
-    static constexpr pin_t EncoderInterruptPin = D4;
 
     enum class EncoderFunction : uint8_t
     {
@@ -39,17 +28,38 @@ private:
         __count
     };
 
-    std::array<Encoder, static_cast<uint8_t>(EncoderFunction::__count)> m_Encoders;
-    std::array<RGBColor, static_cast<uint8_t>(EncoderFunction::__count)> m_FunctionColors;
+    RGBColor m_FunctionColors[static_cast<size_t>(EncoderFunction::__count)];
 
-    Encoder& encoderFor(EncoderFunction const encoderFunction)
-    {
-        return m_Encoders[static_cast<uint8_t>(encoderFunction)];
-    };
-
-    RGBColor const& colorFor(EncoderFunction const encoderFunction)
+    constexpr RGBColor const& colorFor(EncoderFunction const encoderFunction)
     {
         return m_FunctionColors[static_cast<uint8_t>(encoderFunction)];
+    };
+
+private:
+    //
+    // LCD
+    //
+
+    LCD m_LCD;
+
+    LCD::StaticText m_PositionText;
+    LCD::StaticText m_SpeedText;
+    LCD::StaticText m_AccelerationText;
+
+private:
+    //
+    // Encoders
+    //
+
+    TwoWire& m_Wire;
+
+    static constexpr pin_t EncoderInterruptPin = D4;
+
+    Encoder m_Encoders[static_cast<size_t>(EncoderFunction::__count)];
+
+    constexpr Encoder& encoderFor(EncoderFunction const encoderFunction)
+    {
+        return m_Encoders[static_cast<uint8_t>(encoderFunction)];
     };
 };
 

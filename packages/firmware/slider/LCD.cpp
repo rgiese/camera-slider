@@ -39,10 +39,12 @@ void LCD::blitColorRegion(
     m_LCD.endWrite();
 }
 
-void LCD::updateNumericStatusValue(uint16_t const x, uint16_t const y, RGBColor const color, int32_t const value)
+void LCD::StaticText::setText(std::string const& text) const
 {
-    m_LCD.setCursor(x, y);
-    m_LCD.setTextColor(color.to565Color());
-    m_LCD.setTextSize(3);
-    m_LCD.print(value);
+    m_Parent.m_LCD.setCursor(m_Rect.X, m_Rect.Y);
+    m_Parent.m_LCD.setTextColor(m_Color.to565Color());
+    m_Parent.m_LCD.setTextSize(3);
+    m_Parent.m_LCD.print(text.c_str());
+
+    Serial.printlnf("... Static: %s at %d, %d, color %x", text.c_str(), m_Rect.X, m_Rect.Y, m_Color.to565Color());
 }

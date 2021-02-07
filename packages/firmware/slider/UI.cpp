@@ -3,7 +3,20 @@
 UI g_UI;
 
 UI::UI()
-    : m_LCD()
+    : m_FunctionColors({
+          RGBColor{0xf2, 0x67, 0x39},  // Position
+          RGBColor{0xf5, 0x2c, 0x68},  // Speed
+          RGBColor{0xe0, 0xca, 0x3e},  // Acceleration
+          RGBColor{0xff, 0xff, 0xff},  // Step
+          RGBColor{0x0c, 0xf2, 0xbd},  // Rate
+      })
+    // LCD
+    , m_LCD()
+    , m_PositionText(m_LCD, LCD::Rect{X : 0, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Position))
+    , m_SpeedText(m_LCD, LCD::Rect{X : 140, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Speed))
+    , m_AccelerationText(
+          m_LCD, LCD::Rect{X : 300, Y : 280, Width : 100, Height : 50}, colorFor(EncoderFunction::Acceleration))
+    // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({
           Encoder(m_Wire, 0x14),  // Position
@@ -11,13 +24,6 @@ UI::UI()
           Encoder(m_Wire, 0x12),  // Acceleration
           Encoder(m_Wire, 0x10),  // Step
           Encoder(m_Wire, 0x11),  // Rate
-      })
-    , m_FunctionColors({
-          RGBColor{0xf2, 0x67, 0x39},  // Position
-          RGBColor{0xf5, 0x2c, 0x68},  // Speed
-          RGBColor{0xe0, 0xca, 0x3e},  // Acceleration
-          RGBColor{0xff, 0xff, 0xff},  // Step
-          RGBColor{0x0c, 0xf2, 0xbd},  // Rate
       })
 {
 }
@@ -30,18 +36,19 @@ void UI::begin()
     pinMode(EncoderInterruptPin, INPUT_PULLUP);
 
     // Configure I2C-based encoders
-    for (auto& encoder : m_Encoders)
-    {
-        encoder.begin();
-    }
-
     for (uint8_t idxEncoder = 0; idxEncoder < static_cast<uint8_t>(EncoderFunction::__count); ++idxEncoder)
     {
+        m_Encoders[idxEncoder].begin();
         m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
     }
 
     // Set up observers
-    g_MotorController.CurrentPosition.attach([this](int32_t const position) {
-        m_LCD.updateNumericStatusValue(0, 280, colorFor(EncoderFunction::Position), position);
-    });
+    g_MotorController.CurrentPosition.attach(
+        [this](int32_t const position) { m_PositionText.setText(std::to_string(position)); });
+
+    g_MotorController.CurrentVelocity.attach(
+        [this](int32_t const velocity) { m_SpeedText.setText(std::to_string(velocity)); });
+
+    g_MotorController.MaximumAcceleration.attach(
+        [this](uint32_t const acceleration) { m_AccelerationText.setText(std::to_string(acceleration)); });
 }
