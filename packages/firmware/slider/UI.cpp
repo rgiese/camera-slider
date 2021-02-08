@@ -15,42 +15,43 @@ UI::UI()
     // LCD
     , m_LCD()
     , m_PositionSpeedAcceleration_Font(&FreeSans18pt7b)
-    , m_PositionText(m_LCD,
-                     LCD::Rect{
-                         X : 0,
-                         Y : LCDConstants::PositionSpeedAcceleration_Y,
-                         Width : LCDConstants::PositionSpeedAcceleration_Width,
-                         Height : LCDConstants::PositionSpeedAcceleration_Height
-                     },
-                     LCD::Alignment::Center,
-                     m_PositionSpeedAcceleration_Font,
-                     colorFor(EncoderFunction::Position),
-                     RGBColor(),
-                     LCDConstants::PositionSpeedAcceleration_HighlightHeight)
-    , m_SpeedText(m_LCD,
-                  LCD::Rect{
-                      X : (LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width) / 2,
-                      Y : LCDConstants::PositionSpeedAcceleration_Y,
-                      Width : LCDConstants::PositionSpeedAcceleration_Width,
-                      Height : LCDConstants::PositionSpeedAcceleration_Height
-                  },
-                  LCD::Alignment::Center,
-                  m_PositionSpeedAcceleration_Font,
-                  colorFor(EncoderFunction::Speed),
-                  RGBColor(),
-                  LCDConstants::PositionSpeedAcceleration_HighlightHeight)
-    , m_AccelerationText(m_LCD,
-                         LCD::Rect{
-                             X : LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width,
-                             Y : LCDConstants::PositionSpeedAcceleration_Y,
-                             Width : LCDConstants::PositionSpeedAcceleration_Width,
-                             Height : LCDConstants::PositionSpeedAcceleration_Height
-                         },
-                         LCD::Alignment::Center,
-                         m_PositionSpeedAcceleration_Font,
-                         colorFor(EncoderFunction::Acceleration),
-                         RGBColor(),
-                         LCDConstants::PositionSpeedAcceleration_HighlightHeight)
+    , m_CoreNumericDisplays(
+          {LCD::StaticNumericText(m_LCD,  // Position
+                                  LCD::Rect{
+                                      X : 0,
+                                      Y : LCDConstants::PositionSpeedAcceleration_Y,
+                                      Width : LCDConstants::PositionSpeedAcceleration_Width,
+                                      Height : LCDConstants::PositionSpeedAcceleration_Height
+                                  },
+                                  LCD::Alignment::Center,
+                                  m_PositionSpeedAcceleration_Font,
+                                  colorFor(EncoderFunction::Position),
+                                  RGBColor(),
+                                  LCDConstants::PositionSpeedAcceleration_HighlightHeight),
+           LCD::StaticNumericText(m_LCD,  // Speed
+                                  LCD::Rect{
+                                      X : (LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width) / 2,
+                                      Y : LCDConstants::PositionSpeedAcceleration_Y,
+                                      Width : LCDConstants::PositionSpeedAcceleration_Width,
+                                      Height : LCDConstants::PositionSpeedAcceleration_Height
+                                  },
+                                  LCD::Alignment::Center,
+                                  m_PositionSpeedAcceleration_Font,
+                                  colorFor(EncoderFunction::Speed),
+                                  RGBColor(),
+                                  LCDConstants::PositionSpeedAcceleration_HighlightHeight),
+           LCD::StaticNumericText(m_LCD,  // Acceleration
+                                  LCD::Rect{
+                                      X : LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width,
+                                      Y : LCDConstants::PositionSpeedAcceleration_Y,
+                                      Width : LCDConstants::PositionSpeedAcceleration_Width,
+                                      Height : LCDConstants::PositionSpeedAcceleration_Height
+                                  },
+                                  LCD::Alignment::Center,
+                                  m_PositionSpeedAcceleration_Font,
+                                  colorFor(EncoderFunction::Acceleration),
+                                  RGBColor(),
+                                  LCDConstants::PositionSpeedAcceleration_HighlightHeight)})
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({
@@ -75,20 +76,43 @@ void UI::begin()
     {
         m_Encoders[idxEncoder].begin();
         m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
-        m_Encoders[idxEncoder].setIncrementValue(1);
     }
 
+    auto const setIncrementCallback = [this](EncoderFunction const encoderFunction,
+                                             uint8_t const maxEncoderOrderOfMagnitude) {
+        encoderFor(encoderFunction).setPushButtonDownCallback([this, encoderFunction, maxEncoderOrderOfMagnitude]() {
+            uint8_t const currentOrderOfMagnitude = encoderFor(encoderFunction).getIncrementOrderOfMagnitude();
+            uint8_t const updatedOrderOfMagnitude =
+                (currentOrderOfMagnitude < maxEncoderOrderOfMagnitude) ? currentOrderOfMagnitude + 1 : 0;
+
+            encoderFor(encoderFunction).setIncrementOrderOfMagnitude(updatedOrderOfMagnitude);
+            coreNumericDisplayFor(encoderFunction).setActiveDigit(updatedOrderOfMagnitude);
+        });
+    };
+
+    setIncrementCallback(EncoderFunction::Position, 3);
+    setIncrementCallback(EncoderFunction::Speed, 3);
+    setIncrementCallback(EncoderFunction::Acceleration, 3);
+
     // Set up observers
-    g_MotorController.CurrentPosition.attach([this](int32_t const position) { m_PositionText.setValue(position); });
+    g_MotorController.CurrentPosition.attach(
+        [this](int32_t const position) { coreNumericDisplayFor(EncoderFunction::Position).setValue(position); });
 
-    g_MotorController.MaximumSpeed.attach([this](int32_t const velocity) { m_SpeedText.setValue(velocity); });
+    g_MotorController.MaximumSpeed.attach(
+        [this](int32_t const velocity) { coreNumericDisplayFor(EncoderFunction::Speed).setValue(velocity); });
 
-    g_MotorController.MaximumAcceleration.attach(
-        [this](uint32_t const acceleration) { m_AccelerationText.setValue(acceleration); });
+    g_MotorController.MaximumAcceleration.attach([this](uint32_t const acceleration) {
+        coreNumericDisplayFor(EncoderFunction::Acceleration).setValue(acceleration);
+    });
 }
 
 void UI::onMainLoop()
 {
+    for (uint8_t idxEncoder = 0; idxEncoder < static_cast<uint8_t>(EncoderFunction::__count); ++idxEncoder)
+    {
+        m_Encoders[idxEncoder].pollForUpdates();
+    }
+
     // Pick up value updates from encoders
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
     int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();

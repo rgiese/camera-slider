@@ -24,6 +24,26 @@ void Encoder::begin()
 
     writeRegister(I2CRegister::CounterMaxValue_0, std::numeric_limits<int32_t>::max());
     writeRegister(I2CRegister::CounterMinValue_0, std::numeric_limits<int32_t>::min());
+
+    setIncrementOrderOfMagnitude(0);
+}
+
+void Encoder::setPushButtonDownCallback(PushButtonCallback callback)
+{
+    m_PushButtonDownCallback = callback;
+}
+
+void Encoder::pollForUpdates()
+{
+    EncoderStatusBits encoderStatus{0};
+    {
+        encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
+    }
+
+    if (encoderStatus.IsPushButtonPressed && m_PushButtonDownCallback)
+    {
+        m_PushButtonDownCallback();
+    }
 }
 
 void Encoder::setColor(RGBColor const& color)
@@ -36,9 +56,27 @@ void Encoder::setColor(RGBColor const& color)
     m_Wire.write(color.Blue);
 }
 
-void Encoder::setIncrementValue(uint32_t const incrementValue)
+void Encoder::setIncrementOrderOfMagnitude(uint8_t const incrementOrderOfMagnitude)
 {
-    writeRegister(I2CRegister::StepValue_0, incrementValue);
+    m_IncrementOrderOfMagnitude = incrementOrderOfMagnitude;
+
+    auto const powerOf10 = [](uint8_t const exponent) -> uint32_t {
+        uint32_t value = 1;
+
+        for (uint8_t idxExponent = 0; idxExponent < exponent; ++idxExponent)
+        {
+            value = value * 10;
+        }
+
+        return value;
+    };
+
+    writeRegister(I2CRegister::StepValue_0, powerOf10(m_IncrementOrderOfMagnitude));
+}
+
+uint8_t Encoder::getIncrementOrderOfMagnitude()
+{
+    return m_IncrementOrderOfMagnitude;
 }
 
 int32_t Encoder::getLatestValueDelta()

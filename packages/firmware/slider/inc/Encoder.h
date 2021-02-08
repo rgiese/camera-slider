@@ -6,19 +6,38 @@ public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
         , m_Address(address)
+        , m_PushButtonDownCallback()
+        , m_IncrementOrderOfMagnitude(0)
     {
     }
 
+public:
+    //
+    // Initialization
+    //
     void begin();
+
+    using PushButtonCallback = std::function<void(void)>;
+    void setPushButtonDownCallback(PushButtonCallback callback);
+
+public:
+    //
+    // Runtime
+    //
+    void pollForUpdates();
 
     void setColor(RGBColor const& color);
 
-    void setIncrementValue(uint32_t const incrementValue);
+    void setIncrementOrderOfMagnitude(uint8_t const incrementOrderOfMagnitude);
+    uint8_t getIncrementOrderOfMagnitude();
+
     int32_t getLatestValueDelta();
 
 private:
     TwoWire& m_Wire;
     uint8_t const m_Address;
+    PushButtonCallback m_PushButtonDownCallback;
+    uint8_t m_IncrementOrderOfMagnitude;
 
     //
     // Implementation constants

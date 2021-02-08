@@ -53,9 +53,12 @@ private:
 
     GFXfont const* const m_PositionSpeedAcceleration_Font;
 
-    LCD::StaticNumericText m_PositionText;
-    LCD::StaticNumericText m_SpeedText;
-    LCD::StaticNumericText m_AccelerationText;
+    LCD::StaticNumericText m_CoreNumericDisplays[3 /*static_cast<size_t>(EncoderFunction::__count)*/];
+
+    constexpr LCD::StaticNumericText& coreNumericDisplayFor(EncoderFunction const encoderFunction)
+    {
+        return m_CoreNumericDisplays[static_cast<uint8_t>(encoderFunction)];
+    };
 
 private:
     //
