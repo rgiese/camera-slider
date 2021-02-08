@@ -11,8 +11,10 @@ public:
 
     void begin();
 
-
     void setColor(RGBColor const& color);
+
+    void setIncrementValue(uint32_t const incrementValue);
+    int32_t getLatestValueDelta();
 
 private:
     TwoWire& m_Wire;
@@ -71,6 +73,19 @@ private:
         };
     };
 
+    struct GeneralConfiguration2Register
+    {
+        bool EnableI2CClockStretch : 1;
+        bool RelativeMode : 1;
+        int8_t Unused : 6;
+
+        operator uint8_t() const
+        {
+            static_assert(sizeof(*this) == sizeof(uint8_t));
+            return *reinterpret_cast<uint8_t const*>(this);
+        };
+    };
+
     struct InterruptConfigurationRegister
     {
         bool PushButtonRelease : 1;
@@ -113,4 +128,98 @@ private:
             static_assert(sizeof(*this) == sizeof(uint8_t));
         }
     };
+
+private:
+    //
+    // I2C tools
+    //
+
+    class AutoTransmission
+    {
+    public:
+        AutoTransmission(TwoWire& wire, uint8_t const address)
+            : m_Wire(wire)
+        {
+            m_Wire.beginTransmission(WireTransmission(address).timeout(100ms));
+        }
+
+        ~AutoTransmission()
+        {
+            uint8_t const transmissionStatus = m_Wire.endTransmission();
+
+            if (transmissionStatus != 0)
+            {
+                Serial.printlnf("!! I2C transmission problem: code %u.", transmissionStatus);
+            }
+        }
+
+    private:
+        // Non-copyable
+        AutoTransmission(AutoTransmission const&) = delete;
+        AutoTransmission& operator=(AutoTransmission const&) = delete;
+
+    private:
+        TwoWire& m_Wire;
+    };
+
+    template <typename T>
+    void writeScalar(T const value) const
+    {
+        std::array<uint8_t, sizeof(T)> rgData;
+
+        *reinterpret_cast<T*>(rgData.data()) = value;
+
+        for (int8_t idxByte = sizeof(T) - 1; idxByte >= 0; --idxByte)
+        {
+            m_Wire.write(rgData[idxByte]);
+        }
+    }
+
+    template <typename T>
+    void writeRegister(I2CRegister const i2cRegister, T const value)
+    {
+        AutoTransmission autoTransmission(m_Wire, m_Address);
+        m_Wire.write(static_cast<uint8_t>(i2cRegister));
+
+        writeScalar(value);
+    }
+
+    template <typename T>
+    T readScalar() const
+    {
+        std::array<uint8_t, sizeof(T)> rgData;
+
+        for (int8_t idxByte = sizeof(T) - 1; idxByte >= 0; --idxByte)
+        {
+            rgData[idxByte] = m_Wire.read();
+        }
+
+        return *reinterpret_cast<T const*>(rgData.data());
+    }
+
+    template <typename T>
+    T readRegister(I2CRegister const i2cRegister)
+    {
+        {
+            AutoTransmission autoTransmission(m_Wire, m_Address);
+            m_Wire.write(static_cast<uint8_t>(i2cRegister));
+        }
+
+        T value = 0;
+        {
+            m_Wire.requestFrom(m_Address, sizeof(value));
+
+            if (m_Wire.available())
+            {
+                // Reads and auto-zeroes (.RelativeMode = true) the current value
+                value = readScalar<decltype(value)>();
+            }
+            else
+            {
+                Serial.println("!! I2C read problem: not available");
+            }
+        }
+
+        return value;
+    }
 };

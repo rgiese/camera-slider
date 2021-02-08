@@ -7,6 +7,7 @@ public:
     UI();
 
     void begin();
+    void onMainLoop();
 
 private:
     // Non-copyable

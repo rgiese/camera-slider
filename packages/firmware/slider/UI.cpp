@@ -72,15 +72,45 @@ void UI::begin()
     {
         m_Encoders[idxEncoder].begin();
         m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
+        m_Encoders[idxEncoder].setIncrementValue(1);
     }
 
     // Set up observers
     g_MotorController.CurrentPosition.attach(
         [this](int32_t const position) { m_PositionText.setText(std::to_string(position)); });
 
-    g_MotorController.CurrentVelocity.attach(
+    g_MotorController.MaximumSpeed.attach(
         [this](int32_t const velocity) { m_SpeedText.setText(std::to_string(velocity)); });
 
     g_MotorController.MaximumAcceleration.attach(
         [this](uint32_t const acceleration) { m_AccelerationText.setText(std::to_string(acceleration)); });
+}
+
+void UI::onMainLoop()
+{
+    // Pick up value updates from encoders
+    int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
+    int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();
+    int32_t const accelerationDelta = encoderFor(EncoderFunction::Acceleration).getLatestValueDelta();
+
+    if (positionDelta != 0)
+    {
+        Request request = {Type : RequestType::DesiredPositionDelta};
+        request.DesiredPositionDelta.delta = positionDelta;
+        g_RequestQueue.push(request);
+    }
+
+    if (speedDelta != 0)
+    {
+        Request request = {Type : RequestType::DesiredMaximumSpeedDelta};
+        request.DesiredMaximumSpeedDelta.delta = speedDelta;
+        g_RequestQueue.push(request);
+    }
+
+    if (accelerationDelta != 0)
+    {
+        Request request = {Type : RequestType::DesiredMaximumAccelerationDelta};
+        request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
+        g_RequestQueue.push(request);
+    }
 }

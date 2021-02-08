@@ -87,6 +87,11 @@ void loop()
             Activity mainLoopSectionActivity("deliverObservables", 10);
             ObservableStore::sharedInstance().deliverAll();
         }
+
+        {
+            Activity mainLoopSectionActivity("uiLoop", 10);
+            g_UI.onMainLoop();
+        }
     }
 
     if (Particle.connected())

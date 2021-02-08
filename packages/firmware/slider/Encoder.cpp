@@ -1,33 +1,5 @@
 #include "inc/stdinc.h"
 
-class AutoTransmission
-{
-public:
-    AutoTransmission(TwoWire& wire, uint8_t const address)
-        : m_Wire(wire)
-    {
-        m_Wire.beginTransmission(WireTransmission(address).timeout(100ms));
-    }
-
-    ~AutoTransmission()
-    {
-        uint8_t const transmissionStatus = m_Wire.endTransmission();
-
-        if (transmissionStatus != 0)
-        {
-            Serial.printlnf("!! I2C transmission problem: code %u.", transmissionStatus);
-        }
-    }
-
-private:
-    // Non-copyable
-    AutoTransmission(AutoTransmission const&) = delete;
-    AutoTransmission& operator=(AutoTransmission const&) = delete;
-
-private:
-    TwoWire& m_Wire;
-};
-
 void Encoder::begin()
 {
     // Initiate reset in GeneralConfiguration
@@ -41,13 +13,17 @@ void Encoder::begin()
     // Wait for reset to complete
     delay(1);
 
-    // Set up configuration
-    {
-        AutoTransmission autoTransmission(m_Wire, m_Address);
+    // Set up configuration:
+    // - Don't need pullups, is RGB
+    // - Operate in relative mode (device will automatically clear current value register on every read operation)
+    // - Set range to maximum signed range
+    writeRegister(I2CRegister::GeneralConfiguration,
+                  GeneralConfigurationRegister{.DisableInterruptPullup = true, .EncoderIsRGB = true});
 
-        m_Wire.write(static_cast<uint8_t>(I2CRegister::GeneralConfiguration));
-        m_Wire.write(GeneralConfigurationRegister{.DisableInterruptPullup = true, .EncoderIsRGB = true});
-    }
+    writeRegister(I2CRegister::GeneralConfiguration2, GeneralConfiguration2Register{.RelativeMode = true});
+
+    writeRegister(I2CRegister::CounterMaxValue_0, std::numeric_limits<int32_t>::max());
+    writeRegister(I2CRegister::CounterMinValue_0, std::numeric_limits<int32_t>::min());
 }
 
 void Encoder::setColor(RGBColor const& color)
@@ -58,4 +34,14 @@ void Encoder::setColor(RGBColor const& color)
     m_Wire.write(color.Red);
     m_Wire.write(color.Green);
     m_Wire.write(color.Blue);
+}
+
+void Encoder::setIncrementValue(uint32_t const incrementValue)
+{
+    writeRegister(I2CRegister::StepValue_0, incrementValue);
+}
+
+int32_t Encoder::getLatestValueDelta()
+{
+    return readRegister<int32_t>(I2CRegister::CounterValue_0);
 }

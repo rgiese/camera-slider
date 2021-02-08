@@ -13,6 +13,7 @@
 #include <math.h>
 
 #include <array>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <queue>
