@@ -25,7 +25,8 @@ UI::UI()
                      LCD::Alignment::Center,
                      m_PositionSpeedAcceleration_Font,
                      colorFor(EncoderFunction::Position),
-                     RGBColor())
+                     RGBColor(),
+                     LCDConstants::PositionSpeedAcceleration_HighlightHeight)
     , m_SpeedText(m_LCD,
                   LCD::Rect{
                       X : (LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width) / 2,
@@ -36,7 +37,8 @@ UI::UI()
                   LCD::Alignment::Center,
                   m_PositionSpeedAcceleration_Font,
                   colorFor(EncoderFunction::Speed),
-                  RGBColor())
+                  RGBColor(),
+                  LCDConstants::PositionSpeedAcceleration_HighlightHeight)
     , m_AccelerationText(m_LCD,
                          LCD::Rect{
                              X : LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width,
@@ -47,7 +49,8 @@ UI::UI()
                          LCD::Alignment::Center,
                          m_PositionSpeedAcceleration_Font,
                          colorFor(EncoderFunction::Acceleration),
-                         RGBColor())
+                         RGBColor(),
+                         LCDConstants::PositionSpeedAcceleration_HighlightHeight)
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({
@@ -76,14 +79,12 @@ void UI::begin()
     }
 
     // Set up observers
-    g_MotorController.CurrentPosition.attach(
-        [this](int32_t const position) { m_PositionText.setText(std::to_string(position)); });
+    g_MotorController.CurrentPosition.attach([this](int32_t const position) { m_PositionText.setValue(position); });
 
-    g_MotorController.MaximumSpeed.attach(
-        [this](int32_t const velocity) { m_SpeedText.setText(std::to_string(velocity)); });
+    g_MotorController.MaximumSpeed.attach([this](int32_t const velocity) { m_SpeedText.setValue(velocity); });
 
     g_MotorController.MaximumAcceleration.attach(
-        [this](uint32_t const acceleration) { m_AccelerationText.setText(std::to_string(acceleration)); });
+        [this](uint32_t const acceleration) { m_AccelerationText.setValue(acceleration); });
 }
 
 void UI::onMainLoop()

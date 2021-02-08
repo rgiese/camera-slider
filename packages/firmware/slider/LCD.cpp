@@ -81,8 +81,10 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
     m_LCD.endWrite();
 }
 
-void LCD::StaticText::setText(std::string const& text) const
+void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharacterToHighlight) const
 {
+    constexpr uint16_t c_AnyColor = static_cast<uint16_t>(-1);
+
     // Write to backbuffer
     GFXcanvas1& monochromeCanvas = m_Parent.m_MonochromeCanvas;
     {
@@ -103,7 +105,7 @@ void LCD::StaticText::setText(std::string const& text) const
         uint16_t measuredWidth;
         uint16_t measuredHeight;
         {
-            monochromeCanvas.getTextBounds(text.c_str(), 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
+            monochromeCanvas.getTextBounds(szText, 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
         }
 
         switch (m_Alignment)
@@ -121,10 +123,60 @@ void LCD::StaticText::setText(std::string const& text) const
                 break;
         }
 
-        monochromeCanvas.print(text.c_str());
+        size_t const cchText = strlen(szText);
+
+        for (size_t idxChar = 0; idxChar < cchText; ++idxChar)
+        {
+            int16_t const startCursorX = monochromeCanvas.getCursorX();
+
+            monochromeCanvas.write(szText[idxChar]);
+
+            bool const isCharacterToHighlight =
+                idxCharacterToHighlight >= 0 && (cchText - idxChar - 1) == idxCharacterToHighlight;
+
+            if (isCharacterToHighlight)
+            {
+                int16_t const endCursorX = monochromeCanvas.getCursorX();
+
+                monochromeCanvas.fillRect(startCursorX,
+                                          m_Rect.Height - m_CharacterHighlightHeight,
+                                          endCursorX - startCursorX,
+                                          m_CharacterHighlightHeight,
+                                          c_AnyColor);
+            }
+        }
     }
 
     // Write backbuffer to device
     m_Parent.blitMonochromeCanvas(
         m_Rect.X, m_Rect.Y, m_Rect.Width, m_Rect.Height, m_ForegroundColor, m_BackgroundColor);
+}
+
+void LCD::StaticNumericText::setValue(int32_t const value)
+{
+    if (m_Value != value)
+    {
+        m_Value = value;
+        update();
+    }
+}
+
+void LCD::StaticNumericText::setActiveDigit(uint8_t const activeDigit)
+{
+    if (m_ActiveDigit != activeDigit)
+    {
+        m_ActiveDigit = activeDigit;
+        update();
+    }
+}
+
+void LCD::StaticNumericText::update()
+{
+    // Create text buffer
+    char rgText[std::numeric_limits<decltype(m_Value)>::digits10 + 1 /* sign */ + 1 /* terminator */];
+    {
+        snprintf(rgText, countof(rgText), "%0*d", m_ActiveDigit + 1, m_Value);
+    }
+
+    setText(rgText, m_ActiveDigit);
 }

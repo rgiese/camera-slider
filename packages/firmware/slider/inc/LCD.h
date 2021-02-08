@@ -28,23 +28,50 @@ public:
                    Alignment alignment,
                    GFXfont const* font,
                    RGBColor foregroundColor,
-                   RGBColor backgroundColor)
+                   RGBColor backgroundColor,
+                   uint8_t characterHighlightHeight = 0)
             : m_Parent(parent)
             , m_Rect(rect)
             , m_Alignment(alignment)
             , m_Font(font)
             , m_ForegroundColor(foregroundColor)
-            , m_BackgroundColor(backgroundColor){};
+            , m_BackgroundColor(backgroundColor)
+            , m_CharacterHighlightHeight(characterHighlightHeight){};
 
-        void setText(std::string const& text) const;
+        void setText(const char* const szText, ssize_t const idxCharacterToHighlight = -1) const;
 
-    private:
+    protected:
         LCD& m_Parent;
         Rect const m_Rect;
         Alignment const m_Alignment;
         GFXfont const* const m_Font;
         RGBColor const m_ForegroundColor;
         RGBColor const m_BackgroundColor;
+        uint8_t m_CharacterHighlightHeight;
+    };
+
+    class StaticNumericText : private StaticText
+    {
+    public:
+        StaticNumericText(LCD& parent,
+                          Rect rect,
+                          Alignment alignment,
+                          GFXfont const* font,
+                          RGBColor foregroundColor,
+                          RGBColor backgroundColor,
+                          uint8_t characterHighlightHeight)
+            : StaticText(parent, rect, alignment, font, foregroundColor, backgroundColor, characterHighlightHeight)
+            , m_Value(std::numeric_limits<decltype(m_Value)>::max())
+            , m_ActiveDigit(0){};
+
+        void setValue(int32_t const value);
+        void setActiveDigit(uint8_t const activeDigit);
+
+    private:
+        int32_t m_Value;
+        uint8_t m_ActiveDigit;
+
+        void update();
     };
 
 public:

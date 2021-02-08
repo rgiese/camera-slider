@@ -47,14 +47,15 @@ private:
     {
         static constexpr uint16_t PositionSpeedAcceleration_Width = 128;
         static constexpr uint16_t PositionSpeedAcceleration_Height = 32;
+        static constexpr uint16_t PositionSpeedAcceleration_HighlightHeight = 2;
         static constexpr uint16_t PositionSpeedAcceleration_Y = LCD::DisplayHeight - PositionSpeedAcceleration_Height;
     };
 
     GFXfont const* const m_PositionSpeedAcceleration_Font;
 
-    LCD::StaticText m_PositionText;
-    LCD::StaticText m_SpeedText;
-    LCD::StaticText m_AccelerationText;
+    LCD::StaticNumericText m_PositionText;
+    LCD::StaticNumericText m_SpeedText;
+    LCD::StaticNumericText m_AccelerationText;
 
 private:
     //
