@@ -4,6 +4,7 @@
 void TrackingDesiredPositionState::onEnteringState()
 {
     g_Display.set("Tracking desired position");
+    g_MotorController.setTargetPosition(g_MotorController.CurrentPosition);
 }
 
 void TrackingDesiredPositionState::onLoop()

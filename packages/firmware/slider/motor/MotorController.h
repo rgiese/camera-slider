@@ -59,7 +59,7 @@ public:
     // Constants
     //
 
-    static constexpr uint32_t c_MaxSafePosition_Steps = 10000;
+    static constexpr int32_t c_MaxSafePosition_Steps = 10000;
 
     static constexpr uint32_t c_MaxSafeHomingSpeed_StepsPerSec = 2000;
     static constexpr uint32_t c_DefaultSpeed_StepsPerSec = 8000;

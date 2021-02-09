@@ -23,7 +23,7 @@ constexpr std::size_t static_strlen(T const (&)[N]) noexcept
 
 
 template <class T>
-constexpr T const& clamp(T const& value, T const& low, T const& high)
+constexpr T clamp(T const value, T const low, T const high)
 {
     return (value < low) ? low : (high < value) ? high : value;
 }

@@ -33,7 +33,7 @@ void MotorController::onLoop()
 
 void MotorController::setTargetPosition(int32_t const targetPosition)
 {
-    m_Tic.setTargetPosition(targetPosition);
+    m_Tic.setTargetPosition(clamp<int32_t>(targetPosition, 0, c_MaxSafePosition_Steps));
 }
 
 void MotorController::setMaxSpeed(uint32_t const stepsPerSecond)
@@ -54,6 +54,7 @@ void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
 
 void MotorController::goHome()
 {
+    m_Tic.setTargetPosition(0);  // Update internal tracking
     m_Tic.goHomeReverse();
 }
 
