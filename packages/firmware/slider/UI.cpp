@@ -53,28 +53,30 @@ UI::UI()
                                         colorFor(EncoderFunction::Acceleration),
                                         RGBColor(),
                                         LCDConstants::DesiredMovementParameters_HighlightHeight)
-    , m_Text_ReportedPosition(m_LCD,
-                              LCD::Rect{
-                                  X : 0,
-                                  Y : LCDConstants::ReportedMovementParameters_Y,
-                                  Width : LCDConstants::ReportedMovementParameters_Width,
-                                  Height : LCDConstants::ReportedMovementParameters_Height
-                              },
-                              LCD::Alignment::Center,
-                              m_ReportedMovementParameters_Font,
-                              colorFor(EncoderFunction::Position),
-                              RGBColor())
-    , m_Text_ReportedVelocity(m_LCD,
-                              LCD::Rect{
-                                  X : (LCD::DisplayWidth - LCDConstants::ReportedMovementParameters_Width) / 2,
-                                  Y : LCDConstants::ReportedMovementParameters_Y,
-                                  Width : LCDConstants::ReportedMovementParameters_Width,
-                                  Height : LCDConstants::ReportedMovementParameters_Height
-                              },
-                              LCD::Alignment::Center,
-                              m_ReportedMovementParameters_Font,
-                              colorFor(EncoderFunction::Speed),
-                              RGBColor())
+    , m_Text_ReportedPosition(
+          m_LCD,
+          LCD::Rect{
+              X : 0,
+              Y : LCDConstants::ReportedMovementParameters_Y,
+              Width : LCDConstants::ReportedMovementParameters_Width,
+              Height : LCDConstants::ReportedMovementParameters_Height
+          },
+          LCD::Alignment::Center,
+          m_ReportedMovementParameters_Font,
+          colorFor(EncoderFunction::Position).multiply(LCDConstants::ReportedMovementParameters_ColorMultiplier),
+          RGBColor())
+    , m_Text_ReportedVelocity(
+          m_LCD,
+          LCD::Rect{
+              X : (LCD::DisplayWidth - LCDConstants::ReportedMovementParameters_Width) / 2,
+              Y : LCDConstants::ReportedMovementParameters_Y,
+              Width : LCDConstants::ReportedMovementParameters_Width,
+              Height : LCDConstants::ReportedMovementParameters_Height
+          },
+          LCD::Alignment::Center,
+          m_ReportedMovementParameters_Font,
+          colorFor(EncoderFunction::Speed).multiply(LCDConstants::ReportedMovementParameters_ColorMultiplier),
+          RGBColor())
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({

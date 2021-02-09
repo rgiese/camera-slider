@@ -54,6 +54,7 @@ private:
         static constexpr uint16_t ReportedMovementParameters_Height = DesiredMovementParameters_Height;
         static constexpr uint16_t ReportedMovementParameters_Y =
             DesiredMovementParameters_Y - ReportedMovementParameters_Height;
+        static constexpr float ReportedMovementParameters_ColorMultiplier = 0.8f;
     };
 
     GFXfont const* const m_DesiredMovementParameters_Font;
