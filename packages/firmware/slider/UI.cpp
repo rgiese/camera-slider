@@ -1,5 +1,6 @@
 #include "inc/stdinc.h"
 
+#include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSans12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
 
@@ -15,8 +16,42 @@ UI::UI()
       })
     // LCD
     , m_LCD()
+    , m_MovementParameterLabels_Font(&FreeSans9pt7b)
     , m_DesiredMovementParameters_Font(&FreeSans18pt7b)
     , m_ReportedMovementParameters_Font(&FreeSans12pt7b)
+    , m_Label_Position(m_LCD,
+                       LCD::Rect{
+                           X : 0,
+                           Y : LCDConstants::MovementParameterLabels_Y,
+                           Width : LCDConstants::MovementParameterLabels_Width,
+                           Height : LCDConstants::MovementParameterLabels_Height
+                       },
+                       LCD::Alignment::Center,
+                       m_MovementParameterLabels_Font,
+                       colorFor(EncoderFunction::Position),
+                       RGBColor())
+    , m_Label_Speed(m_LCD,
+                    LCD::Rect{
+                        X : (LCD::DisplayWidth - LCDConstants::MovementParameterLabels_Width) / 2,
+                        Y : LCDConstants::MovementParameterLabels_Y,
+                        Width : LCDConstants::MovementParameterLabels_Width,
+                        Height : LCDConstants::MovementParameterLabels_Height
+                    },
+                    LCD::Alignment::Center,
+                    m_MovementParameterLabels_Font,
+                    colorFor(EncoderFunction::Speed),
+                    RGBColor())
+    , m_Label_Acceleration(m_LCD,
+                           LCD::Rect{
+                               X : LCD::DisplayWidth - LCDConstants::MovementParameterLabels_Width,
+                               Y : LCDConstants::MovementParameterLabels_Y,
+                               Width : LCDConstants::MovementParameterLabels_Width,
+                               Height : LCDConstants::MovementParameterLabels_Height
+                           },
+                           LCD::Alignment::Center,
+                           m_MovementParameterLabels_Font,
+                           colorFor(EncoderFunction::Acceleration),
+                           RGBColor())
     , m_Text_DesiredPosition(m_LCD,
                              LCD::Rect{
                                  X : 0,
@@ -136,6 +171,11 @@ void UI::begin()
 
     g_MotorController.CurrentVelocity.attach(
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
+
+    // Set up labels
+    m_Label_Position.setText("Position");
+    m_Label_Speed.setText("Speed");
+    m_Label_Acceleration.setText("Acceleration");
 }
 
 void UI::onMainLoop()
