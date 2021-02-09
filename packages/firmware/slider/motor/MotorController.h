@@ -36,6 +36,7 @@ public:
     Observable<bool> IsPositionCertain;
     Observable<int32_t> CurrentPosition;
     Observable<int32_t> CurrentVelocity;
+    Observable<int32_t> TargetPosition;
     Observable<uint32_t> MaximumSpeed;
     Observable<uint32_t> MaximumAcceleration;
 

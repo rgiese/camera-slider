@@ -59,7 +59,7 @@ public:
                           GFXfont const* font,
                           RGBColor foregroundColor,
                           RGBColor backgroundColor,
-                          uint8_t characterHighlightHeight)
+                          uint8_t characterHighlightHeight = 0)
             : StaticText(parent, rect, alignment, font, foregroundColor, backgroundColor, characterHighlightHeight)
             , m_Value(std::numeric_limits<decltype(m_Value)>::max())
             , m_ActiveDigit(0){};

@@ -1,5 +1,6 @@
 #include "inc/stdinc.h"
 
+#include <Fonts/FreeSans12pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
 
 UI g_UI;
@@ -14,43 +15,66 @@ UI::UI()
       })
     // LCD
     , m_LCD()
-    , m_PositionSpeedAcceleration_Font(&FreeSans18pt7b)
+    , m_DesiredMovementParameters_Font(&FreeSans18pt7b)
+    , m_ReportedMovementParameters_Font(&FreeSans12pt7b)
     , m_Text_DesiredPosition(m_LCD,
                              LCD::Rect{
                                  X : 0,
-                                 Y : LCDConstants::PositionSpeedAcceleration_Y,
-                                 Width : LCDConstants::PositionSpeedAcceleration_Width,
-                                 Height : LCDConstants::PositionSpeedAcceleration_Height
+                                 Y : LCDConstants::DesiredMovementParameters_Y,
+                                 Width : LCDConstants::DesiredMovementParameters_Width,
+                                 Height : LCDConstants::DesiredMovementParameters_Height
                              },
                              LCD::Alignment::Center,
-                             m_PositionSpeedAcceleration_Font,
+                             m_DesiredMovementParameters_Font,
                              colorFor(EncoderFunction::Position),
                              RGBColor(),
-                             LCDConstants::PositionSpeedAcceleration_HighlightHeight)
+                             LCDConstants::DesiredMovementParameters_HighlightHeight)
     , m_Text_DesiredMaximumSpeed(m_LCD,
                                  LCD::Rect{
-                                     X : (LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width) / 2,
-                                     Y : LCDConstants::PositionSpeedAcceleration_Y,
-                                     Width : LCDConstants::PositionSpeedAcceleration_Width,
-                                     Height : LCDConstants::PositionSpeedAcceleration_Height
+                                     X : (LCD::DisplayWidth - LCDConstants::DesiredMovementParameters_Width) / 2,
+                                     Y : LCDConstants::DesiredMovementParameters_Y,
+                                     Width : LCDConstants::DesiredMovementParameters_Width,
+                                     Height : LCDConstants::DesiredMovementParameters_Height
                                  },
                                  LCD::Alignment::Center,
-                                 m_PositionSpeedAcceleration_Font,
+                                 m_DesiredMovementParameters_Font,
                                  colorFor(EncoderFunction::Speed),
                                  RGBColor(),
-                                 LCDConstants::PositionSpeedAcceleration_HighlightHeight)
+                                 LCDConstants::DesiredMovementParameters_HighlightHeight)
     , m_Text_DesiredMaximumAcceleration(m_LCD,
                                         LCD::Rect{
-                                            X : LCD::DisplayWidth - LCDConstants::PositionSpeedAcceleration_Width,
-                                            Y : LCDConstants::PositionSpeedAcceleration_Y,
-                                            Width : LCDConstants::PositionSpeedAcceleration_Width,
-                                            Height : LCDConstants::PositionSpeedAcceleration_Height
+                                            X : LCD::DisplayWidth - LCDConstants::DesiredMovementParameters_Width,
+                                            Y : LCDConstants::DesiredMovementParameters_Y,
+                                            Width : LCDConstants::DesiredMovementParameters_Width,
+                                            Height : LCDConstants::DesiredMovementParameters_Height
                                         },
                                         LCD::Alignment::Center,
-                                        m_PositionSpeedAcceleration_Font,
+                                        m_DesiredMovementParameters_Font,
                                         colorFor(EncoderFunction::Acceleration),
                                         RGBColor(),
-                                        LCDConstants::PositionSpeedAcceleration_HighlightHeight)
+                                        LCDConstants::DesiredMovementParameters_HighlightHeight)
+    , m_Text_ReportedPosition(m_LCD,
+                              LCD::Rect{
+                                  X : 0,
+                                  Y : LCDConstants::ReportedMovementParameters_Y,
+                                  Width : LCDConstants::ReportedMovementParameters_Width,
+                                  Height : LCDConstants::ReportedMovementParameters_Height
+                              },
+                              LCD::Alignment::Center,
+                              m_ReportedMovementParameters_Font,
+                              colorFor(EncoderFunction::Position),
+                              RGBColor())
+    , m_Text_ReportedVelocity(m_LCD,
+                              LCD::Rect{
+                                  X : (LCD::DisplayWidth - LCDConstants::ReportedMovementParameters_Width) / 2,
+                                  Y : LCDConstants::ReportedMovementParameters_Y,
+                                  Width : LCDConstants::ReportedMovementParameters_Width,
+                                  Height : LCDConstants::ReportedMovementParameters_Height
+                              },
+                              LCD::Alignment::Center,
+                              m_ReportedMovementParameters_Font,
+                              colorFor(EncoderFunction::Speed),
+                              RGBColor())
     // Encoders
     , m_Wire(Wire1)  // UI hangs off (and owns) the second I2C bus
     , m_Encoders({
@@ -96,7 +120,7 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
 
     // Set up observers
-    g_MotorController.CurrentPosition.attach(
+    g_MotorController.TargetPosition.attach(
         [this](int32_t const position) { m_Text_DesiredPosition.setValue(position); });
 
     g_MotorController.MaximumSpeed.attach(
@@ -104,6 +128,12 @@ void UI::begin()
 
     g_MotorController.MaximumAcceleration.attach(
         [this](uint32_t const acceleration) { m_Text_DesiredMaximumAcceleration.setValue(acceleration); });
+
+    g_MotorController.CurrentPosition.attach(
+        [this](int32_t const position) { m_Text_ReportedPosition.setValue(position); });
+
+    g_MotorController.CurrentVelocity.attach(
+        [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 }
 
 void UI::onMainLoop()

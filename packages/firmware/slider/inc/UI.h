@@ -45,17 +45,26 @@ private:
 
     struct LCDConstants
     {
-        static constexpr uint16_t PositionSpeedAcceleration_Width = 128;
-        static constexpr uint16_t PositionSpeedAcceleration_Height = 32;
-        static constexpr uint16_t PositionSpeedAcceleration_HighlightHeight = 2;
-        static constexpr uint16_t PositionSpeedAcceleration_Y = LCD::DisplayHeight - PositionSpeedAcceleration_Height;
+        static constexpr uint16_t DesiredMovementParameters_Width = 128;
+        static constexpr uint16_t DesiredMovementParameters_Height = 32;
+        static constexpr uint16_t DesiredMovementParameters_HighlightHeight = 2;
+        static constexpr uint16_t DesiredMovementParameters_Y = LCD::DisplayHeight - DesiredMovementParameters_Height;
+
+        static constexpr uint16_t ReportedMovementParameters_Width = DesiredMovementParameters_Width;
+        static constexpr uint16_t ReportedMovementParameters_Height = DesiredMovementParameters_Height;
+        static constexpr uint16_t ReportedMovementParameters_Y =
+            DesiredMovementParameters_Y - ReportedMovementParameters_Height;
     };
 
-    GFXfont const* const m_PositionSpeedAcceleration_Font;
+    GFXfont const* const m_DesiredMovementParameters_Font;
+    GFXfont const* const m_ReportedMovementParameters_Font;
 
     LCD::StaticNumericText m_Text_DesiredPosition;
     LCD::StaticNumericText m_Text_DesiredMaximumSpeed;
     LCD::StaticNumericText m_Text_DesiredMaximumAcceleration;
+
+    LCD::StaticNumericText m_Text_ReportedPosition;
+    LCD::StaticNumericText m_Text_ReportedVelocity;
 
 private:
     //

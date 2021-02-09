@@ -22,6 +22,7 @@ void MotorController::onLoop()
     IsPositionCertain.update(!m_Tic.getPositionUncertain());
     CurrentPosition.update(m_Tic.getCurrentPosition());
     CurrentVelocity.update(velocityFromTicUnits(m_Tic.getCurrentVelocity()));
+    TargetPosition.update(m_Tic.getTargetPosition());
     MaximumSpeed.update(speedFromTicUnits(m_Tic.getMaxSpeed()));
     MaximumAcceleration.update(accelerationFromTicUnits(m_Tic.getMaxAccel()));
 }
