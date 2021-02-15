@@ -1,5 +1,9 @@
 #include "inc/stdinc.h"
 
+//
+// Conversions
+//
+
 bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
                                          size_t const cbData,
                                          _Out_ MovementProgram& movementProgram)
@@ -68,6 +72,10 @@ void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbuffe
 
     Flatbuffers::Firmware::FinishMovementProgramBuffer(flatbufferBuilder, movementProgramRoot);
 }
+
+//
+// Debugging
+//
 
 void MovementProgram::dump(char const* const szPrefix) const
 {
