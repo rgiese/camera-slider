@@ -24,8 +24,7 @@ UI::UI()
     // Movement program
     , m_Label_Step(m_LCD,
                    LCD::Rect{
-                       X : UITools::getEvenlyDividedX(
-                           LCDConstants::nMovementProgramColumns, 0, LCDConstants::MovementParameterLabels_Width),
+                       X : LCDConstants::MovementParameterLabels_X(0),
                        Y : LCDConstants::MovementParameterLabels_Y,
                        Width : LCDConstants::MovementParameterLabels_Width,
                        Height : LCDConstants::MovementParameterLabels_Height
@@ -36,8 +35,7 @@ UI::UI()
                    RGBColor())
     , m_Label_Position(m_LCD,
                        LCD::Rect{
-                           X : UITools::getEvenlyDividedX(
-                               LCDConstants::nMovementProgramColumns, 1, LCDConstants::MovementParameterLabels_Width),
+                           X : LCDConstants::MovementParameterLabels_X(1),
                            Y : LCDConstants::MovementParameterLabels_Y,
                            Width : LCDConstants::MovementParameterLabels_Width,
                            Height : LCDConstants::MovementParameterLabels_Height
@@ -48,8 +46,7 @@ UI::UI()
                        RGBColor())
     , m_Label_Speed(m_LCD,
                     LCD::Rect{
-                        X : UITools::getEvenlyDividedX(
-                            LCDConstants::nMovementProgramColumns, 2, LCDConstants::MovementParameterLabels_Width),
+                        X : LCDConstants::MovementParameterLabels_X(2),
                         Y : LCDConstants::MovementParameterLabels_Y,
                         Width : LCDConstants::MovementParameterLabels_Width,
                         Height : LCDConstants::MovementParameterLabels_Height
@@ -58,67 +55,58 @@ UI::UI()
                     m_MovementParameterLabels_Font,
                     colorFor(EncoderFunction::Speed),
                     RGBColor())
-    , m_Label_Acceleration(
-          m_LCD,
-          LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementProgramColumns, 3, LCDConstants::MovementParameterLabels_Width),
-              Y : LCDConstants::MovementParameterLabels_Y,
-              Width : LCDConstants::MovementParameterLabels_Width,
-              Height : LCDConstants::MovementParameterLabels_Height
-          },
-          LCD::Alignment::Left,
-          m_MovementParameterLabels_Font,
-          colorFor(EncoderFunction::Acceleration),
-          RGBColor())
+    , m_Label_Acceleration(m_LCD,
+                           LCD::Rect{
+                               X : LCDConstants::MovementParameterLabels_X(3),
+                               Y : LCDConstants::MovementParameterLabels_Y,
+                               Width : LCDConstants::MovementParameterLabels_Width,
+                               Height : LCDConstants::MovementParameterLabels_Height
+                           },
+                           LCD::Alignment::Left,
+                           m_MovementParameterLabels_Font,
+                           colorFor(EncoderFunction::Acceleration),
+                           RGBColor())
     // Movement controls
-    , m_Text_DesiredPosition(
-          m_LCD,
-          LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 0, LCDConstants::DesiredMovementParameters_Width),
-              Y : LCDConstants::DesiredMovementParameters_Y,
-              Width : LCDConstants::DesiredMovementParameters_Width,
-              Height : LCDConstants::DesiredMovementParameters_Height
-          },
-          LCD::Alignment::Center,
-          m_DesiredMovementParameters_Font,
-          colorFor(EncoderFunction::Position),
-          RGBColor(),
-          LCDConstants::DesiredMovementParameters_HighlightHeight)
-    , m_Text_DesiredMaximumSpeed(
-          m_LCD,
-          LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 1, LCDConstants::DesiredMovementParameters_Width),
-              Y : LCDConstants::DesiredMovementParameters_Y,
-              Width : LCDConstants::DesiredMovementParameters_Width,
-              Height : LCDConstants::DesiredMovementParameters_Height
-          },
-          LCD::Alignment::Center,
-          m_DesiredMovementParameters_Font,
-          colorFor(EncoderFunction::Speed),
-          RGBColor(),
-          LCDConstants::DesiredMovementParameters_HighlightHeight)
-    , m_Text_DesiredMaximumAcceleration(
-          m_LCD,
-          LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 2, LCDConstants::DesiredMovementParameters_Width),
-              Y : LCDConstants::DesiredMovementParameters_Y,
-              Width : LCDConstants::DesiredMovementParameters_Width,
-              Height : LCDConstants::DesiredMovementParameters_Height
-          },
-          LCD::Alignment::Center,
-          m_DesiredMovementParameters_Font,
-          colorFor(EncoderFunction::Acceleration),
-          RGBColor(),
-          LCDConstants::DesiredMovementParameters_HighlightHeight)
+    , m_Text_DesiredPosition(m_LCD,
+                             LCD::Rect{
+                                 X : LCDConstants::DesiredMovementParameters_X(0),
+                                 Y : LCDConstants::DesiredMovementParameters_Y,
+                                 Width : LCDConstants::DesiredMovementParameters_Width,
+                                 Height : LCDConstants::DesiredMovementParameters_Height
+                             },
+                             LCD::Alignment::Center,
+                             m_DesiredMovementParameters_Font,
+                             colorFor(EncoderFunction::Position),
+                             RGBColor(),
+                             LCDConstants::DesiredMovementParameters_HighlightHeight)
+    , m_Text_DesiredMaximumSpeed(m_LCD,
+                                 LCD::Rect{
+                                     X : LCDConstants::DesiredMovementParameters_X(1),
+                                     Y : LCDConstants::DesiredMovementParameters_Y,
+                                     Width : LCDConstants::DesiredMovementParameters_Width,
+                                     Height : LCDConstants::DesiredMovementParameters_Height
+                                 },
+                                 LCD::Alignment::Center,
+                                 m_DesiredMovementParameters_Font,
+                                 colorFor(EncoderFunction::Speed),
+                                 RGBColor(),
+                                 LCDConstants::DesiredMovementParameters_HighlightHeight)
+    , m_Text_DesiredMaximumAcceleration(m_LCD,
+                                        LCD::Rect{
+                                            X : LCDConstants::DesiredMovementParameters_X(2),
+                                            Y : LCDConstants::DesiredMovementParameters_Y,
+                                            Width : LCDConstants::DesiredMovementParameters_Width,
+                                            Height : LCDConstants::DesiredMovementParameters_Height
+                                        },
+                                        LCD::Alignment::Center,
+                                        m_DesiredMovementParameters_Font,
+                                        colorFor(EncoderFunction::Acceleration),
+                                        RGBColor(),
+                                        LCDConstants::DesiredMovementParameters_HighlightHeight)
     , m_Text_ReportedPosition(
           m_LCD,
           LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 0, LCDConstants::ReportedMovementParameters_Width),
+              X : LCDConstants::DesiredMovementParameters_X(0),
               Y : LCDConstants::ReportedMovementParameters_Y,
               Width : LCDConstants::ReportedMovementParameters_Width,
               Height : LCDConstants::ReportedMovementParameters_Height
@@ -130,8 +118,7 @@ UI::UI()
     , m_Text_ReportedVelocity(
           m_LCD,
           LCD::Rect{
-              X : UITools::getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 1, LCDConstants::ReportedMovementParameters_Width),
+              X : LCDConstants::DesiredMovementParameters_X(1),
               Y : LCDConstants::ReportedMovementParameters_Y,
               Width : LCDConstants::ReportedMovementParameters_Width,
               Height : LCDConstants::ReportedMovementParameters_Height

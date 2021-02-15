@@ -13,13 +13,6 @@ namespace UITools
 
         return static_cast<uint16_t>(controlStart);
     }
-
-    static constexpr uint16_t getEvenlyDividedX(uint16_t const cDivisions,
-                                                uint16_t const idxDivision,
-                                                uint16_t const controlSize)
-    {
-        return getEvenlyDivided(LCD::DisplayWidth, cDivisions, idxDivision, controlSize);
-    }
 };  // namespace UITools
 
 class UI
@@ -74,6 +67,11 @@ private:
 
         static constexpr uint16_t MovementParameterLabels_Width = LCD::DisplayWidth / nMovementProgramColumns;
         static constexpr uint16_t MovementParameterLabels_Height = 18;
+        static constexpr uint16_t MovementParameterLabels_X(uint16_t const idxLabel)
+        {
+            return UITools::getEvenlyDivided(
+                LCD::DisplayWidth, nMovementProgramColumns, idxLabel, MovementParameterLabels_Width);
+        }
         static constexpr uint16_t MovementParameterLabels_Y = PaddingSmall;
 
         // Movement controls row
@@ -83,6 +81,11 @@ private:
             std::min(128, LCD::DisplayWidth / nMovementControlsColumns);
         static constexpr uint16_t DesiredMovementParameters_Height = 32;
         static constexpr uint16_t DesiredMovementParameters_HighlightHeight = 2;
+        static constexpr uint16_t DesiredMovementParameters_X(uint16_t const idxLabel)
+        {
+            return UITools::getEvenlyDivided(
+                LCD::DisplayWidth, nMovementControlsColumns, idxLabel, DesiredMovementParameters_Width);
+        }
         static constexpr uint16_t DesiredMovementParameters_Y =
             LCD::DisplayHeight - DesiredMovementParameters_Height - PaddingMedium;
 
