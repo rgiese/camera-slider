@@ -200,22 +200,22 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
     // Set up observers
-    g_MotorController.TargetPosition.attach(
+    g_MotorController.TargetPosition.attach_and_initialize(
         [this](int32_t const position) { m_Text_DesiredPosition.setValue(position); });
 
-    g_MotorController.MaximumSpeed.attach(
+    g_MotorController.MaximumSpeed.attach_and_initialize(
         [this](int32_t const velocity) { m_Text_DesiredMaximumSpeed.setValue(velocity); });
 
-    g_MotorController.MaximumAcceleration.attach(
+    g_MotorController.MaximumAcceleration.attach_and_initialize(
         [this](uint32_t const acceleration) { m_Text_DesiredMaximumAcceleration.setValue(acceleration); });
 
-    g_MotorController.CurrentPosition.attach(
+    g_MotorController.CurrentPosition.attach_and_initialize(
         [this](int32_t const position) { m_Text_ReportedPosition.setValue(position); });
 
-    g_MotorController.CurrentVelocity.attach(
+    g_MotorController.CurrentVelocity.attach_and_initialize(
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
-    g_MovementProgramStore.CurrentMovementProgram.attach(
+    g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize(
         [this](MovementProgram const& movementProgram) { m_Text_DesiredRate.setValue(movementProgram.RatePercent); });
 
     // Set up labels
@@ -224,8 +224,6 @@ void UI::begin()
     m_Label_Speed.setText("Speed");
     m_Label_Acceleration.setText("Acceleration");
     m_Label_Rate.setText("Rate");
-
-    m_Text_DesiredRate.setValue(0);
 }
 
 void UI::onMainLoop()

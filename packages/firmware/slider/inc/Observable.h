@@ -105,6 +105,19 @@ public:
         m_Observers.push_back(c);
     }
 
+    void attach_and_initialize(Callback c)
+    {
+        attach(c);
+
+        T valueToDeliver;
+        {
+            std::lock_guard<std::mutex> guard(m_Mutex);
+            valueToDeliver = m_Value;
+        }
+
+        c(valueToDeliver);
+    }
+
 private:
     // Non-copyable
     Observable<T>(Observable<T> const&) = delete;
