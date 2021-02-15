@@ -35,21 +35,36 @@ struct MovementProgram
 
     MovementProgram() = default;
 
+    //
+    // Data
+    //
+
+    Flatbuffers::Firmware::MovementProgramFlags Flags = Flatbuffers::Firmware::MovementProgramFlags::NONE;
+    uint16_t RatePercent = 100;
+    std::vector<Movement> Movements = {};
+
+    //
+    // Conversions
+    //
+
     static bool fromFlatbufferData(uint8_t const* const pData,
                                    size_t const cbData,
                                    _Out_ MovementProgram& movementProgram);
 
     void toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder) const;
 
-    Flatbuffers::Firmware::MovementProgramFlags Flags = Flatbuffers::Firmware::MovementProgramFlags::NONE;
-    uint16_t RatePercent = 100;
-    std::vector<Movement> Movements = {};
+    //
+    // Comparison
+    //
 
     bool operator==(MovementProgram const& other) const
     {
         return Flags == other.Flags && RatePercent == other.RatePercent && Movements == other.Movements;
     }
 
+    //
     // Debugging tools
+    //
+
     void dump(char const* const szPrefix) const;
 };
