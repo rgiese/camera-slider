@@ -118,17 +118,15 @@ void LCD::drawText(char const* const szText,
         switch (alignment)
         {
             case Alignment::Left:
-                monochromeCanvas.setCursor(0, -measuredY);
+                monochromeCanvas.setCursor(-measuredX, -measuredY);
                 break;
 
             case Alignment::Center:
-                monochromeCanvas.setCursor((rect.Width - measuredWidth) / 2, -measuredY);
+                monochromeCanvas.setCursor((rect.Width - measuredWidth) / 2 - measuredX, -measuredY);
                 break;
 
             case Alignment::Right:
-                monochromeCanvas.setCursor(
-                    rect.Width - measuredWidth - 1 /* boundary pixel */ - 1 /* rounding error in AdaFruit library? */,
-                    -measuredY);
+                monochromeCanvas.setCursor(rect.Width - measuredWidth - measuredX - 1 /* boundary pixel */, -measuredY);
                 break;
         }
 
