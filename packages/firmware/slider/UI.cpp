@@ -232,7 +232,7 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Position, 3, m_Text_DesiredPosition);
     setIncrementCallback(EncoderFunction::Speed, 3, m_Text_DesiredMaximumSpeed);
     setIncrementCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
-    setIncrementCallback(EncoderFunction::Rate, 3, m_Text_DesiredRate);
+    setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
     // Set up observers
     g_MotorController.TargetPosition.attach(
@@ -249,6 +249,9 @@ void UI::begin()
 
     g_MotorController.CurrentVelocity.attach(
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
+
+    g_MovementProgramStore.CurrentMovementProgram.attach(
+        [this](MovementProgram const& movementProgram) { m_Text_DesiredRate.setValue(movementProgram.RatePercent); });
 
     // Set up labels
     m_Label_Step.setText("Step");
@@ -271,6 +274,7 @@ void UI::onMainLoop()
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
     int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();
     int32_t const accelerationDelta = encoderFor(EncoderFunction::Acceleration).getLatestValueDelta();
+    int32_t const rateDelta = encoderFor(EncoderFunction::Rate).getLatestValueDelta();
 
     if (positionDelta != 0)
     {
@@ -291,5 +295,13 @@ void UI::onMainLoop()
         Request request = {Type : RequestType::DesiredMaximumAccelerationDelta};
         request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
         g_RequestQueue.push(request);
+    }
+
+    if (rateDelta != 0)
+    {
+        MovementProgram const mutatedMovementProgram =
+            g_MovementProgramStore.CurrentMovementProgram.get().mutateRate(rateDelta);
+
+        g_MovementProgramStore.setMovementProgram(mutatedMovementProgram);
     }
 }

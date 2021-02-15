@@ -43,6 +43,15 @@ struct MovementProgram
     uint16_t RatePercent = 100;
     std::vector<Movement> Movements = {};
 
+    static constexpr uint16_t RatePercent_Minimum = 1;
+    static constexpr uint16_t RatePercent_Maximum = 1000;
+
+    //
+    // Mutations
+    //
+
+    MovementProgram mutateRate(int16_t const RateDelta) const;
+
     //
     // Conversions
     //

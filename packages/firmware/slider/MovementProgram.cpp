@@ -1,6 +1,19 @@
 #include "inc/stdinc.h"
 
 //
+// Mutations
+//
+
+MovementProgram MovementProgram::mutateRate(int16_t const RateDelta) const
+{
+    MovementProgram mutatedMovementProgram = *this;
+    mutatedMovementProgram.RatePercent =
+        clamp_delta(mutatedMovementProgram.RatePercent, RateDelta, RatePercent_Minimum, RatePercent_Maximum);
+
+    return mutatedMovementProgram;
+}
+
+//
 // Conversions
 //
 
@@ -29,7 +42,7 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
     auto const pSourceProgram = Flatbuffers::Firmware::GetMovementProgram(pData);
 
     movementProgram.Flags = pSourceProgram->flags();
-    movementProgram.RatePercent = pSourceProgram->rate();
+    movementProgram.RatePercent = clamp(pSourceProgram->rate(), RatePercent_Minimum, RatePercent_Maximum);
 
     auto const pSourceMovements = pSourceProgram->movements();
 
