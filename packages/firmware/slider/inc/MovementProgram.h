@@ -42,12 +42,12 @@ struct MovementProgram
     void toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbufferBuilder) const;
 
     Flatbuffers::Firmware::MovementProgramFlags Flags = Flatbuffers::Firmware::MovementProgramFlags::NONE;
-    float Rate = 1;
+    uint16_t RatePercent = 100;
     std::vector<Movement> Movements = {};
 
     bool operator==(MovementProgram const& other) const
     {
-        return Flags == other.Flags && Rate == other.Rate && Movements == other.Movements;
+        return Flags == other.Flags && RatePercent == other.RatePercent && Movements == other.Movements;
     }
 
     // Debugging tools

@@ -27,9 +27,10 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
     {
         case Flatbuffers::Firmware::MovementType::Move: {
             // Apply desired motor settings
-            g_MotorController.setMaxSpeed(static_cast<uint32_t>(movement.DesiredSpeed * movementProgram.Rate));
+            g_MotorController.setMaxSpeed(
+                static_cast<uint32_t>(movement.DesiredSpeed * movementProgram.RatePercent / 100.0f));
             g_MotorController.setMaxAcceleration(
-                static_cast<uint32_t>(movement.DesiredAcceleration * movementProgram.Rate));
+                static_cast<uint32_t>(movement.DesiredAcceleration * movementProgram.RatePercent / 100.0f));
 
             // Seek to position
             g_MotorController.setTargetPosition(movement.DesiredPosition);
@@ -82,7 +83,8 @@ void RunningMovementProgramState::onLoop()
         case Flatbuffers::Firmware::MovementType::Delay: {
             unsigned long const timeDelayed_msec = millis() - m_DelayStart_msec;
 
-            if (timeDelayed_msec > static_cast<unsigned long>(movement.DelayTime * movementProgram.Rate))
+            if (timeDelayed_msec >
+                static_cast<unsigned long>(movement.DelayTime * movementProgram.RatePercent / 100.0f))
             {
                 m_DelayStart_msec = 0;
                 return nextStep();

@@ -25,7 +25,7 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
     auto const pSourceProgram = Flatbuffers::Firmware::GetMovementProgram(pData);
 
     movementProgram.Flags = pSourceProgram->flags();
-    movementProgram.Rate = pSourceProgram->rate() / 100.0f;
+    movementProgram.RatePercent = pSourceProgram->rate();
 
     auto const pSourceMovements = pSourceProgram->movements();
 
@@ -63,8 +63,8 @@ void MovementProgram::toFlatbufferData(flatbuffers::FlatBufferBuilder& flatbuffe
         }
     }
 
-    auto const movementProgramRoot = Flatbuffers::Firmware::CreateMovementProgramDirect(
-        flatbufferBuilder, Flags, static_cast<uint32_t>(Rate * 100.f), &movements);
+    auto const movementProgramRoot =
+        Flatbuffers::Firmware::CreateMovementProgramDirect(flatbufferBuilder, Flags, RatePercent, &movements);
 
     Flatbuffers::Firmware::FinishMovementProgramBuffer(flatbufferBuilder, movementProgramRoot);
 }
@@ -84,7 +84,7 @@ void MovementProgram::dump(char const* const szPrefix) const
             }
         }
 
-        Serial.printlnf("  Rate: %.2f", Rate);
+        Serial.printlnf("  Rate: %u", RatePercent);
     }
 
     if (!Movements.empty())
