@@ -119,7 +119,7 @@ void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharact
                 break;
 
             case Alignment::Right:
-                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth, -measuredY);
+                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth - 1 /* boundary pixel */ - 1 /* rounding error in AdaFruit library? */, -measuredY);
                 break;
         }
 
