@@ -1,5 +1,26 @@
 #pragma once
 
+namespace UITools
+{
+    static constexpr uint16_t getEvenlyDivided(uint16_t const totalSize,
+                                               uint16_t const cDivisions,
+                                               uint16_t const idxDivision,
+                                               uint16_t const controlSize)
+    {
+        float const sizePerDivision = totalSize / cDivisions;
+        float const controlCenter = (idxDivision + 0.5f) * sizePerDivision;
+        float const controlStart = controlCenter - (controlSize * 0.5f);
+
+        return static_cast<uint16_t>(controlStart);
+    }
+
+    static constexpr uint16_t getEvenlyDividedX(uint16_t const cDivisions,
+                                                uint16_t const idxDivision,
+                                                uint16_t const controlSize)
+    {
+        return getEvenlyDivided(LCD::DisplayWidth, cDivisions, idxDivision, controlSize);
+    }
+};  // namespace UITools
 
 class UI
 {
@@ -74,11 +95,14 @@ private:
         // Rate control
         static constexpr uint16_t DesiredRateParameter_Width = DesiredMovementParameters_Width;
         static constexpr uint16_t DesiredRateParameter_Height = DesiredMovementParameters_Height;
+        static constexpr uint16_t DesiredRateParameter_X =
+            LCD::DisplayWidth - DesiredRateParameter_Width - PaddingSmall;
         static constexpr uint16_t DesiredRateParameter_Y =
-            DesiredMovementParameters_Y - (DesiredMovementParameters_Height + 2 * PaddingMedium);
+            UITools::getEvenlyDivided(LCD::DisplayHeight, 2, 1, DesiredRateParameter_Height);
 
         static constexpr uint16_t DesiredRateLabel_Width = DesiredRateParameter_Width;
         static constexpr uint16_t DesiredRateLabel_Height = MovementParameterLabels_Height;
+        static constexpr uint16_t DesiredRateLabel_X = DesiredRateParameter_X;
         static constexpr uint16_t DesiredRateLabel_Y = DesiredRateParameter_Y - DesiredRateLabel_Height;
     };
 

@@ -6,25 +6,6 @@
 
 UI g_UI;
 
-static constexpr uint16_t getEvenlyDivided(uint16_t const totalSize,
-                                           uint16_t const cDivisions,
-                                           uint16_t const idxDivision,
-                                           uint16_t const controlSize)
-{
-    float const sizePerDivision = totalSize / cDivisions;
-    float const controlCenter = (idxDivision + 0.5f) * sizePerDivision;
-    float const controlStart = controlCenter - (controlSize * 0.5f);
-
-    return static_cast<uint16_t>(controlStart);
-}
-
-static constexpr uint16_t getEvenlyDividedX(uint16_t const cDivisions,
-                                            uint16_t const idxDivision,
-                                            uint16_t const controlSize)
-{
-    return getEvenlyDivided(LCD::DisplayWidth, cDivisions, idxDivision, controlSize);
-}
-
 UI::UI()
     : m_FunctionColors({
           RGBColor{0xf2, 0x67, 0x39},  // Position
@@ -43,7 +24,7 @@ UI::UI()
     // Movement program
     , m_Label_Step(m_LCD,
                    LCD::Rect{
-                       X : getEvenlyDividedX(
+                       X : UITools::getEvenlyDividedX(
                            LCDConstants::nMovementProgramColumns, 0, LCDConstants::MovementParameterLabels_Width),
                        Y : LCDConstants::MovementParameterLabels_Y,
                        Width : LCDConstants::MovementParameterLabels_Width,
@@ -55,7 +36,7 @@ UI::UI()
                    RGBColor())
     , m_Label_Position(m_LCD,
                        LCD::Rect{
-                           X : getEvenlyDividedX(
+                           X : UITools::getEvenlyDividedX(
                                LCDConstants::nMovementProgramColumns, 1, LCDConstants::MovementParameterLabels_Width),
                            Y : LCDConstants::MovementParameterLabels_Y,
                            Width : LCDConstants::MovementParameterLabels_Width,
@@ -67,7 +48,7 @@ UI::UI()
                        RGBColor())
     , m_Label_Speed(m_LCD,
                     LCD::Rect{
-                        X : getEvenlyDividedX(
+                        X : UITools::getEvenlyDividedX(
                             LCDConstants::nMovementProgramColumns, 2, LCDConstants::MovementParameterLabels_Width),
                         Y : LCDConstants::MovementParameterLabels_Y,
                         Width : LCDConstants::MovementParameterLabels_Width,
@@ -80,7 +61,7 @@ UI::UI()
     , m_Label_Acceleration(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementProgramColumns, 3, LCDConstants::MovementParameterLabels_Width),
               Y : LCDConstants::MovementParameterLabels_Y,
               Width : LCDConstants::MovementParameterLabels_Width,
@@ -94,7 +75,7 @@ UI::UI()
     , m_Text_DesiredPosition(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementControlsColumns, 0, LCDConstants::DesiredMovementParameters_Width),
               Y : LCDConstants::DesiredMovementParameters_Y,
               Width : LCDConstants::DesiredMovementParameters_Width,
@@ -108,7 +89,7 @@ UI::UI()
     , m_Text_DesiredMaximumSpeed(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementControlsColumns, 1, LCDConstants::DesiredMovementParameters_Width),
               Y : LCDConstants::DesiredMovementParameters_Y,
               Width : LCDConstants::DesiredMovementParameters_Width,
@@ -122,7 +103,7 @@ UI::UI()
     , m_Text_DesiredMaximumAcceleration(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementControlsColumns, 2, LCDConstants::DesiredMovementParameters_Width),
               Y : LCDConstants::DesiredMovementParameters_Y,
               Width : LCDConstants::DesiredMovementParameters_Width,
@@ -136,7 +117,7 @@ UI::UI()
     , m_Text_ReportedPosition(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementControlsColumns, 0, LCDConstants::ReportedMovementParameters_Width),
               Y : LCDConstants::ReportedMovementParameters_Y,
               Width : LCDConstants::ReportedMovementParameters_Width,
@@ -149,7 +130,7 @@ UI::UI()
     , m_Text_ReportedVelocity(
           m_LCD,
           LCD::Rect{
-              X : getEvenlyDividedX(
+              X : UITools::getEvenlyDividedX(
                   LCDConstants::nMovementControlsColumns, 1, LCDConstants::ReportedMovementParameters_Width),
               Y : LCDConstants::ReportedMovementParameters_Y,
               Width : LCDConstants::ReportedMovementParameters_Width,
@@ -162,8 +143,7 @@ UI::UI()
     // Rate
     , m_Label_Rate(m_LCD,
                    LCD::Rect{
-                       X : getEvenlyDividedX(
-                           LCDConstants::nMovementControlsColumns, 2, LCDConstants::DesiredMovementParameters_Width),
+                       X : LCDConstants::DesiredRateLabel_X,
                        Y : LCDConstants::DesiredRateLabel_Y,
                        Width : LCDConstants::DesiredRateLabel_Width,
                        Height : LCDConstants::DesiredRateLabel_Height
@@ -172,20 +152,18 @@ UI::UI()
                    m_MovementParameterLabels_Font,
                    colorFor(EncoderFunction::Rate),
                    RGBColor())
-    , m_Text_DesiredRate(
-          m_LCD,
-          LCD::Rect{
-              X : getEvenlyDividedX(
-                  LCDConstants::nMovementControlsColumns, 2, LCDConstants::DesiredMovementParameters_Width),
-              Y : LCDConstants::DesiredRateParameter_Y,
-              Width : LCDConstants::DesiredRateParameter_Width,
-              Height : LCDConstants::DesiredRateParameter_Height
-          },
-          LCD::Alignment::Right,
-          m_DesiredMovementParameters_Font,
-          colorFor(EncoderFunction::Rate),
-          RGBColor(),
-          LCDConstants::DesiredMovementParameters_HighlightHeight)
+    , m_Text_DesiredRate(m_LCD,
+                         LCD::Rect{
+                             X : LCDConstants::DesiredRateParameter_X,
+                             Y : LCDConstants::DesiredRateParameter_Y,
+                             Width : LCDConstants::DesiredRateParameter_Width,
+                             Height : LCDConstants::DesiredRateParameter_Height
+                         },
+                         LCD::Alignment::Right,
+                         m_DesiredMovementParameters_Font,
+                         colorFor(EncoderFunction::Rate),
+                         RGBColor(),
+                         LCDConstants::DesiredMovementParameters_HighlightHeight)
 
     //
     // Encoders
