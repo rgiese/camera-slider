@@ -81,14 +81,21 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
     m_LCD.endWrite();
 }
 
-void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharacterToHighlight) const
+void LCD::drawText(char const* const szText,
+                   Rect const rect,
+                   Alignment const alignment,
+                   GFXfont const* const pFont,
+                   RGBColor const foregroundColor,
+                   RGBColor const backgroundColor,
+                   uint8_t const characterHighlightHeight,
+                   ssize_t const idxCharacterToHighlight)
 {
     constexpr uint16_t c_AnyColor = static_cast<uint16_t>(-1);
 
     // Write to backbuffer
-    GFXcanvas1& monochromeCanvas = m_Parent.m_MonochromeCanvas;
+    GFXcanvas1& monochromeCanvas = m_MonochromeCanvas;
     {
-        if (monochromeCanvas.width() < m_Rect.Width || monochromeCanvas.height() < m_Rect.Height)
+        if (monochromeCanvas.width() < rect.Width || monochromeCanvas.height() < rect.Height)
         {
             // Consider tiling later
             return;
@@ -97,7 +104,7 @@ void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharact
         monochromeCanvas.fillScreen(0);
 
         monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
-        monochromeCanvas.setFont(m_Font);
+        monochromeCanvas.setFont(pFont);
         monochromeCanvas.setTextSize(1);
 
         int16_t measuredX;
@@ -108,19 +115,19 @@ void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharact
             monochromeCanvas.getTextBounds(szText, 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
         }
 
-        switch (m_Alignment)
+        switch (alignment)
         {
             case Alignment::Left:
                 monochromeCanvas.setCursor(0, -measuredY);
                 break;
 
             case Alignment::Center:
-                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2, -measuredY);
+                monochromeCanvas.setCursor((rect.Width - measuredWidth) / 2, -measuredY);
                 break;
 
             case Alignment::Right:
                 monochromeCanvas.setCursor(
-                    m_Rect.Width - measuredWidth - 1 /* boundary pixel */ - 1 /* rounding error in AdaFruit library? */,
+                    rect.Width - measuredWidth - 1 /* boundary pixel */ - 1 /* rounding error in AdaFruit library? */,
                     -measuredY);
                 break;
         }
@@ -141,17 +148,28 @@ void LCD::StaticText::setText(const char* const szText, ssize_t const idxCharact
                 int16_t const endCursorX = monochromeCanvas.getCursorX();
 
                 monochromeCanvas.fillRect(startCursorX,
-                                          m_Rect.Height - m_CharacterHighlightHeight,
+                                          rect.Height - characterHighlightHeight,
                                           endCursorX - startCursorX,
-                                          m_CharacterHighlightHeight,
+                                          characterHighlightHeight,
                                           c_AnyColor);
             }
         }
     }
 
     // Write backbuffer to device
-    m_Parent.blitMonochromeCanvas(
-        m_Rect.X, m_Rect.Y, m_Rect.Width, m_Rect.Height, m_ForegroundColor, m_BackgroundColor);
+    blitMonochromeCanvas(rect.X, rect.Y, rect.Width, rect.Height, foregroundColor, backgroundColor);
+}
+
+void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharacterToHighlight) const
+{
+    m_Parent.drawText(szText,
+                      m_Rect,
+                      m_Alignment,
+                      m_Font,
+                      m_ForegroundColor,
+                      m_BackgroundColor,
+                      m_CharacterHighlightHeight,
+                      idxCharacterToHighlight);
 }
 
 void LCD::StaticNumericText::setValue(int32_t const value)
