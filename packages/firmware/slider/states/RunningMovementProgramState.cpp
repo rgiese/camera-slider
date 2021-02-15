@@ -5,22 +5,21 @@ void RunningMovementProgramState::onEnteringState()
 {
     g_Display.set("Running program");
 
-    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-    movementProgram.dump("running");
+    m_CurrentMovementProgram = g_MovementProgramStore.CurrentMovementProgram;
+    m_CurrentMovementProgram.dump("running");
 
-    if (!movementProgram.Movements.size())
+    if (!m_CurrentMovementProgram.Movements.size())
     {
         // Empty program -> exit state
         return exitProgram();
     }
 
-    enterStep(m_idxInitialStep < movementProgram.Movements.size() ? m_idxInitialStep : 0);
+    enterStep(m_idxInitialStep < m_CurrentMovementProgram.Movements.size() ? m_idxInitialStep : 0);
 }
 
 void RunningMovementProgramState::enterStep(size_t const idxStep)
 {
-    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-    MovementProgram::Movement const& movement = movementProgram.Movements.at(idxStep);
+    MovementProgram::Movement const& movement = m_CurrentMovementProgram.Movements.at(idxStep);
 
     // Prep for movement
     switch (movement.Type)
@@ -28,9 +27,9 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
         case Flatbuffers::Firmware::MovementType::Move: {
             // Apply desired motor settings
             g_MotorController.setMaxSpeed(
-                static_cast<uint32_t>(movement.DesiredSpeed * movementProgram.RatePercent / 100.0f));
+                static_cast<uint32_t>(movement.DesiredSpeed * m_CurrentMovementProgram.RatePercent / 100.0f));
             g_MotorController.setMaxAcceleration(
-                static_cast<uint32_t>(movement.DesiredAcceleration * movementProgram.RatePercent / 100.0f));
+                static_cast<uint32_t>(movement.DesiredAcceleration * m_CurrentMovementProgram.RatePercent / 100.0f));
 
             // Seek to position
             g_MotorController.setTargetPosition(movement.DesiredPosition);
@@ -67,8 +66,7 @@ void RunningMovementProgramState::onLoop()
     }
 
     // Check if movement is completed
-    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-    MovementProgram::Movement const& movement = movementProgram.Movements.at(m_idxCurrentStep);
+    MovementProgram::Movement const& movement = m_CurrentMovementProgram.Movements.at(m_idxCurrentStep);
 
     switch (movement.Type)
     {
@@ -84,7 +82,7 @@ void RunningMovementProgramState::onLoop()
             unsigned long const timeDelayed_msec = millis() - m_DelayStart_msec;
 
             if (timeDelayed_msec >
-                static_cast<unsigned long>(movement.DelayTime * movementProgram.RatePercent / 100.0f))
+                static_cast<unsigned long>(movement.DelayTime * m_CurrentMovementProgram.RatePercent / 100.0f))
             {
                 m_DelayStart_msec = 0;
                 return nextStep();
@@ -100,14 +98,13 @@ void RunningMovementProgramState::onLoop()
 
 void RunningMovementProgramState::nextStep()
 {
-    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-
-    if ((m_idxCurrentStep + 1) >= movementProgram.Movements.size())
+    if ((m_idxCurrentStep + 1) >= m_CurrentMovementProgram.Movements.size())
     {
         // Reached end of movement list
-        bool const isRepeatRequested = !!(movementProgram.Flags & Flatbuffers::Firmware::MovementProgramFlags::Repeat);
+        bool const isRepeatRequested =
+            !!(m_CurrentMovementProgram.Flags & Flatbuffers::Firmware::MovementProgramFlags::Repeat);
 
-        if (isRepeatRequested && movementProgram.Movements.size() > 1)
+        if (isRepeatRequested && m_CurrentMovementProgram.Movements.size() > 1)
         {
             // Repeat (provided we had more than one step)
             return enterStep(0);
@@ -144,20 +141,21 @@ bool RunningMovementProgramState::onRequest(Request const& request)
 
         case RequestType::StartMovementProgram:
             if (request.StartMovementProgram.atStep != m_idxCurrentStep &&
-                request.StartMovementProgram.atStep <
-                    g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
+                request.StartMovementProgram.atStep < m_CurrentMovementProgram.Movements.size())
             {
                 enterStep(request.StartMovementProgram.atStep);
             }
             return true;
 
         case RequestType::UpdatedMovementProgram:
-            if (m_idxCurrentStep < g_MovementProgramStore.CurrentMovementProgram.get().Movements.size())
+            m_CurrentMovementProgram = g_MovementProgramStore.CurrentMovementProgram;
+
+            if (m_idxCurrentStep < m_CurrentMovementProgram.Movements.size())
             {
                 // Reboot step to update
                 enterStep(m_idxCurrentStep);
             }
-            else if (!g_MovementProgramStore.CurrentMovementProgram.get().Movements.empty())
+            else if (!m_CurrentMovementProgram.Movements.empty())
             {
                 // Reboot entire program
                 enterStep(0);

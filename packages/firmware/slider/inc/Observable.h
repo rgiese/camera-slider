@@ -75,14 +75,25 @@ public:
         }
     }
 
-    operator T const &() const
+    template <typename U = T>
+    typename std::enable_if<std::is_integral<U>::value || std::is_enum<U>::value, U>::type get() const
     {
         return m_Value;
     }
 
-    T const& get() const  // use when auto-casting is ambiguous
+    template <typename U = T>
+    typename std::enable_if<!(std::is_integral<U>::value || std::is_enum<U>::value), U>::type get() const
     {
-        return m_Value;
+        std::lock_guard<std::mutex> guard(m_Mutex);
+
+        T value = m_Value;
+
+        return value;
+    }
+
+    operator T() const
+    {
+        return get();
     }
 
     // Observer side
@@ -102,7 +113,7 @@ private:
 private:
     std::vector<Callback> m_Observers;
 
-    std::mutex m_Mutex;
+    mutable std::mutex m_Mutex;
 
     T m_Value;
     bool m_IsDirty;

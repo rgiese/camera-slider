@@ -17,6 +17,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <type_traits>
 
 // Core definitions
 #include "inc/CoreDefs.h"
