@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <chrono>
+using namespace std::chrono_literals;
+
 #include <cstdarg>
 #include <cstring>
 #include <ctime>
