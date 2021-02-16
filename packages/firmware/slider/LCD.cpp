@@ -14,20 +14,19 @@ void LCD::begin()
     m_LCD.begin(32 * 1000 * 1000);  // 32Mhz is the Particle Gen3 maximum
     m_LCD.setRotation(3);
 
-    blitColorRegion(0, 0, m_LCD.width(), m_LCD.height(), RGBColor());
+    blitColorRegion(Rect{0, 0, m_LCD.width(), m_LCD.height()}, RGBColor());
 }
 
-void LCD::blitColorRegion(
-    uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, RGBColor const color)
+void LCD::blitColorRegion(Rect const& rect, RGBColor const color)
 {
     // A (much) faster version of m_LCD.fillScreen
     std::array<uint16_t, DisplayWidth> pixelBuffer;  // about the maximum we're willing to pay in stack space
     pixelBuffer.fill(color.to565Color());
 
     m_LCD.startWrite();
-    m_LCD.setAddrWindow(x, y, width, height);
+    m_LCD.setAddrWindow(rect.X, rect.Y, rect.Width, rect.Height);
 
-    size_t cPixelsRemaining = width * height;
+    size_t cPixelsRemaining = rect.Width * rect.Height;
 
     while (cPixelsRemaining)
     {
@@ -82,7 +81,7 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
 }
 
 void LCD::drawText(char const* const szText,
-                   Rect const rect,
+                   Rect const& rect,
                    Alignment const alignment,
                    GFXfont const* const pFont,
                    RGBColor const foregroundColor,

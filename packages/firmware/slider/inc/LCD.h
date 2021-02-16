@@ -83,11 +83,10 @@ public:
     static constexpr uint16_t DisplayHeight = HX8357_TFTWIDTH;
 
 public:
-    void blitColorRegion(
-        uint16_t const x, uint16_t const y, uint16_t const width, uint16_t const height, RGBColor const color);
+    void blitColorRegion(Rect const& rect, RGBColor const color);
 
     void drawText(char const* const szText,
-                  Rect const rect,
+                  Rect const& rect,
                   Alignment const alignment,
                   GFXfont const* const pFont,
                   RGBColor const foregroundColor,
