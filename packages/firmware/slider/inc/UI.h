@@ -87,6 +87,8 @@ private:
             return MovementProgramTable_Rect.Y + idxRow * MovementProgramTableRow_Height;
         }
 
+        static constexpr uint16_t nMovementProgramTableRows =
+            MovementProgramTable_Rect.Height / MovementProgramTableRow_Height;
 
         // Movement controls row
         static constexpr uint16_t nMovementControlsColumns = 3;
@@ -142,7 +144,18 @@ private:
     LCD::StaticText m_Label_Rate;
     LCD::StaticNumericText m_Text_DesiredRate;
 
-    void drawMovementProgram(MovementProgram const& movementProgram);
+    struct MovementProgramRow
+    {
+        LCD::StaticNumericText Step;
+        LCD::StaticNumericText DesiredPosition;
+        LCD::StaticNumericText DesiredSpeed;
+        LCD::StaticNumericText DesiredAcceleration;
+
+        void clear();
+        void update(uint16_t const idxMovement, MovementProgram::Movement const& movement);
+    };
+
+    std::vector<MovementProgramRow> m_MovementProgramRows;
 
 private:
     //

@@ -153,7 +153,7 @@ UI::UI()
                          colorFor(EncoderFunction::Rate),
                          RGBColor(),
                          LCDConstants::DesiredMovementParameters_HighlightHeight)
-
+    , m_MovementProgramRows()
     //
     // Encoders
     //
@@ -166,6 +166,32 @@ UI::UI()
           Encoder(m_Wire, 0x11),  // Rate
       })
 {
+    m_MovementProgramRows.reserve(LCDConstants::nMovementProgramTableRows);
+
+    // Generate controls for entire movement program table
+    for (uint16_t idxRow = 0; idxRow < LCDConstants::nMovementProgramTableRows; ++idxRow)
+    {
+        auto const buildControl = [this, idxRow](uint16_t idxColumn, RGBColor const& color) -> LCD::StaticNumericText {
+            return LCD::StaticNumericText(
+                m_LCD,
+                LCD::Rect{LCDConstants::MovementProgramTableRow_CellX(idxColumn),
+                          LCDConstants::MovementProgramTableRow_CellY(idxRow),
+                          (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
+                                          : LCDConstants::MovementProgramTableRow_StepWidth,
+                          LCDConstants::MovementProgramTableRow_Height},
+                LCD::Alignment::Left,
+                m_MovementParameterLabels_Font,
+                color,
+                RGBColor());
+        };
+
+        m_MovementProgramRows.push_back({
+            buildControl(0, colorFor(EncoderFunction::Step)),
+            buildControl(1, colorFor(EncoderFunction::Position)),
+            buildControl(2, colorFor(EncoderFunction::Speed)),
+            buildControl(3, colorFor(EncoderFunction::Acceleration)),
+        });
+    }
 }
 
 void UI::begin()
@@ -219,7 +245,18 @@ void UI::begin()
 
     g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
         m_Text_DesiredRate.setValue(movementProgram.RatePercent);
-        drawMovementProgram(movementProgram);
+
+        size_t idxMovement = 0;
+
+        for (; idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size()); ++idxMovement)
+        {
+            m_MovementProgramRows[idxMovement].update(idxMovement, movementProgram.Movements[idxMovement]);
+        }
+
+        for (; idxMovement < m_MovementProgramRows.size(); ++idxMovement)
+        {
+            m_MovementProgramRows[idxMovement].clear();
+        }
     });
 
     // Set up labels
@@ -228,6 +265,22 @@ void UI::begin()
     m_Label_Speed.setText("Speed");
     m_Label_Acceleration.setText("Acceleration");
     m_Label_Rate.setText("Rate");
+}
+
+void UI::MovementProgramRow::clear()
+{
+    Step.clear();
+    DesiredPosition.clear();
+    DesiredSpeed.clear();
+    DesiredAcceleration.clear();
+}
+
+void UI::MovementProgramRow::update(uint16_t const idxMovement, MovementProgram::Movement const& movement)
+{
+    Step.setValue(idxMovement);
+    DesiredPosition.setValue(movement.DesiredPosition);
+    DesiredSpeed.setValue(movement.DesiredSpeed);
+    DesiredAcceleration.setValue(movement.DesiredAcceleration);
 }
 
 void UI::onMainLoop()
@@ -270,41 +323,5 @@ void UI::onMainLoop()
             g_MovementProgramStore.CurrentMovementProgram.get().mutateRate(rateDelta);
 
         g_MovementProgramStore.setMovementProgram(mutatedMovementProgram);
-    }
-}
-
-void UI::drawMovementProgram(MovementProgram const& movementProgram)
-{
-    m_LCD.blitColorRegion(LCDConstants::MovementProgramTable_Rect, RGBColor());
-
-    uint16_t const cRowsToDisplay =
-        static_cast<uint16_t>(std::min(movementProgram.Movements.size(),
-                                       static_cast<size_t>(LCDConstants::MovementProgramTable_Rect.Height /
-                                                           LCDConstants::MovementProgramTableRow_Height)));
-
-    for (uint16_t idxMovement = 0; idxMovement < cRowsToDisplay; ++idxMovement)
-    {
-        MovementProgram::Movement const& movement = movementProgram.Movements[idxMovement];
-
-        auto const drawMovementCell = [this, idxMovement](
-                                          uint32_t const value, uint16_t idxColumn, RGBColor const& color) {
-            char szBuffer[32];
-            snprintf(szBuffer, countof(szBuffer), "%u", value);
-
-            m_LCD.drawText(szBuffer,
-                           LCD::Rect{LCDConstants::MovementProgramTableRow_CellX(idxColumn),
-                                     LCDConstants::MovementProgramTableRow_CellY(idxMovement),
-                                     (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
-                                                     : LCDConstants::MovementProgramTableRow_StepWidth,
-                                     LCDConstants::MovementProgramTableRow_Height},
-                           LCD::Alignment::Left,
-                           m_MovementParameterLabels_Font,
-                           color);
-        };
-
-        drawMovementCell(idxMovement, 0, colorFor(EncoderFunction::Step));
-        drawMovementCell(movement.DesiredPosition, 1, colorFor(EncoderFunction::Position));
-        drawMovementCell(movement.DesiredSpeed, 2, colorFor(EncoderFunction::Speed));
-        drawMovementCell(movement.DesiredAcceleration, 3, colorFor(EncoderFunction::Acceleration));
     }
 }
