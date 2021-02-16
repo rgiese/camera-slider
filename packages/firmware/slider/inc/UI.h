@@ -63,32 +63,14 @@ private:
         static constexpr uint16_t PaddingMedium = 6;
 
         // Movement program table
-        static constexpr uint16_t MovementProgramTableHeader_Y = PaddingSmall;
-        static constexpr uint16_t MovementProgramTableHeader_Height = 18;
-
-        static constexpr LCD::Rect MovementProgramTable_Rect{
-            PaddingSmall, MovementProgramTableHeader_Y + MovementProgramTableHeader_Height, 350, 200};
-
-        static constexpr uint16_t MovementProgramTableRow_Height = 18;
+        static constexpr uint16_t MovementProgramTableX = PaddingSmall;
+        static constexpr uint16_t MovementProgramTableY = PaddingSmall;
 
         static constexpr uint16_t MovementProgramTableRow_StepWidth = 50;
-        static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth =
-            (MovementProgramTable_Rect.Width - MovementProgramTableRow_StepWidth) / 3;
+        static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth = 100;
+        static constexpr uint16_t MovementProgramTableRow_Height = 18;
 
-        static constexpr uint16_t MovementProgramTableRow_CellX(uint16_t const idxColumn)
-        {
-            return MovementProgramTable_Rect.X +
-                   ((idxColumn > 0) ? MovementProgramTableRow_StepWidth +
-                                          (idxColumn - 1) * MovementProgramTableRow_MovementParameterWidth
-                                    : 0);
-        }
-        static constexpr uint16_t MovementProgramTableRow_CellY(uint16_t const idxRow)
-        {
-            return MovementProgramTable_Rect.Y + idxRow * MovementProgramTableRow_Height;
-        }
-
-        static constexpr uint16_t nMovementProgramTableRows =
-            MovementProgramTable_Rect.Height / MovementProgramTableRow_Height;
+        static constexpr uint16_t nMovementProgramTableRows = 7;
 
         // Movement controls row
         static constexpr uint16_t nMovementControlsColumns = 3;
@@ -120,7 +102,7 @@ private:
             UITools::getEvenlyDivided(LCD::DisplayHeight, 2, 1, DesiredRateParameter_Height);
 
         static constexpr uint16_t DesiredRateLabel_Width = DesiredRateParameter_Width;
-        static constexpr uint16_t DesiredRateLabel_Height = MovementProgramTableHeader_Height;
+        static constexpr uint16_t DesiredRateLabel_Height = 18;
         static constexpr uint16_t DesiredRateLabel_X = DesiredRateParameter_X;
         static constexpr uint16_t DesiredRateLabel_Y = DesiredRateParameter_Y - DesiredRateLabel_Height;
     };
@@ -128,11 +110,6 @@ private:
     GFXfont const* const m_MovementParameterLabels_Font;
     GFXfont const* const m_DesiredMovementParameters_Font;
     GFXfont const* const m_ReportedMovementParameters_Font;
-
-    LCD::StaticText m_Label_Step;
-    LCD::StaticText m_Label_Position;
-    LCD::StaticText m_Label_Speed;
-    LCD::StaticText m_Label_Acceleration;
 
     LCD::StaticNumericText m_Text_DesiredPosition;
     LCD::StaticNumericText m_Text_DesiredMaximumSpeed;

@@ -6,8 +6,6 @@
 
 UI g_UI;
 
-constexpr LCD::Rect UI::LCDConstants::MovementProgramTable_Rect;
-
 UI::UI()
     : m_FunctionColors({
           RGBColor{0xf2, 0x67, 0x39},  // Position
@@ -23,51 +21,6 @@ UI::UI()
     , m_MovementParameterLabels_Font(&FreeSans9pt7b)
     , m_DesiredMovementParameters_Font(&FreeSans18pt7b)
     , m_ReportedMovementParameters_Font(&FreeSans12pt7b)
-    // Movement program
-    , m_Label_Step(m_LCD,
-                   LCD::Rect{
-                       X : LCDConstants::MovementProgramTableRow_CellX(0),
-                       Y : LCDConstants::MovementProgramTableHeader_Y,
-                       Width : LCDConstants::MovementProgramTableRow_StepWidth,
-                       Height : LCDConstants::MovementProgramTableHeader_Height
-                   },
-                   LCD::Alignment::Left,
-                   m_MovementParameterLabels_Font,
-                   colorFor(EncoderFunction::Step),
-                   RGBColor())
-    , m_Label_Position(m_LCD,
-                       LCD::Rect{
-                           X : LCDConstants::MovementProgramTableRow_CellX(1),
-                           Y : LCDConstants::MovementProgramTableHeader_Y,
-                           Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
-                           Height : LCDConstants::MovementProgramTableHeader_Height
-                       },
-                       LCD::Alignment::Left,
-                       m_MovementParameterLabels_Font,
-                       colorFor(EncoderFunction::Position),
-                       RGBColor())
-    , m_Label_Speed(m_LCD,
-                    LCD::Rect{
-                        X : LCDConstants::MovementProgramTableRow_CellX(2),
-                        Y : LCDConstants::MovementProgramTableHeader_Y,
-                        Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
-                        Height : LCDConstants::MovementProgramTableHeader_Height
-                    },
-                    LCD::Alignment::Left,
-                    m_MovementParameterLabels_Font,
-                    colorFor(EncoderFunction::Speed),
-                    RGBColor())
-    , m_Label_Acceleration(m_LCD,
-                           LCD::Rect{
-                               X : LCDConstants::MovementProgramTableRow_CellX(3),
-                               Y : LCDConstants::MovementProgramTableHeader_Y,
-                               Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
-                               Height : LCDConstants::MovementProgramTableHeader_Height
-                           },
-                           LCD::Alignment::Left,
-                           m_MovementParameterLabels_Font,
-                           colorFor(EncoderFunction::Acceleration),
-                           RGBColor())
     // Movement controls
     , m_Text_DesiredPosition(m_LCD,
                              LCD::Rect{
@@ -169,13 +122,24 @@ UI::UI()
     m_MovementProgramRows.reserve(LCDConstants::nMovementProgramTableRows);
 
     // Generate controls for entire movement program table
+    auto const MovementProgramTableRow_CellX = [](uint16_t const idxColumn) -> uint16_t {
+        return LCDConstants::MovementProgramTableX +
+               ((idxColumn > 0) ? LCDConstants::MovementProgramTableRow_StepWidth +
+                                      (idxColumn - 1) * LCDConstants::MovementProgramTableRow_MovementParameterWidth
+                                : 0);
+    };
+
+    auto const MovementProgramTableRow_CellY = [](uint16_t const idxRow) -> uint16_t {
+        return LCDConstants::MovementProgramTableY + idxRow * LCDConstants::MovementProgramTableRow_Height;
+    };
+
     for (uint16_t idxRow = 0; idxRow < LCDConstants::nMovementProgramTableRows; ++idxRow)
     {
-        auto const buildControl = [this, idxRow](uint16_t idxColumn, RGBColor const& color) -> LCD::StaticNumericText {
+        auto const buildControl = [&](uint16_t idxColumn, RGBColor const& color) -> LCD::StaticNumericText {
             return LCD::StaticNumericText(
                 m_LCD,
-                LCD::Rect{LCDConstants::MovementProgramTableRow_CellX(idxColumn),
-                          LCDConstants::MovementProgramTableRow_CellY(idxRow),
+                LCD::Rect{MovementProgramTableRow_CellX(idxColumn),
+                          MovementProgramTableRow_CellY(idxRow),
                           (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
                                           : LCDConstants::MovementProgramTableRow_StepWidth,
                           LCDConstants::MovementProgramTableRow_Height},
@@ -248,22 +212,26 @@ void UI::begin()
 
         size_t idxMovement = 0;
 
-        for (; idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size()); ++idxMovement)
+        // FUTURE: Make sure selected step is in view range
+        for (; idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size() - 1);
+             ++idxMovement)
         {
-            m_MovementProgramRows[idxMovement].update(idxMovement, movementProgram.Movements[idxMovement]);
+            // m_MovementProgramRows[0] is a header row, skip
+            m_MovementProgramRows[idxMovement + 1].update(idxMovement, movementProgram.Movements[idxMovement]);
         }
 
-        for (; idxMovement < m_MovementProgramRows.size(); ++idxMovement)
+        for (; idxMovement < m_MovementProgramRows.size() - 1; ++idxMovement)
         {
-            m_MovementProgramRows[idxMovement].clear();
+            m_MovementProgramRows[idxMovement + 1].clear();
         }
     });
 
     // Set up labels
-    m_Label_Step.setText("Step");
-    m_Label_Position.setText("Position");
-    m_Label_Speed.setText("Speed");
-    m_Label_Acceleration.setText("Acceleration");
+    m_MovementProgramRows[0].Step.setText("Step");
+    m_MovementProgramRows[0].DesiredPosition.setText("Position");
+    m_MovementProgramRows[0].DesiredSpeed.setText("Speed");
+    m_MovementProgramRows[0].DesiredAcceleration.setText("Acceleration");
+
     m_Label_Rate.setText("Rate");
 }
 
