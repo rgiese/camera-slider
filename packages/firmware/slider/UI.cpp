@@ -150,7 +150,7 @@ UI::UI()
         };
 
         m_MovementProgramRows.push_back({
-            buildControl(0, colorFor(EncoderFunction::Step)),
+            buildControl(0, colorFor(EncoderFunction::Step).multiply(0.8f)),
             buildControl(1, colorFor(EncoderFunction::Position)),
             buildControl(2, colorFor(EncoderFunction::Speed)),
             buildControl(3, colorFor(EncoderFunction::Acceleration)),
@@ -245,7 +245,7 @@ void UI::MovementProgramRow::clear()
 
 void UI::MovementProgramRow::update(uint16_t const idxMovement, MovementProgram::Movement const& movement)
 {
-    Step.setValue(idxMovement);
+    Step.setValue(idxMovement + 1 /* human-readable */);
     DesiredPosition.setValue(movement.DesiredPosition);
     DesiredSpeed.setValue(movement.DesiredSpeed);
     DesiredAcceleration.setValue(movement.DesiredAcceleration);
