@@ -58,7 +58,8 @@ private:
     uint16_t m_idxSelectedStep;
     uint16_t m_nStepsInProgram;
 
-    void updatedSelectedStep(int16_t const idxSelectedStepDelta = 0);
+    void updateSelectedStep(MovementProgram const& movementProgram, int16_t const idxSelectedStepDelta = 0);
+    bool editingExistingStep() const;
 
 private:
     //

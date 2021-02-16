@@ -217,14 +217,26 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
     // Set up observers
-    g_MotorController.TargetPosition.attach_and_initialize(
-        [this](int32_t const position) { m_Text_DesiredPosition.setValue(position); });
+    g_MotorController.TargetPosition.attach_and_initialize([this](int32_t const position) {
+        if (!editingExistingStep())
+        {
+            m_Text_DesiredPosition.setValue(position);
+        }
+    });
 
-    g_MotorController.MaximumSpeed.attach_and_initialize(
-        [this](int32_t const velocity) { m_Text_DesiredMaximumSpeed.setValue(velocity); });
+    g_MotorController.MaximumSpeed.attach_and_initialize([this](int32_t const velocity) {
+        if (!editingExistingStep())
+        {
+            m_Text_DesiredMaximumSpeed.setValue(velocity);
+        }
+    });
 
-    g_MotorController.MaximumAcceleration.attach_and_initialize(
-        [this](uint32_t const acceleration) { m_Text_DesiredMaximumAcceleration.setValue(acceleration); });
+    g_MotorController.MaximumAcceleration.attach_and_initialize([this](uint32_t const acceleration) {
+        if (!editingExistingStep())
+        {
+            m_Text_DesiredMaximumAcceleration.setValue(acceleration);
+        }
+    });
 
     g_MotorController.CurrentPosition.attach_and_initialize(
         [this](int32_t const position) { m_Text_ReportedPosition.setValue(position); });
@@ -233,9 +245,8 @@ void UI::begin()
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
     g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
-        // Step
-        m_nStepsInProgram = movementProgram.Movements.size();
-        updatedSelectedStep();
+        // Steps and controls
+        updateSelectedStep(movementProgram);
 
         // Rate
         m_Text_DesiredRate.setValue(movementProgram.RatePercent);
@@ -266,7 +277,7 @@ void UI::begin()
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
 
-    updatedSelectedStep();
+    updateSelectedStep(g_MovementProgramStore.CurrentMovementProgram);
 }
 
 void UI::MovementProgramRow::clear()
@@ -299,32 +310,43 @@ void UI::onMainLoop()
     int32_t const stepDelta = encoderFor(EncoderFunction::Step).getLatestValueDelta();
     int32_t const rateDelta = encoderFor(EncoderFunction::Rate).getLatestValueDelta();
 
-    if (positionDelta != 0)
+    // Apply movement parameters
+    if (editingExistingStep())
     {
-        Request request = {Type : RequestType::DesiredPositionDelta};
-        request.DesiredPositionDelta.delta = positionDelta;
-        g_RequestQueue.push(request);
+        // Editing existing step - update program
+    }
+    else
+    {
+        // Creating new step - control live position
+        if (positionDelta != 0)
+        {
+            Request request = {Type : RequestType::DesiredPositionDelta};
+            request.DesiredPositionDelta.delta = positionDelta;
+            g_RequestQueue.push(request);
+        }
+
+        if (speedDelta != 0)
+        {
+            Request request = {Type : RequestType::DesiredMaximumSpeedDelta};
+            request.DesiredMaximumSpeedDelta.delta = speedDelta;
+            g_RequestQueue.push(request);
+        }
+
+        if (accelerationDelta != 0)
+        {
+            Request request = {Type : RequestType::DesiredMaximumAccelerationDelta};
+            request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
+            g_RequestQueue.push(request);
+        }
     }
 
-    if (speedDelta != 0)
-    {
-        Request request = {Type : RequestType::DesiredMaximumSpeedDelta};
-        request.DesiredMaximumSpeedDelta.delta = speedDelta;
-        g_RequestQueue.push(request);
-    }
-
-    if (accelerationDelta != 0)
-    {
-        Request request = {Type : RequestType::DesiredMaximumAccelerationDelta};
-        request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
-        g_RequestQueue.push(request);
-    }
-
+    // Apply step selection
     if (stepDelta != 0)
     {
-        updatedSelectedStep(stepDelta);
+        updateSelectedStep(g_MovementProgramStore.CurrentMovementProgram, stepDelta);
     }
 
+    // Apply rate selection
     if (rateDelta != 0)
     {
         MovementProgram const mutatedMovementProgram =
@@ -334,18 +356,35 @@ void UI::onMainLoop()
     }
 }
 
-void UI::updatedSelectedStep(int16_t const idxSelectedStepDelta)
+void UI::updateSelectedStep(MovementProgram const& movementProgram, int16_t const idxSelectedStepDelta)
 {
+    m_nStepsInProgram = movementProgram.Movements.size();
+
     // Note: clamp_delta accepts values up to and _including_ the maximum value provided (m_nStepsInProgram)
     // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
     m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, idxSelectedStepDelta, 0, m_nStepsInProgram);
 
-    if (m_idxSelectedStep >= m_nStepsInProgram)
+    if (editingExistingStep())
     {
-        m_Text_DesiredStep.setText("new");
+        m_Text_DesiredStep.setValue(m_idxSelectedStep + 1 /* human-readable */);
+
+        MovementProgram::Movement const& movement = movementProgram.Movements[m_idxSelectedStep];
+
+        m_Text_DesiredPosition.setValue(movement.DesiredPosition);
+        m_Text_DesiredMaximumSpeed.setValue(movement.DesiredSpeed);
+        m_Text_DesiredMaximumAcceleration.setValue(movement.DesiredAcceleration);
     }
     else
     {
-        m_Text_DesiredStep.setValue(m_idxSelectedStep + 1 /* human-readable */);
+        m_Text_DesiredStep.setText("new");
+
+        m_Text_DesiredPosition.setValue(g_MotorController.TargetPosition);
+        m_Text_DesiredMaximumSpeed.setValue(g_MotorController.MaximumSpeed);
+        m_Text_DesiredMaximumAcceleration.setValue(g_MotorController.MaximumAcceleration);
     }
+}
+
+bool UI::editingExistingStep() const
+{
+    return m_idxSelectedStep < m_nStepsInProgram;
 }
