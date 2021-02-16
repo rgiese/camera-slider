@@ -14,6 +14,8 @@ UI::UI()
           RGBColor{0xff, 0xff, 0xff},  // Step
           RGBColor{0x0c, 0xf2, 0xbd},  // Rate
       })
+    , m_idxSelectedStep()
+    , m_nStepsInProgram()
     //
     // LCD
     //
@@ -104,8 +106,7 @@ UI::UI()
                          LCD::Alignment::Right,
                          m_DesiredMovementParameters_Font,
                          colorFor(EncoderFunction::Step),
-                         RGBColor(),
-                         LCDConstants::DesiredMovementParameters_HighlightHeight)
+                         RGBColor())
     // Rate
     , m_Label_Rate(m_LCD,
                    LCD::Rect{
@@ -232,8 +233,14 @@ void UI::begin()
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
     g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
+        // Step
+        m_nStepsInProgram = movementProgram.Movements.size();
+        updatedSelectedStep();
+
+        // Rate
         m_Text_DesiredRate.setValue(movementProgram.RatePercent);
 
+        // Movements
         size_t idxMovement = 0;
 
         // FUTURE: Make sure selected step is in view range
@@ -259,7 +266,7 @@ void UI::begin()
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
 
-    m_Text_DesiredStep.setText("new");
+    updatedSelectedStep();
 }
 
 void UI::MovementProgramRow::clear()
@@ -289,6 +296,7 @@ void UI::onMainLoop()
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
     int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();
     int32_t const accelerationDelta = encoderFor(EncoderFunction::Acceleration).getLatestValueDelta();
+    int32_t const stepDelta = encoderFor(EncoderFunction::Step).getLatestValueDelta();
     int32_t const rateDelta = encoderFor(EncoderFunction::Rate).getLatestValueDelta();
 
     if (positionDelta != 0)
@@ -312,11 +320,32 @@ void UI::onMainLoop()
         g_RequestQueue.push(request);
     }
 
+    if (stepDelta != 0)
+    {
+        updatedSelectedStep(stepDelta);
+    }
+
     if (rateDelta != 0)
     {
         MovementProgram const mutatedMovementProgram =
             g_MovementProgramStore.CurrentMovementProgram.get().mutateRate(rateDelta);
 
         g_MovementProgramStore.setMovementProgram(mutatedMovementProgram);
+    }
+}
+
+void UI::updatedSelectedStep(int16_t const idxSelectedStepDelta)
+{
+    // Note: clamp_delta accepts values up to and _including_ the maximum value provided (m_nStepsInProgram)
+    // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
+    m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, idxSelectedStepDelta, 0, m_nStepsInProgram);
+
+    if (m_idxSelectedStep >= m_nStepsInProgram)
+    {
+        m_Text_DesiredStep.setText("new");
+    }
+    else
+    {
+        m_Text_DesiredStep.setValue(m_idxSelectedStep + 1 /* human-readable */);
     }
 }
