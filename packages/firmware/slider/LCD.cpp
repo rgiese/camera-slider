@@ -157,25 +157,36 @@ void LCD::drawText(char const* const szText,
     blitMonochromeCanvas(rect.X, rect.Y, rect.Width, rect.Height, foregroundColor, backgroundColor);
 }
 
-void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharacterToHighlight) const
+void LCD::StaticText::clear()
 {
-    m_Parent.drawText(szText,
-                      m_Rect,
-                      m_Alignment,
-                      m_Font,
-                      m_ForegroundColor,
-                      m_BackgroundColor,
-                      m_CharacterHighlightHeight,
-                      idxCharacterToHighlight);
+    if (m_Text[0])
+    {
+        setText("");
+    }
+}
+
+void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharacterToHighlight)
+{
+    if (strcmp(szText, m_Text) != 0)
+    {
+        strncpy(m_Text, szText, countof(m_Text));
+        m_Text[countof(m_Text) - 1] = 0;
+
+        m_Parent.drawText(m_Text,
+                          m_Rect,
+                          m_Alignment,
+                          m_Font,
+                          m_ForegroundColor,
+                          m_BackgroundColor,
+                          m_CharacterHighlightHeight,
+                          idxCharacterToHighlight);
+    }
 }
 
 void LCD::StaticNumericText::setValue(int32_t const value)
 {
-    if (m_Value != value)
-    {
-        m_Value = value;
-        update();
-    }
+    m_Value = value;
+    update();
 }
 
 void LCD::StaticNumericText::setActiveDigit(uint8_t const activeDigit)
@@ -189,7 +200,6 @@ void LCD::StaticNumericText::setActiveDigit(uint8_t const activeDigit)
 
 void LCD::StaticNumericText::update()
 {
-    // Create text buffer
     char rgText[std::numeric_limits<decltype(m_Value)>::digits10 + 1 /* sign */ + 1 /* terminator */];
     {
         snprintf(rgText, countof(rgText), "%0*d", m_ActiveDigit + 1, m_Value);

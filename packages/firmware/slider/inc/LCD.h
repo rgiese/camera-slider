@@ -36,9 +36,11 @@ public:
             , m_Font(font)
             , m_ForegroundColor(foregroundColor)
             , m_BackgroundColor(backgroundColor)
-            , m_CharacterHighlightHeight(characterHighlightHeight){};
+            , m_CharacterHighlightHeight(characterHighlightHeight)
+            , m_Text(){};
 
-        void setText(char const* const szText, ssize_t const idxCharacterToHighlight = -1) const;
+        void clear();
+        void setText(char const* const szText, ssize_t const idxCharacterToHighlight = -1);
 
     protected:
         LCD& m_Parent;
@@ -48,9 +50,11 @@ public:
         RGBColor const m_ForegroundColor;
         RGBColor const m_BackgroundColor;
         uint8_t m_CharacterHighlightHeight;
+
+        char m_Text[32];
     };
 
-    class StaticNumericText : private StaticText
+    class StaticNumericText : public StaticText
     {
     public:
         StaticNumericText(LCD& parent,
