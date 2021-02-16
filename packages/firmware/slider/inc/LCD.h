@@ -90,9 +90,9 @@ public:
                   Alignment const alignment,
                   GFXfont const* const pFont,
                   RGBColor const foregroundColor,
-                  RGBColor const backgroundColor,
-                  uint8_t const characterHighlightHeight,
-                  ssize_t const idxCharacterToHighlight);
+                  RGBColor const backgroundColor = RGBColor(),
+                  uint8_t const characterHighlightHeight = 0,
+                  ssize_t const idxCharacterToHighlight = -1);
 
 private:
     // Non-copyable

@@ -74,6 +74,17 @@ private:
         }
         static constexpr uint16_t MovementParameterLabels_Y = PaddingSmall;
 
+        // Movement program table
+        static constexpr LCD::Rect MovementProgramTable_Rect{
+            PaddingSmall, MovementParameterLabels_Y + MovementParameterLabels_Height + PaddingSmall, 300, 200};
+
+        static constexpr uint16_t MovementProgramTableRow_Height = 18;
+
+        static constexpr uint16_t MovementProgramTableRow_StepWidth = 50;
+        static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth =
+            (MovementProgramTable_Rect.Width - MovementProgramTableRow_StepWidth) / 3;
+
+
         // Movement controls row
         static constexpr uint16_t nMovementControlsColumns = 3;
 
@@ -127,6 +138,8 @@ private:
 
     LCD::StaticText m_Label_Rate;
     LCD::StaticNumericText m_Text_DesiredRate;
+
+    void drawMovementProgram(MovementProgram const& movementProgram);
 
 private:
     //

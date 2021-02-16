@@ -6,6 +6,8 @@
 
 UI g_UI;
 
+constexpr LCD::Rect UI::LCDConstants::MovementProgramTable_Rect;
+
 UI::UI()
     : m_FunctionColors({
           RGBColor{0xf2, 0x67, 0x39},  // Position
@@ -215,8 +217,10 @@ void UI::begin()
     g_MotorController.CurrentVelocity.attach_and_initialize(
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
-    g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize(
-        [this](MovementProgram const& movementProgram) { m_Text_DesiredRate.setValue(movementProgram.RatePercent); });
+    g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
+        m_Text_DesiredRate.setValue(movementProgram.RatePercent);
+        drawMovementProgram(movementProgram);
+    });
 
     // Set up labels
     m_Label_Step.setText("Step");
@@ -266,5 +270,47 @@ void UI::onMainLoop()
             g_MovementProgramStore.CurrentMovementProgram.get().mutateRate(rateDelta);
 
         g_MovementProgramStore.setMovementProgram(mutatedMovementProgram);
+    }
+}
+
+void UI::drawMovementProgram(MovementProgram const& movementProgram)
+{
+    m_LCD.blitColorRegion(LCDConstants::MovementProgramTable_Rect, RGBColor());
+
+    uint16_t const cRowsToDisplay =
+        static_cast<uint16_t>(std::min(movementProgram.Movements.size(),
+                                       static_cast<size_t>(LCDConstants::MovementProgramTable_Rect.Height /
+                                                           LCDConstants::MovementProgramTableRow_Height)));
+
+    for (uint16_t idxMovement = 0; idxMovement < cRowsToDisplay; ++idxMovement)
+    {
+        MovementProgram::Movement const& movement = movementProgram.Movements[idxMovement];
+
+        auto const drawMovementCell = [this, idxMovement](
+                                          uint32_t const value, uint16_t idxColumn, RGBColor const& color) {
+            char szBuffer[32];
+            snprintf(szBuffer, countof(szBuffer), "%u", value);
+
+            m_LCD.drawText(
+                szBuffer,
+                LCD::Rect{LCDConstants::MovementProgramTable_Rect.X +
+                              ((idxColumn > 0)
+                                   ? LCDConstants::MovementProgramTableRow_StepWidth +
+                                         (idxColumn - 1) * LCDConstants::MovementProgramTableRow_MovementParameterWidth
+                                   : 0),
+                          LCDConstants::MovementProgramTable_Rect.Y +
+                              idxMovement * LCDConstants::MovementProgramTableRow_Height,
+                          (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
+                                          : LCDConstants::MovementProgramTableRow_StepWidth,
+                          LCDConstants::MovementProgramTableRow_Height},
+                LCD::Alignment::Left,
+                m_MovementParameterLabels_Font,
+                color);
+        };
+
+        drawMovementCell(idxMovement, 0, colorFor(EncoderFunction::Step));
+        drawMovementCell(movement.DesiredPosition, 1, colorFor(EncoderFunction::Position));
+        drawMovementCell(movement.DesiredSpeed, 2, colorFor(EncoderFunction::Speed));
+        drawMovementCell(movement.DesiredAcceleration, 3, colorFor(EncoderFunction::Acceleration));
     }
 }
