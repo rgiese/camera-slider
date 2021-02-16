@@ -62,7 +62,10 @@ private:
         static constexpr uint16_t PaddingSmall = 4;
         static constexpr uint16_t PaddingMedium = 6;
 
+        //
         // Movement program table
+        //
+
         static constexpr uint16_t MovementProgramTableX = PaddingSmall;
         static constexpr uint16_t MovementProgramTableY = PaddingSmall;
 
@@ -72,7 +75,10 @@ private:
 
         static constexpr uint16_t nMovementProgramTableRows = 7;
 
+        //
         // Movement controls row
+        //
+
         static constexpr uint16_t nMovementControlsColumns = 3;
 
         static constexpr uint16_t DesiredMovementParameters_Width =
@@ -93,18 +99,31 @@ private:
             DesiredMovementParameters_Y - ReportedMovementParameters_Height - PaddingSmall;
         static constexpr float ReportedMovementParameters_ColorMultiplier = 0.8f;
 
-        // Rate control
-        static constexpr uint16_t DesiredRateParameter_Width = DesiredMovementParameters_Width;
-        static constexpr uint16_t DesiredRateParameter_Height = DesiredMovementParameters_Height;
-        static constexpr uint16_t DesiredRateParameter_X =
-            LCD::DisplayWidth - DesiredRateParameter_Width - PaddingSmall;
-        static constexpr uint16_t DesiredRateParameter_Y =
-            UITools::getEvenlyDivided(LCD::DisplayHeight, 2, 1, DesiredRateParameter_Height);
+        //
+        // Step and rate controls column
+        //
 
-        static constexpr uint16_t DesiredRateLabel_Width = DesiredRateParameter_Width;
-        static constexpr uint16_t DesiredRateLabel_Height = 18;
-        static constexpr uint16_t DesiredRateLabel_X = DesiredRateParameter_X;
-        static constexpr uint16_t DesiredRateLabel_Y = DesiredRateParameter_Y - DesiredRateLabel_Height;
+        static constexpr uint16_t DesiredStepAndRateParameter_Width = DesiredMovementParameters_Width;
+        static constexpr uint16_t DesiredStepAndRateParameter_Height = DesiredMovementParameters_Height;
+        static constexpr uint16_t DesiredStepAndRateParameter_X =
+            LCD::DisplayWidth - DesiredStepAndRateParameter_Width - PaddingSmall;
+
+
+        static constexpr uint16_t DesiredStepAndRateLabel_Width = DesiredStepAndRateParameter_Width;
+        static constexpr uint16_t DesiredStepAndRateLabel_Height = 18;
+        static constexpr uint16_t DesiredStepAndRateLabel_X = DesiredStepAndRateParameter_X;
+
+        // Step control
+        static constexpr uint16_t DesiredStepParameter_Y =
+            UITools::getEvenlyDivided(LCD::DisplayHeight, 2, 0, DesiredStepAndRateParameter_Height);
+
+        static constexpr uint16_t DesiredStepLabel_Y = DesiredStepParameter_Y - DesiredStepAndRateLabel_Height;
+
+        // Rate control
+        static constexpr uint16_t DesiredRateParameter_Y =
+            UITools::getEvenlyDivided(LCD::DisplayHeight, 2, 1, DesiredStepAndRateParameter_Height);
+
+        static constexpr uint16_t DesiredRateLabel_Y = DesiredRateParameter_Y - DesiredStepAndRateLabel_Height;
     };
 
     GFXfont const* const m_MovementParameterLabels_Font;
@@ -117,6 +136,9 @@ private:
 
     LCD::StaticNumericText m_Text_ReportedPosition;
     LCD::StaticNumericText m_Text_ReportedVelocity;
+
+    LCD::StaticText m_Label_Step;
+    LCD::StaticNumericText m_Text_DesiredStep;
 
     LCD::StaticText m_Label_Rate;
     LCD::StaticNumericText m_Text_DesiredRate;

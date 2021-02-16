@@ -82,13 +82,37 @@ UI::UI()
           m_ReportedMovementParameters_Font,
           colorFor(EncoderFunction::Speed).multiply(LCDConstants::ReportedMovementParameters_ColorMultiplier),
           RGBColor())
+    // Step
+    , m_Label_Step(m_LCD,
+                   LCD::Rect{
+                       X : LCDConstants::DesiredStepAndRateLabel_X,
+                       Y : LCDConstants::DesiredStepLabel_Y,
+                       Width : LCDConstants::DesiredStepAndRateLabel_Width,
+                       Height : LCDConstants::DesiredStepAndRateLabel_Height
+                   },
+                   LCD::Alignment::Right,
+                   m_MovementParameterLabels_Font,
+                   colorFor(EncoderFunction::Step),
+                   RGBColor())
+    , m_Text_DesiredStep(m_LCD,
+                         LCD::Rect{
+                             X : LCDConstants::DesiredStepAndRateParameter_X,
+                             Y : LCDConstants::DesiredStepParameter_Y,
+                             Width : LCDConstants::DesiredStepAndRateParameter_Width,
+                             Height : LCDConstants::DesiredStepAndRateParameter_Height
+                         },
+                         LCD::Alignment::Right,
+                         m_DesiredMovementParameters_Font,
+                         colorFor(EncoderFunction::Step),
+                         RGBColor(),
+                         LCDConstants::DesiredMovementParameters_HighlightHeight)
     // Rate
     , m_Label_Rate(m_LCD,
                    LCD::Rect{
-                       X : LCDConstants::DesiredRateLabel_X,
+                       X : LCDConstants::DesiredStepAndRateLabel_X,
                        Y : LCDConstants::DesiredRateLabel_Y,
-                       Width : LCDConstants::DesiredRateLabel_Width,
-                       Height : LCDConstants::DesiredRateLabel_Height
+                       Width : LCDConstants::DesiredStepAndRateLabel_Width,
+                       Height : LCDConstants::DesiredStepAndRateLabel_Height
                    },
                    LCD::Alignment::Right,
                    m_MovementParameterLabels_Font,
@@ -96,10 +120,10 @@ UI::UI()
                    RGBColor())
     , m_Text_DesiredRate(m_LCD,
                          LCD::Rect{
-                             X : LCDConstants::DesiredRateParameter_X,
+                             X : LCDConstants::DesiredStepAndRateParameter_X,
                              Y : LCDConstants::DesiredRateParameter_Y,
-                             Width : LCDConstants::DesiredRateParameter_Width,
-                             Height : LCDConstants::DesiredRateParameter_Height
+                             Width : LCDConstants::DesiredStepAndRateParameter_Width,
+                             Height : LCDConstants::DesiredStepAndRateParameter_Height
                          },
                          LCD::Alignment::Right,
                          m_DesiredMovementParameters_Font,
@@ -232,7 +256,10 @@ void UI::begin()
     m_MovementProgramRows[0].DesiredSpeed.setText("Speed");
     m_MovementProgramRows[0].DesiredAcceleration.setText("Acceleration");
 
+    m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
+
+    m_Text_DesiredStep.setText("new");
 }
 
 void UI::MovementProgramRow::clear()
