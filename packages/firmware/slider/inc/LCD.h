@@ -23,6 +23,9 @@ public:
     class StaticText
     {
     public:
+        static constexpr ssize_t c_idxHighlightCharacter_None = -1;
+
+    public:
         StaticText(LCD& parent,
                    Rect rect,
                    Alignment alignment,
@@ -37,10 +40,11 @@ public:
             , m_ForegroundColor(foregroundColor)
             , m_BackgroundColor(backgroundColor)
             , m_CharacterHighlightHeight(characterHighlightHeight)
-            , m_Text(){};
+            , m_Text()
+            , m_idxCharacterToHighlight(c_idxHighlightCharacter_None){};
 
         void clear();
-        void setText(char const* const szText, ssize_t const idxCharacterToHighlight = -1);
+        void setText(char const* const szText, ssize_t const idxCharacterToHighlight = c_idxHighlightCharacter_None);
 
     protected:
         LCD& m_Parent;
@@ -52,6 +56,7 @@ public:
         uint8_t m_CharacterHighlightHeight;
 
         char m_Text[32];
+        ssize_t m_idxCharacterToHighlight;
     };
 
     class StaticNumericText : public StaticText

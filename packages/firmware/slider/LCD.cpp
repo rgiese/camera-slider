@@ -167,8 +167,10 @@ void LCD::StaticText::clear()
 
 void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharacterToHighlight)
 {
-    if (strcmp(szText, m_Text) != 0)
+    if ((idxCharacterToHighlight != m_idxCharacterToHighlight) || (strcmp(szText, m_Text) != 0))
     {
+        m_idxCharacterToHighlight = idxCharacterToHighlight;
+
         strncpy(m_Text, szText, countof(m_Text));
         m_Text[countof(m_Text) - 1] = 0;
 
@@ -179,7 +181,7 @@ void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharact
                           m_ForegroundColor,
                           m_BackgroundColor,
                           m_CharacterHighlightHeight,
-                          idxCharacterToHighlight);
+                          m_idxCharacterToHighlight);
     }
 }
 
