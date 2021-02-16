@@ -26,10 +26,10 @@ UI::UI()
     // Movement program
     , m_Label_Step(m_LCD,
                    LCD::Rect{
-                       X : LCDConstants::MovementParameterLabels_X(0),
-                       Y : LCDConstants::MovementParameterLabels_Y,
-                       Width : LCDConstants::MovementParameterLabels_Width,
-                       Height : LCDConstants::MovementParameterLabels_Height
+                       X : LCDConstants::MovementProgramTableRow_CellX(0),
+                       Y : LCDConstants::MovementProgramTableHeader_Y,
+                       Width : LCDConstants::MovementProgramTableRow_StepWidth,
+                       Height : LCDConstants::MovementProgramTableHeader_Height
                    },
                    LCD::Alignment::Left,
                    m_MovementParameterLabels_Font,
@@ -37,10 +37,10 @@ UI::UI()
                    RGBColor())
     , m_Label_Position(m_LCD,
                        LCD::Rect{
-                           X : LCDConstants::MovementParameterLabels_X(1),
-                           Y : LCDConstants::MovementParameterLabels_Y,
-                           Width : LCDConstants::MovementParameterLabels_Width,
-                           Height : LCDConstants::MovementParameterLabels_Height
+                           X : LCDConstants::MovementProgramTableRow_CellX(1),
+                           Y : LCDConstants::MovementProgramTableHeader_Y,
+                           Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
+                           Height : LCDConstants::MovementProgramTableHeader_Height
                        },
                        LCD::Alignment::Left,
                        m_MovementParameterLabels_Font,
@@ -48,10 +48,10 @@ UI::UI()
                        RGBColor())
     , m_Label_Speed(m_LCD,
                     LCD::Rect{
-                        X : LCDConstants::MovementParameterLabels_X(2),
-                        Y : LCDConstants::MovementParameterLabels_Y,
-                        Width : LCDConstants::MovementParameterLabels_Width,
-                        Height : LCDConstants::MovementParameterLabels_Height
+                        X : LCDConstants::MovementProgramTableRow_CellX(2),
+                        Y : LCDConstants::MovementProgramTableHeader_Y,
+                        Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
+                        Height : LCDConstants::MovementProgramTableHeader_Height
                     },
                     LCD::Alignment::Left,
                     m_MovementParameterLabels_Font,
@@ -59,10 +59,10 @@ UI::UI()
                     RGBColor())
     , m_Label_Acceleration(m_LCD,
                            LCD::Rect{
-                               X : LCDConstants::MovementParameterLabels_X(3),
-                               Y : LCDConstants::MovementParameterLabels_Y,
-                               Width : LCDConstants::MovementParameterLabels_Width,
-                               Height : LCDConstants::MovementParameterLabels_Height
+                               X : LCDConstants::MovementProgramTableRow_CellX(3),
+                               Y : LCDConstants::MovementProgramTableHeader_Y,
+                               Width : LCDConstants::MovementProgramTableRow_MovementParameterWidth,
+                               Height : LCDConstants::MovementProgramTableHeader_Height
                            },
                            LCD::Alignment::Left,
                            m_MovementParameterLabels_Font,
@@ -291,21 +291,15 @@ void UI::drawMovementProgram(MovementProgram const& movementProgram)
             char szBuffer[32];
             snprintf(szBuffer, countof(szBuffer), "%u", value);
 
-            m_LCD.drawText(
-                szBuffer,
-                LCD::Rect{LCDConstants::MovementProgramTable_Rect.X +
-                              ((idxColumn > 0)
-                                   ? LCDConstants::MovementProgramTableRow_StepWidth +
-                                         (idxColumn - 1) * LCDConstants::MovementProgramTableRow_MovementParameterWidth
-                                   : 0),
-                          LCDConstants::MovementProgramTable_Rect.Y +
-                              idxMovement * LCDConstants::MovementProgramTableRow_Height,
-                          (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
-                                          : LCDConstants::MovementProgramTableRow_StepWidth,
-                          LCDConstants::MovementProgramTableRow_Height},
-                LCD::Alignment::Left,
-                m_MovementParameterLabels_Font,
-                color);
+            m_LCD.drawText(szBuffer,
+                           LCD::Rect{LCDConstants::MovementProgramTableRow_CellX(idxColumn),
+                                     LCDConstants::MovementProgramTableRow_CellY(idxMovement),
+                                     (idxColumn > 0) ? LCDConstants::MovementProgramTableRow_MovementParameterWidth
+                                                     : LCDConstants::MovementProgramTableRow_StepWidth,
+                                     LCDConstants::MovementProgramTableRow_Height},
+                           LCD::Alignment::Left,
+                           m_MovementParameterLabels_Font,
+                           color);
         };
 
         drawMovementCell(idxMovement, 0, colorFor(EncoderFunction::Step));
