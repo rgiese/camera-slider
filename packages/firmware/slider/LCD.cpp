@@ -165,7 +165,7 @@ void LCD::StaticText::clear()
     }
 }
 
-void LCD::StaticText::setText(char const* const szText, ssize_t const idxCharacterToHighlight)
+void LCD::StaticText::setText(char const* const szText, int16_t const idxCharacterToHighlight)
 {
     if ((idxCharacterToHighlight != m_idxCharacterToHighlight) || (strcmp(szText, m_Text) != 0))
     {
