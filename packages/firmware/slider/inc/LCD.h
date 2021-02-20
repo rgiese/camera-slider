@@ -101,18 +101,6 @@ public:
     static constexpr uint16_t DisplayWidth = HX8357_TFTHEIGHT;  // (rotated)
     static constexpr uint16_t DisplayHeight = HX8357_TFTWIDTH;
 
-public:
-    void blitColorRegion(Rect const& rect, RGBColor const color);
-
-    void drawText(char const* const szText,
-                  Rect const& rect,
-                  Alignment const alignment,
-                  GFXfont const* const pFont,
-                  RGBColor const foregroundColor,
-                  RGBColor const backgroundColor = RGBColor(),
-                  uint8_t const characterHighlightHeight = 0,
-                  ssize_t const idxCharacterToHighlight = -1);
-
 private:
     // Non-copyable
     LCD(LCD const&) = delete;
@@ -125,6 +113,8 @@ private:
     GFXcanvas1 m_MonochromeCanvas;
 
 private:
+    void blitColorRegion(Rect const& rect, RGBColor const color);
+
     void blitMonochromeCanvas(uint16_t const x,
                               uint16_t const y,
                               uint16_t const width,

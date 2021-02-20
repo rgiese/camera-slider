@@ -80,83 +80,6 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
     m_LCD.endWrite();
 }
 
-void LCD::drawText(char const* const szText,
-                   Rect const& rect,
-                   Alignment const alignment,
-                   GFXfont const* const pFont,
-                   RGBColor const foregroundColor,
-                   RGBColor const backgroundColor,
-                   uint8_t const characterHighlightHeight,
-                   ssize_t const idxCharacterToHighlight)
-{
-    constexpr uint16_t c_AnyColor = static_cast<uint16_t>(-1);
-
-    // Write to backbuffer
-    GFXcanvas1& monochromeCanvas = m_MonochromeCanvas;
-    {
-        if (monochromeCanvas.width() < rect.Width || monochromeCanvas.height() < rect.Height)
-        {
-            // Consider tiling later
-            return;
-        }
-
-        monochromeCanvas.fillScreen(0);
-
-        monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
-        monochromeCanvas.setFont(pFont);
-        monochromeCanvas.setTextSize(1);
-
-        int16_t measuredX;
-        int16_t measuredY;
-        uint16_t measuredWidth;
-        uint16_t measuredHeight;
-        {
-            monochromeCanvas.getTextBounds(szText, 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
-        }
-
-        switch (alignment)
-        {
-            case Alignment::Left:
-                monochromeCanvas.setCursor(-measuredX, -measuredY);
-                break;
-
-            case Alignment::Center:
-                monochromeCanvas.setCursor((rect.Width - measuredWidth) / 2 - measuredX, -measuredY);
-                break;
-
-            case Alignment::Right:
-                monochromeCanvas.setCursor(rect.Width - measuredWidth - measuredX - 1 /* boundary pixel */, -measuredY);
-                break;
-        }
-
-        size_t const cchText = strlen(szText);
-
-        for (size_t idxChar = 0; idxChar < cchText; ++idxChar)
-        {
-            int16_t const startCursorX = monochromeCanvas.getCursorX();
-
-            monochromeCanvas.write(szText[idxChar]);
-
-            bool const isCharacterToHighlight =
-                idxCharacterToHighlight >= 0 && (cchText - idxChar - 1) == idxCharacterToHighlight;
-
-            if (isCharacterToHighlight)
-            {
-                int16_t const endCursorX = monochromeCanvas.getCursorX();
-
-                monochromeCanvas.fillRect(startCursorX,
-                                          rect.Height - characterHighlightHeight,
-                                          endCursorX - startCursorX,
-                                          characterHighlightHeight,
-                                          c_AnyColor);
-            }
-        }
-    }
-
-    // Write backbuffer to device
-    blitMonochromeCanvas(rect.X, rect.Y, rect.Width, rect.Height, foregroundColor, backgroundColor);
-}
-
 void LCD::StaticText::clear()
 {
     if (m_Text[0])
@@ -198,14 +121,74 @@ void LCD::StaticText::setBackgroundColor(RGBColor const backgroundColor)
 
 void LCD::StaticText::update()
 {
-    m_Parent.drawText(m_Text,
-                      m_Rect,
-                      m_Alignment,
-                      m_Font,
-                      m_ForegroundColor,
-                      m_BackgroundColor,
-                      m_CharacterHighlightHeight,
-                      m_idxCharacterToHighlight);
+    constexpr uint16_t c_AnyColor = static_cast<uint16_t>(-1);
+
+    // Write to backbuffer
+    GFXcanvas1& monochromeCanvas = m_Parent.m_MonochromeCanvas;
+    {
+        if (monochromeCanvas.width() < m_Rect.Width || monochromeCanvas.height() < m_Rect.Height)
+        {
+            // Consider tiling later
+            return;
+        }
+
+        monochromeCanvas.fillScreen(0);
+
+        monochromeCanvas.setTextColor(static_cast<uint16_t>(-1));
+        monochromeCanvas.setFont(m_Font);
+        monochromeCanvas.setTextSize(1);
+
+        int16_t measuredX;
+        int16_t measuredY;
+        uint16_t measuredWidth;
+        uint16_t measuredHeight;
+        {
+            monochromeCanvas.getTextBounds(m_Text, 0, 0, &measuredX, &measuredY, &measuredWidth, &measuredHeight);
+        }
+
+        switch (m_Alignment)
+        {
+            case Alignment::Left:
+                monochromeCanvas.setCursor(-measuredX, -measuredY);
+                break;
+
+            case Alignment::Center:
+                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2 - measuredX, -measuredY);
+                break;
+
+            case Alignment::Right:
+                monochromeCanvas.setCursor(m_Rect.Width - measuredWidth - measuredX - 1 /* boundary pixel */,
+                                           -measuredY);
+                break;
+        }
+
+        size_t const cchText = strlen(m_Text);
+
+        for (size_t idxChar = 0; idxChar < cchText; ++idxChar)
+        {
+            int16_t const startCursorX = monochromeCanvas.getCursorX();
+
+            monochromeCanvas.write(m_Text[idxChar]);
+
+            bool const isCharacterToHighlight =
+                m_idxCharacterToHighlight >= 0 && (cchText - idxChar - 1) == m_idxCharacterToHighlight;
+
+            if (isCharacterToHighlight)
+            {
+                int16_t const endCursorX = monochromeCanvas.getCursorX();
+
+                monochromeCanvas.fillRect(startCursorX,
+                                          m_Rect.Height - m_CharacterHighlightHeight,
+                                          endCursorX - startCursorX,
+                                          m_CharacterHighlightHeight,
+                                          c_AnyColor);
+            }
+        }
+    }
+
+    // Write backbuffer to device
+    m_Parent.blitMonochromeCanvas(
+        m_Rect.X, m_Rect.Y, m_Rect.Width, m_Rect.Height, m_ForegroundColor, m_BackgroundColor);
 }
 
 void LCD::StaticNumericText::setValue(int32_t const value)
