@@ -33,18 +33,18 @@ void MotorController::onLoop()
 
 void MotorController::setTargetPosition(int32_t const targetPosition)
 {
-    m_Tic.setTargetPosition(clamp<int32_t>(targetPosition, 0, c_MaxSafePosition_Steps));
+    m_Tic.setTargetPosition(clamp<int32_t>(targetPosition, c_MinimumPosition_Steps, c_MaxSafePosition_Steps));
 }
 
 void MotorController::setMaxSpeed(uint32_t const stepsPerSecond)
 {
-    m_Tic.setMaxSpeed(speedToTicUnits(std::min(stepsPerSecond, c_MaxSafeSpeed_StepsPerSec)));
+    m_Tic.setMaxSpeed(speedToTicUnits(clamp(stepsPerSecond, c_MinimumSpeed_StepsPerSec, c_MaxSafeSpeed_StepsPerSec)));
 }
 
 void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
 {
-    uint32_t const safeStepsPerSecondPerSecond =
-        std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec);
+    uint32_t const safeStepsPerSecondPerSecond = clamp(
+        stepsPerSecondPerSecond, c_MinimumAcceleration_StepsPerSecPerSec, c_MaxSafeAcceleration_StepsPerSecPerSec);
 
     uint32_t const ticStepsPerSecondPerSecond = accelerationToTicUnits(safeStepsPerSecondPerSecond);
 

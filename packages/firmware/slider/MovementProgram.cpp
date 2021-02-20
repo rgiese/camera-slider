@@ -49,9 +49,15 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
             MovementProgram::Movement movement = {
                 Type : sourceMovement->type(),
                 DelayTime : sourceMovement->delayTime(),
-                DesiredPosition : sourceMovement->desiredPosition(),
-                DesiredSpeed : sourceMovement->desiredSpeed(),
-                DesiredAcceleration : sourceMovement->desiredAcceleration()
+                DesiredPosition : clamp(sourceMovement->desiredPosition(),
+                                        MotorController::c_MinimumPosition_Steps,
+                                        MotorController::c_MaxSafePosition_Steps),
+                DesiredSpeed : clamp(sourceMovement->desiredSpeed(),
+                                     MotorController::c_MinimumSpeed_StepsPerSec,
+                                     MotorController::c_MaxSafeSpeed_StepsPerSec),
+                DesiredAcceleration : clamp(sourceMovement->desiredAcceleration(),
+                                            MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                            MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec),
             };
 
             movementProgram.Movements.emplace_back(movement);
