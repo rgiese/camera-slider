@@ -174,21 +174,44 @@ void LCD::StaticText::setText(char const* const szText, int16_t const idxCharact
         strncpy(m_Text, szText, countof(m_Text));
         m_Text[countof(m_Text) - 1] = 0;
 
-        m_Parent.drawText(m_Text,
-                          m_Rect,
-                          m_Alignment,
-                          m_Font,
-                          m_ForegroundColor,
-                          m_BackgroundColor,
-                          m_CharacterHighlightHeight,
-                          m_idxCharacterToHighlight);
+        update();
     }
+}
+
+void LCD::StaticText::setForegroundColor(RGBColor const foregroundColor)
+{
+    if (foregroundColor != m_ForegroundColor)
+    {
+        m_ForegroundColor = foregroundColor;
+        update();
+    }
+}
+
+void LCD::StaticText::setBackgroundColor(RGBColor const backgroundColor)
+{
+    if (backgroundColor != m_BackgroundColor)
+    {
+        m_BackgroundColor = backgroundColor;
+        update();
+    }
+}
+
+void LCD::StaticText::update()
+{
+    m_Parent.drawText(m_Text,
+                      m_Rect,
+                      m_Alignment,
+                      m_Font,
+                      m_ForegroundColor,
+                      m_BackgroundColor,
+                      m_CharacterHighlightHeight,
+                      m_idxCharacterToHighlight);
 }
 
 void LCD::StaticNumericText::setValue(int32_t const value)
 {
     m_Value = value;
-    update();
+    updateTextFromValueAndActiveDigit();
 }
 
 void LCD::StaticNumericText::setActiveDigit(uint8_t const activeDigit)
@@ -196,11 +219,11 @@ void LCD::StaticNumericText::setActiveDigit(uint8_t const activeDigit)
     if (m_ActiveDigit != activeDigit)
     {
         m_ActiveDigit = activeDigit;
-        update();
+        updateTextFromValueAndActiveDigit();
     }
 }
 
-void LCD::StaticNumericText::update()
+void LCD::StaticNumericText::updateTextFromValueAndActiveDigit()
 {
     char rgText[std::numeric_limits<decltype(m_Value)>::digits10 + 1 /* sign */ + 1 /* terminator */];
     {

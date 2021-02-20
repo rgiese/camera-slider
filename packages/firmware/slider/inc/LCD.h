@@ -37,26 +37,35 @@ public:
             , m_Rect(rect)
             , m_Alignment(alignment)
             , m_Font(font)
-            , m_ForegroundColor(foregroundColor)
-            , m_BackgroundColor(backgroundColor)
             , m_CharacterHighlightHeight(characterHighlightHeight)
             , m_Text()
-            , m_idxCharacterToHighlight(c_idxHighlightCharacter_None){};
+            , m_idxCharacterToHighlight(c_idxHighlightCharacter_None)
+            , m_ForegroundColor(foregroundColor)
+            , m_BackgroundColor(backgroundColor){};
 
         void clear();
         void setText(char const* const szText, int16_t const idxCharacterToHighlight = c_idxHighlightCharacter_None);
 
+        void setForegroundColor(RGBColor const foregroundColor);
+        void setBackgroundColor(RGBColor const backgroundColor);
+
     protected:
         LCD& m_Parent;
+
+        // Immutable properties
         Rect const m_Rect;
         Alignment const m_Alignment;
         GFXfont const* const m_Font;
-        RGBColor const m_ForegroundColor;
-        RGBColor const m_BackgroundColor;
-        uint8_t m_CharacterHighlightHeight;
+        uint8_t const m_CharacterHighlightHeight;
 
+        // Mutable properties
         char m_Text[32];
         int16_t m_idxCharacterToHighlight;
+        RGBColor m_ForegroundColor;
+        RGBColor m_BackgroundColor;
+
+    protected:
+        void update();
     };
 
     class StaticNumericText : public StaticText
@@ -77,10 +86,11 @@ public:
         void setActiveDigit(uint8_t const activeDigit);
 
     private:
+        // Mutable properties
         int32_t m_Value;
         uint8_t m_ActiveDigit;
 
-        void update();
+        void updateTextFromValueAndActiveDigit();
     };
 
 public:

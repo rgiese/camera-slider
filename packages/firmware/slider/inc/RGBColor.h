@@ -25,4 +25,14 @@ union RGBColor
                         clamp<uint8_t>(static_cast<uint8_t>((Green * ratio) + 0.5), 0, 255),
                         clamp<uint8_t>(static_cast<uint8_t>((Blue * ratio) + 0.5), 0, 255)};
     };
+
+    bool constexpr operator==(RGBColor const& other) const
+    {
+        return this->Value == other.Value;
+    }
+
+    bool constexpr operator!=(RGBColor const& other) const
+    {
+        return this->Value != other.Value;
+    }
 };

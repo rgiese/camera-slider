@@ -297,13 +297,13 @@ void UI::begin()
         for (; idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size() - 1);
              ++idxMovement)
         {
-            // m_MovementProgramRows[0] is a header row, skip
-            m_MovementProgramRows[idxMovement + 1].update(idxMovement, movementProgram.Movements[idxMovement]);
+            movementProgramRowForMovementIndex(idxMovement)
+                .updateContent(idxMovement, movementProgram.Movements[idxMovement]);
         }
 
         for (; idxMovement < m_MovementProgramRows.size() - 1; ++idxMovement)
         {
-            m_MovementProgramRows[idxMovement + 1].clear();
+            movementProgramRowForMovementIndex(idxMovement).clear();
         }
     });
 
@@ -327,12 +327,28 @@ void UI::MovementProgramRow::clear()
     DesiredAcceleration.clear();
 }
 
-void UI::MovementProgramRow::update(uint16_t const idxMovement, MovementProgram::Movement const& movement)
+void UI::MovementProgramRow::updateContent(uint16_t const idxMovement, MovementProgram::Movement const& movement)
 {
     Step.setValue(idxMovement + 1 /* human-readable */);
     DesiredPosition.setValue(movement.DesiredPosition);
     DesiredSpeed.setValue(movement.DesiredSpeed);
     DesiredAcceleration.setValue(movement.DesiredAcceleration);
+}
+
+void UI::MovementProgramRow::updateSelectionStatus(uint16_t const idxMovement, bool const fIsSelectedRow)
+{
+    RGBColor const backgroundColor = fIsSelectedRow ? RGBColor{0xFF, 0xFF, 0xFF}.multiply(0.4f) : RGBColor();
+
+    Step.setBackgroundColor(backgroundColor);
+    DesiredPosition.setBackgroundColor(backgroundColor);
+    DesiredSpeed.setBackgroundColor(backgroundColor);
+    DesiredAcceleration.setBackgroundColor(backgroundColor);
+}
+
+UI::MovementProgramRow& UI::movementProgramRowForMovementIndex(uint16_t const idxMovement)
+{
+    // m_MovementProgramRows[0] is a header row, skip
+    return m_MovementProgramRows[idxMovement + 1];
 }
 
 void UI::onMainLoop()
@@ -436,6 +452,14 @@ void UI::updateSelectedStep(MovementProgram const& movementProgram, int16_t cons
         m_Text_DesiredPosition.setValue(g_MotorController.TargetPosition);
         m_Text_DesiredMaximumSpeed.setValue(g_MotorController.MaximumSpeed);
         m_Text_DesiredMaximumAcceleration.setValue(g_MotorController.MaximumAcceleration);
+    }
+
+    for (size_t idxMovement = 0;
+         idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size() - 1);
+         ++idxMovement)
+    {
+        movementProgramRowForMovementIndex(idxMovement)
+            .updateSelectionStatus(idxMovement, idxMovement == m_idxSelectedStep);
     }
 }
 

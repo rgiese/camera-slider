@@ -162,10 +162,13 @@ private:
         LCD::StaticNumericText DesiredAcceleration;
 
         void clear();
-        void update(uint16_t const idxMovement, MovementProgram::Movement const& movement);
+        void updateContent(uint16_t const idxMovement, MovementProgram::Movement const& movement);
+        void updateSelectionStatus(uint16_t const idxMovement, bool const fIsSelectedRow);
     };
 
     std::vector<MovementProgramRow> m_MovementProgramRows;
+
+    MovementProgramRow& movementProgramRowForMovementIndex(uint16_t const idxMovement);
 
 private:
     //
