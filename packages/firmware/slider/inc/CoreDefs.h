@@ -36,7 +36,7 @@ constexpr T clamp_delta(T const value, U const delta, T const low, T const high)
     return (computedValue < low) ? low : (high < computedValue) ? high : static_cast<T>(computedValue);
 }
 
-static constexpr uint16_t __bswap_16(uint16_t const value)
+static constexpr uint16_t __byteswap_16(uint16_t const value)
 {
     return (value >> 8) | (value << 8);
 }

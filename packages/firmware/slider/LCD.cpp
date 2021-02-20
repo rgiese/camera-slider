@@ -53,8 +53,8 @@ void LCD::blitMonochromeCanvas(uint16_t const x,
 
     size_t cPixelsInBuffer = 0;
 
-    uint16_t const foregroundColorValue = __bswap_16(foregroundColor.to565Color());
-    uint16_t const backgroundColorValue = __bswap_16(backgroundColor.to565Color());
+    uint16_t const foregroundColorValue = __byteswap_16(foregroundColor.to565Color());
+    uint16_t const backgroundColorValue = __byteswap_16(backgroundColor.to565Color());
 
     for (uint16_t sourceY = 0; sourceY < height; ++sourceY)
     {
