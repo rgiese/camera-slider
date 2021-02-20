@@ -46,7 +46,7 @@ void BluetoothProgramService::onDesiredMovementProgramChanged(uint8_t const* con
         movementProgram.dump("desired");
     }
 
-    g_MovementProgramStore.setMovementProgram(movementProgram);
+    g_MovementProgramStore.CurrentMovementProgram.update(movementProgram);
 }
 
 void BluetoothProgramService::onStartMovementProgramChanged(uint8_t const* const pData,

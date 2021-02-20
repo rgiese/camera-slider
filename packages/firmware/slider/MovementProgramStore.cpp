@@ -2,11 +2,8 @@
 
 MovementProgramStore g_MovementProgramStore;
 
-void MovementProgramStore::setMovementProgram(MovementProgram const& movementProgram)
+MovementProgramStore::MovementProgramStore()
 {
-    CurrentMovementProgram.update(movementProgram);
-
-    Request request = {Type : RequestType::UpdatedMovementProgram};
-
-    g_RequestQueue.push(request);
+    CurrentMovementProgram.attach(
+        [](MovementProgram const&) { g_RequestQueue.push({Type : RequestType::UpdatedMovementProgram}); });
 }

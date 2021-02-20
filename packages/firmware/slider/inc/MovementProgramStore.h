@@ -3,11 +3,9 @@
 class MovementProgramStore
 {
 public:
-    MovementProgramStore() = default;
+    MovementProgramStore();
 
     Observable<MovementProgram> CurrentMovementProgram;
-
-    void setMovementProgram(MovementProgram const& movementProgram);
 
 private:
     // Non-copyable
