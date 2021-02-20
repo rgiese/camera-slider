@@ -83,6 +83,7 @@ private:
         static constexpr uint16_t MovementProgramTableRow_StepWidth = 50;
         static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth = 100;
         static constexpr uint16_t MovementProgramTableRow_Height = 18;
+        static constexpr uint16_t MovementProgramTableRow_TextYOffset = 2;
 
         static constexpr uint16_t nMovementProgramTableRows = 7;
 

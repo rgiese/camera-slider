@@ -149,16 +149,16 @@ void LCD::StaticText::update()
         switch (m_Alignment)
         {
             case Alignment::Left:
-                monochromeCanvas.setCursor(-measuredX, -measuredY);
+                monochromeCanvas.setCursor(-measuredX, -measuredY + m_TextYOffset);
                 break;
 
             case Alignment::Center:
-                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2 - measuredX, -measuredY);
+                monochromeCanvas.setCursor((m_Rect.Width - measuredWidth) / 2 - measuredX, -measuredY + m_TextYOffset);
                 break;
 
             case Alignment::Right:
                 monochromeCanvas.setCursor(m_Rect.Width - measuredWidth - measuredX - 1 /* boundary pixel */,
-                                           -measuredY);
+                                           -measuredY + m_TextYOffset);
                 break;
         }
 

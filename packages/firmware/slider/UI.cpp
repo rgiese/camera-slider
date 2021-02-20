@@ -171,7 +171,9 @@ UI::UI()
                 LCD::Alignment::Left,
                 m_MovementParameterLabels_Font,
                 color,
-                RGBColor());
+                RGBColor(),
+                0,
+                LCDConstants::MovementProgramTableRow_TextYOffset);
         };
 
         m_MovementProgramRows.push_back({

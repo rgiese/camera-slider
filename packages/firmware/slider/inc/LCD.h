@@ -32,12 +32,14 @@ public:
                    GFXfont const* font,
                    RGBColor foregroundColor,
                    RGBColor backgroundColor,
-                   uint8_t characterHighlightHeight = 0)
+                   uint8_t characterHighlightHeight = 0,
+                   uint16_t textYOffset = 0)
             : m_Parent(parent)
             , m_Rect(rect)
             , m_Alignment(alignment)
             , m_Font(font)
             , m_CharacterHighlightHeight(characterHighlightHeight)
+            , m_TextYOffset(textYOffset)
             , m_Text()
             , m_idxCharacterToHighlight(c_idxHighlightCharacter_None)
             , m_ForegroundColor(foregroundColor)
@@ -57,6 +59,7 @@ public:
         Alignment const m_Alignment;
         GFXfont const* const m_Font;
         uint8_t const m_CharacterHighlightHeight;
+        uint16_t const m_TextYOffset;
 
         // Mutable properties
         char m_Text[32];
@@ -77,8 +80,16 @@ public:
                           GFXfont const* font,
                           RGBColor foregroundColor,
                           RGBColor backgroundColor,
-                          uint8_t characterHighlightHeight = 0)
-            : StaticText(parent, rect, alignment, font, foregroundColor, backgroundColor, characterHighlightHeight)
+                          uint8_t characterHighlightHeight = 0,
+                          uint16_t textYOffset = 0)
+            : StaticText(parent,
+                         rect,
+                         alignment,
+                         font,
+                         foregroundColor,
+                         backgroundColor,
+                         characterHighlightHeight,
+                         textYOffset)
             , m_Value(std::numeric_limits<decltype(m_Value)>::max())
             , m_ActiveDigit(0){};
 
