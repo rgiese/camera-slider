@@ -75,6 +75,20 @@ public:
         }
     }
 
+    using MutateFn = std::function<T(T const&)>;
+    void mutate(MutateFn fn)
+    {
+        std::lock_guard<std::mutex> guard(m_Mutex);
+
+        T const mutatedValue = fn(m_Value);
+
+        if (!(m_Value == mutatedValue))
+        {
+            m_Value = mutatedValue;
+            m_IsDirty = true;
+        }
+    }
+
     template <typename U = T>
     typename std::enable_if<std::is_integral<U>::value || std::is_enum<U>::value, U>::type get() const
     {

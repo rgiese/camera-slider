@@ -349,10 +349,13 @@ void UI::onMainLoop()
     // Apply rate selection
     if (rateDelta != 0)
     {
-        MovementProgram const mutatedMovementProgram =
-            g_MovementProgramStore.CurrentMovementProgram.get().mutateRate(rateDelta);
+        g_MovementProgramStore.CurrentMovementProgram.mutate(
+            [rateDelta](MovementProgram const& movementProgram) -> MovementProgram {
+                MovementProgram mutatedMovementProgram = movementProgram;
+                mutatedMovementProgram.applyRateDelta(rateDelta);
 
-        g_MovementProgramStore.setMovementProgram(mutatedMovementProgram);
+                return mutatedMovementProgram;
+            });
     }
 }
 

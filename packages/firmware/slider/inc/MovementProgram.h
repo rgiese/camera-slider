@@ -47,10 +47,10 @@ struct MovementProgram
     static constexpr uint16_t RatePercent_Maximum = 1000;
 
     //
-    // Mutations
+    // Setters
     //
 
-    MovementProgram mutateRate(int16_t const RateDelta) const;
+    void applyRateDelta(int16_t const RateDelta);
 
     //
     // Conversions

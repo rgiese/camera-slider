@@ -4,13 +4,9 @@
 // Mutations
 //
 
-MovementProgram MovementProgram::mutateRate(int16_t const RateDelta) const
+void MovementProgram::applyRateDelta(int16_t const RateDelta)
 {
-    MovementProgram mutatedMovementProgram = *this;
-    mutatedMovementProgram.RatePercent =
-        clamp_delta(mutatedMovementProgram.RatePercent, RateDelta, RatePercent_Minimum, RatePercent_Maximum);
-
-    return mutatedMovementProgram;
+    RatePercent = clamp_delta(RatePercent, RateDelta, RatePercent_Minimum, RatePercent_Maximum);
 }
 
 //
