@@ -58,7 +58,7 @@ private:
     uint16_t m_idxSelectedStep;
     uint16_t m_nStepsInProgram;
 
-    void updateSelectedStep(MovementProgram const& movementProgram, int16_t const idxSelectedStepDelta = 0);
+    void updateWithMovementProgram(MovementProgram const& movementProgram);
     bool editingExistingStep() const;
 
 private:
@@ -162,14 +162,12 @@ private:
         LCD::StaticNumericText DesiredSpeed;
         LCD::StaticNumericText DesiredAcceleration;
 
-        void clear();
-        void updateContent(uint16_t const idxMovement, MovementProgram::Movement const& movement);
-        void updateSelectionStatus(uint16_t const idxMovement, bool const fIsSelectedRow);
+        void updateWithMovement(uint16_t const idxMovement,
+                                MovementProgram const& movementProgram,
+                                uint16_t const idxSelectedMovement);
     };
 
     std::vector<MovementProgramRow> m_MovementProgramRows;
-
-    MovementProgramRow& movementProgramRowForMovementIndex(uint16_t const idxMovement);
 
 private:
     //

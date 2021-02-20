@@ -286,27 +286,8 @@ void UI::begin()
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
     g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
-        // Steps and controls
-        updateSelectedStep(movementProgram);
-
-        // Rate
+        updateWithMovementProgram(movementProgram);
         m_Text_DesiredRate.setValue(movementProgram.RatePercent);
-
-        // Movements
-        size_t idxMovement = 0;
-
-        // FUTURE: Make sure selected step is in view range
-        for (; idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size() - 1);
-             ++idxMovement)
-        {
-            movementProgramRowForMovementIndex(idxMovement)
-                .updateContent(idxMovement, movementProgram.Movements[idxMovement]);
-        }
-
-        for (; idxMovement < m_MovementProgramRows.size() - 1; ++idxMovement)
-        {
-            movementProgramRowForMovementIndex(idxMovement).clear();
-        }
     });
 
     // Set up labels
@@ -318,39 +299,39 @@ void UI::begin()
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
 
-    updateSelectedStep(g_MovementProgramStore.CurrentMovementProgram);
+    updateWithMovementProgram(g_MovementProgramStore.CurrentMovementProgram);
 }
 
-void UI::MovementProgramRow::clear()
+void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
+                                                MovementProgram const& movementProgram,
+                                                uint16_t const idxSelectedMovement)
 {
-    Step.clear();
-    DesiredPosition.clear();
-    DesiredSpeed.clear();
-    DesiredAcceleration.clear();
-}
+    // Update content
+    if (idxMovement >= movementProgram.Movements.size())
+    {
+        Step.clear();
+        DesiredPosition.clear();
+        DesiredSpeed.clear();
+        DesiredAcceleration.clear();
+    }
+    else
+    {
+        MovementProgram::Movement const& movement = movementProgram.Movements[idxMovement];
 
-void UI::MovementProgramRow::updateContent(uint16_t const idxMovement, MovementProgram::Movement const& movement)
-{
-    Step.setValue(idxMovement + 1 /* human-readable */);
-    DesiredPosition.setValue(movement.DesiredPosition);
-    DesiredSpeed.setValue(movement.DesiredSpeed);
-    DesiredAcceleration.setValue(movement.DesiredAcceleration);
-}
+        Step.setValue(idxMovement + 1 /* human-readable */);
+        DesiredPosition.setValue(movement.DesiredPosition);
+        DesiredSpeed.setValue(movement.DesiredSpeed);
+        DesiredAcceleration.setValue(movement.DesiredAcceleration);
+    }
 
-void UI::MovementProgramRow::updateSelectionStatus(uint16_t const idxMovement, bool const fIsSelectedRow)
-{
+    // Update color
+    bool const fIsSelectedRow = idxMovement == idxSelectedMovement;
     RGBColor const backgroundColor = fIsSelectedRow ? RGBColor{0xFF, 0xFF, 0xFF}.multiply(0.4f) : RGBColor();
 
     Step.setBackgroundColor(backgroundColor);
     DesiredPosition.setBackgroundColor(backgroundColor);
     DesiredSpeed.setBackgroundColor(backgroundColor);
     DesiredAcceleration.setBackgroundColor(backgroundColor);
-}
-
-UI::MovementProgramRow& UI::movementProgramRowForMovementIndex(uint16_t const idxMovement)
-{
-    // m_MovementProgramRows[0] is a header row, skip
-    return m_MovementProgramRows[idxMovement + 1];
 }
 
 void UI::onMainLoop()
@@ -413,7 +394,15 @@ void UI::onMainLoop()
     // Apply step selection
     if (stepDelta != 0)
     {
-        updateSelectedStep(g_MovementProgramStore.CurrentMovementProgram, stepDelta);
+        MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+
+        m_nStepsInProgram = movementProgram.Movements.size();
+
+        // Note: clamp_delta accepts values up to and _including_ the maximum value provided (m_nStepsInProgram)
+        // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
+        m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, stepDelta, 0, m_nStepsInProgram);
+
+        updateWithMovementProgram(movementProgram);
     }
 
     // Apply rate selection
@@ -429,14 +418,9 @@ void UI::onMainLoop()
     }
 }
 
-void UI::updateSelectedStep(MovementProgram const& movementProgram, int16_t const idxSelectedStepDelta)
+void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 {
-    m_nStepsInProgram = movementProgram.Movements.size();
-
-    // Note: clamp_delta accepts values up to and _including_ the maximum value provided (m_nStepsInProgram)
-    // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
-    m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, idxSelectedStepDelta, 0, m_nStepsInProgram);
-
+    // Update Step control
     if (editingExistingStep())
     {
         m_Text_DesiredStep.setValue(m_idxSelectedStep + 1 /* human-readable */);
@@ -456,12 +440,24 @@ void UI::updateSelectedStep(MovementProgram const& movementProgram, int16_t cons
         m_Text_DesiredMaximumAcceleration.setValue(g_MotorController.MaximumAcceleration);
     }
 
-    for (size_t idxMovement = 0;
-         idxMovement < std::min(movementProgram.Movements.size(), m_MovementProgramRows.size() - 1);
-         ++idxMovement)
+    // Update movement program table
+    size_t const cMovementTableHeaderRows = 1;
+
+    if (cMovementTableHeaderRows >= m_MovementProgramRows.size())
     {
-        movementProgramRowForMovementIndex(idxMovement)
-            .updateSelectionStatus(idxMovement, idxMovement == m_idxSelectedStep);
+        // Configuration problem
+        return;
+    }
+
+    size_t const cMovementTableRows = m_MovementProgramRows.size() - cMovementTableHeaderRows;
+
+    size_t const idxFirstMovement =  // Ensure the currently selected row is always visible
+        (m_idxSelectedStep > (cMovementTableRows - 1)) ? m_idxSelectedStep - (cMovementTableRows - 1) : 0;
+
+    for (size_t idxRow = 0; idxRow < cMovementTableRows; ++idxRow)
+    {
+        m_MovementProgramRows[idxRow + cMovementTableHeaderRows].updateWithMovement(
+            idxRow + idxFirstMovement, movementProgram, m_idxSelectedStep);
     }
 }
 
