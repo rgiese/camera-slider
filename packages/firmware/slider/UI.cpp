@@ -216,6 +216,45 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
     setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
+    encoderFor(EncoderFunction::Step).setPushButtonUpCallback([this](Encoder::PushDuration const pushDuration) {
+        if (editingExistingStep())
+        {
+            // Delete
+            if (pushDuration == Encoder::PushDuration::Long)
+            {
+                g_MovementProgramStore.CurrentMovementProgram.mutate(
+                    [this](MovementProgram const& movementProgram) -> MovementProgram {
+                        if (m_idxSelectedStep >= movementProgram.Movements.size())
+                        {
+                            return movementProgram;
+                        }
+
+                        MovementProgram mutatedMovementProgram = movementProgram;
+                        mutatedMovementProgram.Movements.erase(mutatedMovementProgram.Movements.begin() +
+                                                               m_idxSelectedStep);
+
+                        return mutatedMovementProgram;
+                    });
+            }
+        }
+        else
+        {
+            // Add step
+            MovementProgram::Movement movement(Flatbuffers::Firmware::MovementType::Move,
+                                               0,
+                                               g_MotorController.TargetPosition,
+                                               g_MotorController.MaximumSpeed,
+                                               g_MotorController.MaximumAcceleration);
+
+            g_MovementProgramStore.CurrentMovementProgram.mutate(
+                [&movement](MovementProgram const& movementProgram) -> MovementProgram {
+                    MovementProgram mutatedMovementProgram = movementProgram;
+                    mutatedMovementProgram.Movements.push_back(movement);
+                    return mutatedMovementProgram;
+                });
+        }
+    });
+
     // Set up observers
     g_MotorController.TargetPosition.attach_and_initialize([this](int32_t const position) {
         if (!editingExistingStep())
@@ -314,6 +353,19 @@ void UI::onMainLoop()
     if (editingExistingStep())
     {
         // Editing existing step - update program
+        g_MovementProgramStore.CurrentMovementProgram.mutate(
+            [&](MovementProgram const& movementProgram) -> MovementProgram {
+                if (m_idxSelectedStep >= movementProgram.Movements.size())
+                {
+                    return movementProgram;
+                }
+
+                MovementProgram mutatedMovementProgram = movementProgram;
+                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDeltas(
+                    positionDelta, speedDelta, accelerationDelta);
+
+                return mutatedMovementProgram;
+            });
     }
     else
     {

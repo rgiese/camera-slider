@@ -4,6 +4,44 @@
 // Mutations
 //
 
+MovementProgram::Movement::Movement(Flatbuffers::Firmware::MovementType const type,
+                                    uint16_t const delayTime,
+                                    int32_t const desiredPosition,
+                                    uint32_t const desiredSpeed,
+                                    uint32_t const desiredAcceleration)
+    : Type(type)
+{
+    DelayTime = delayTime;
+
+    DesiredPosition =
+        clamp(desiredPosition, MotorController::c_MinimumPosition_Steps, MotorController::c_MaxSafePosition_Steps);
+
+    DesiredSpeed =
+        clamp(desiredSpeed, MotorController::c_MinimumSpeed_StepsPerSec, MotorController::c_MaxSafeSpeed_StepsPerSec);
+
+    DesiredAcceleration = clamp(desiredAcceleration,
+                                MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+}
+
+void MovementProgram::Movement::applyDeltas(int32_t const desiredPositionDelta,
+                                            int32_t const desiredSpeedDelta,
+                                            int32_t const desiredAccelerationDelta)
+{
+    DesiredPosition = clamp_delta(DesiredPosition,
+                                  desiredPositionDelta,
+                                  MotorController::c_MinimumPosition_Steps,
+                                  MotorController::c_MaxSafePosition_Steps);
+    DesiredSpeed = clamp_delta(DesiredSpeed,
+                               desiredSpeedDelta,
+                               MotorController::c_MinimumSpeed_StepsPerSec,
+                               MotorController::c_MaxSafeSpeed_StepsPerSec);
+    DesiredAcceleration = clamp_delta(DesiredAcceleration,
+                                      desiredAccelerationDelta,
+                                      MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                      MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+}
+
 void MovementProgram::applyRateDelta(int16_t const RateDelta)
 {
     RatePercent = clamp_delta(RatePercent, RateDelta, RatePercent_Minimum, RatePercent_Maximum);
@@ -46,19 +84,11 @@ bool MovementProgram::fromFlatbufferData(uint8_t const* const pData,
     {
         for (auto const& sourceMovement : *pSourceMovements)
         {
-            MovementProgram::Movement movement = {
-                Type : sourceMovement->type(),
-                DelayTime : sourceMovement->delayTime(),
-                DesiredPosition : clamp(sourceMovement->desiredPosition(),
-                                        MotorController::c_MinimumPosition_Steps,
-                                        MotorController::c_MaxSafePosition_Steps),
-                DesiredSpeed : clamp(sourceMovement->desiredSpeed(),
-                                     MotorController::c_MinimumSpeed_StepsPerSec,
-                                     MotorController::c_MaxSafeSpeed_StepsPerSec),
-                DesiredAcceleration : clamp(sourceMovement->desiredAcceleration(),
-                                            MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
-                                            MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec),
-            };
+            MovementProgram::Movement movement(sourceMovement->type(),
+                                               sourceMovement->delayTime(),
+                                               sourceMovement->desiredPosition(),
+                                               sourceMovement->desiredSpeed(),
+                                               sourceMovement->desiredAcceleration());
 
             movementProgram.Movements.emplace_back(movement);
         }

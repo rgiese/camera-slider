@@ -63,7 +63,8 @@ void Encoder::pollForUpdates()
 
         if (m_PushButtonUpCallback)
         {
-            m_PushButtonUpCallback(durationPressed_msec);
+            m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
+                                                                                    : PushDuration::Short);
         }
     }
 }

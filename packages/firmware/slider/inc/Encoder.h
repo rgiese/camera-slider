@@ -3,6 +3,13 @@
 class Encoder
 {
 public:
+    enum class PushDuration : bool
+    {
+        Long,
+        Short
+    };
+
+public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
         , m_Address(address)
@@ -22,7 +29,7 @@ public:
     using PushButtonDownCallback = std::function<void(void)>;
     void setPushButtonDownCallback(PushButtonDownCallback callback);
 
-    using PushButtonUpCallback = std::function<void(unsigned long const durationPressed_msec)>;
+    using PushButtonUpCallback = std::function<void(PushDuration const pushDuration)>;
     void setPushButtonUpCallback(PushButtonUpCallback callback);
 
 public:
@@ -45,6 +52,8 @@ private:
     PushButtonDownCallback m_PushButtonDownCallback;
     PushButtonUpCallback m_PushButtonUpCallback;
     unsigned long m_TimePushButtonPressedDown;
+
+    static constexpr unsigned long c_LongPushThreshold_msec = 750;
 
     uint8_t m_IncrementOrderOfMagnitude;
 

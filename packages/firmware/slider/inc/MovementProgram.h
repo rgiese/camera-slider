@@ -6,6 +6,12 @@ struct MovementProgram
     {
         Movement() = default;
 
+        Movement(Flatbuffers::Firmware::MovementType const type,
+                 uint16_t const delayTime,
+                 int32_t const desiredPosition,
+                 uint32_t const desiredSpeed,
+                 uint32_t const desiredAcceleration);
+
         Flatbuffers::Firmware::MovementType Type = Flatbuffers::Firmware::MovementType::Move;
         uint16_t DelayTime = 0;
         int32_t DesiredPosition = 0;
@@ -31,6 +37,10 @@ struct MovementProgram
                     return true;
             }
         }
+
+        void applyDeltas(int32_t const desiredPositionDelta,
+                         int32_t const desiredSpeedDelta,
+                         int32_t const desiredAccelerationDelta);
     };
 
     MovementProgram() = default;
