@@ -28,9 +28,14 @@ void Encoder::begin()
     setIncrementOrderOfMagnitude(0);
 }
 
-void Encoder::setPushButtonDownCallback(PushButtonCallback callback)
+void Encoder::setPushButtonDownCallback(PushButtonDownCallback callback)
 {
     m_PushButtonDownCallback = callback;
+}
+
+void Encoder::setPushButtonUpCallback(PushButtonUpCallback callback)
+{
+    m_PushButtonUpCallback = callback;
 }
 
 void Encoder::pollForUpdates()
@@ -40,9 +45,26 @@ void Encoder::pollForUpdates()
         encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
     }
 
-    if (encoderStatus.IsPushButtonPressed && m_PushButtonDownCallback)
+    // Evaluate pressed -> released in order in case we got a down+up in a single poll cycle
+    if (encoderStatus.IsPushButtonPressed)
     {
-        m_PushButtonDownCallback();
+        m_TimePushButtonPressedDown = millis();
+
+        if (m_PushButtonDownCallback)
+        {
+            m_PushButtonDownCallback();
+        }
+    }
+
+    if (encoderStatus.IsPushButtonReleased)
+    {
+        unsigned long const currentTime = millis();
+        unsigned long const durationPressed_msec = currentTime - m_TimePushButtonPressedDown;
+
+        if (m_PushButtonUpCallback)
+        {
+            m_PushButtonUpCallback(durationPressed_msec);
+        }
     }
 }
 

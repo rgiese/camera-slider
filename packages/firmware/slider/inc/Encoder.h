@@ -7,6 +7,8 @@ public:
         : m_Wire(wire)
         , m_Address(address)
         , m_PushButtonDownCallback()
+        , m_PushButtonUpCallback()
+        , m_TimePushButtonPressedDown()
         , m_IncrementOrderOfMagnitude(0)
     {
     }
@@ -17,8 +19,11 @@ public:
     //
     void begin();
 
-    using PushButtonCallback = std::function<void(void)>;
-    void setPushButtonDownCallback(PushButtonCallback callback);
+    using PushButtonDownCallback = std::function<void(void)>;
+    void setPushButtonDownCallback(PushButtonDownCallback callback);
+
+    using PushButtonUpCallback = std::function<void(unsigned long const durationPressed_msec)>;
+    void setPushButtonUpCallback(PushButtonUpCallback callback);
 
 public:
     //
@@ -36,7 +41,11 @@ public:
 private:
     TwoWire& m_Wire;
     uint8_t const m_Address;
-    PushButtonCallback m_PushButtonDownCallback;
+
+    PushButtonDownCallback m_PushButtonDownCallback;
+    PushButtonUpCallback m_PushButtonUpCallback;
+    unsigned long m_TimePushButtonPressedDown;
+
     uint8_t m_IncrementOrderOfMagnitude;
 
     //
