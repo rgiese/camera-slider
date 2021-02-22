@@ -33,8 +33,10 @@ void Encoder::setPushButtonUpCallback(PushButtonUpCallback callback)
     m_PushButtonUpCallback = callback;
 }
 
-void Encoder::setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode)
+void Encoder::setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode, bool const enablePullup)
 {
+    getGPIOConfiguration(pin).PinMode = pinMode;
+
     GPIOConfigurationRegister configuration;
     {
         switch (pinMode)
@@ -53,14 +55,26 @@ void Encoder::setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode)
 
             case GPIOPinMode::DigitalInput:
                 configuration.PinMode = 0b11;
+                configuration.EnablePullup = enablePullup;
+                configuration.InterruptConfiguration = 0b11;  // Interrupts on both edges
+                break;
         }
     }
 
     writeRegister(getGPIOConfigurationRegister(pin), configuration);
 }
 
+void Encoder::setGPIOEdgeCallback(GPIOPin const pin, GPIOInputEdgeCallback callback)
+{
+    getGPIOConfiguration(pin).InputEdgeCallback = callback;
+}
+
 void Encoder::pollForUpdates()
 {
+    //
+    // Encoder status
+    //
+
     EncoderStatusBits encoderStatus{0};
     {
         encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
@@ -86,6 +100,43 @@ void Encoder::pollForUpdates()
         {
             m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
                                                                                     : PushDuration::Short);
+        }
+    }
+
+    //
+    // GPIO status
+    //
+
+    SecondaryInterruptStatusBits secondaryInterruptStatus{0};
+    {
+        secondaryInterruptStatus._Value = readRegister<uint8_t>(I2CRegister::SecondaryInterruptStatus);
+    }
+
+    if (getGPIOConfiguration(GPIOPin::GPIO1).PinMode == GPIOPinMode::DigitalInput &&
+        getGPIOConfiguration(GPIOPin::GPIO1).InputEdgeCallback)
+    {
+        if (secondaryInterruptStatus.GPIO1_HadNegativeEdge)
+        {
+            getGPIOConfiguration(GPIOPin::GPIO1).InputEdgeCallback(GPIOInputEdge::Negative);
+        }
+
+        if (secondaryInterruptStatus.GPIO1_HadPositiveEdge)
+        {
+            getGPIOConfiguration(GPIOPin::GPIO1).InputEdgeCallback(GPIOInputEdge::Positive);
+        }
+    }
+
+    if (getGPIOConfiguration(GPIOPin::GPIO2).PinMode == GPIOPinMode::DigitalInput &&
+        getGPIOConfiguration(GPIOPin::GPIO2).InputEdgeCallback)
+    {
+        if (secondaryInterruptStatus.GPIO2_HadNegativeEdge)
+        {
+            getGPIOConfiguration(GPIOPin::GPIO2).InputEdgeCallback(GPIOInputEdge::Negative);
+        }
+
+        if (secondaryInterruptStatus.GPIO2_HadPositiveEdge)
+        {
+            getGPIOConfiguration(GPIOPin::GPIO2).InputEdgeCallback(GPIOInputEdge::Positive);
         }
     }
 }
@@ -130,5 +181,27 @@ int32_t Encoder::getLatestValueDelta()
 
 void Encoder::setGPIOOutput(GPIOPin const pin, uint8_t const value)
 {
-    writeRegister(getGPIOValueRegister(pin), value);
+    switch (getGPIOConfiguration(pin).PinMode)
+    {
+        case GPIOPinMode::PushPullOutput:
+        case GPIOPinMode::PWMOutput:
+            writeRegister(getGPIOValueRegister(pin), value);
+            break;
+
+        default:
+            return;
+    }
+}
+
+uint8_t Encoder::getGPIOInput(GPIOPin const pin)
+{
+    switch (getGPIOConfiguration(pin).PinMode)
+    {
+        case GPIOPinMode::DigitalInput:
+        case GPIOPinMode::AnalogInput:
+            return readRegister<uint8_t>(getGPIOValueRegister(pin));
+
+        default:
+            return 0;
+    }
 }

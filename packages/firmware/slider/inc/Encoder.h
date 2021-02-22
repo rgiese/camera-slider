@@ -24,6 +24,12 @@ public:
         DigitalInput,
     };
 
+    enum class GPIOInputEdge : bool
+    {
+        Positive,
+        Negative,
+    };
+
 public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
@@ -47,7 +53,10 @@ public:
     using PushButtonUpCallback = std::function<void(PushDuration const pushDuration)>;
     void setPushButtonUpCallback(PushButtonUpCallback callback);
 
-    void setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode);
+    void setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode, bool const enablePullup = false);
+
+    using GPIOInputEdgeCallback = std::function<void(GPIOInputEdge const edge)>;
+    void setGPIOEdgeCallback(GPIOPin const pin, GPIOInputEdgeCallback callback);
 
 public:
     //
@@ -63,6 +72,7 @@ public:
     int32_t getLatestValueDelta();
 
     void setGPIOOutput(GPIOPin const pin, uint8_t const value);
+    uint8_t getGPIOInput(GPIOPin const pin);
 
 private:
     TwoWire& m_Wire;
@@ -73,6 +83,25 @@ private:
     unsigned long m_TimePushButtonPressedDown;
 
     static constexpr unsigned long c_LongPushThreshold_msec = 750;
+
+    struct GPIOConfiguration
+    {
+        GPIOPinMode PinMode = GPIOPinMode::PWMOutput;
+        GPIOInputEdgeCallback InputEdgeCallback = nullptr;
+    };
+
+    std::array<GPIOConfiguration, 2> m_GPIOConfiguration;
+
+    GPIOConfiguration& getGPIOConfiguration(GPIOPin const pin)
+    {
+        switch (pin)
+        {
+            case GPIOPin::GPIO1:
+                return m_GPIOConfiguration[0];
+            case GPIOPin::GPIO2:
+                return m_GPIOConfiguration[1];
+        };
+    }
 
     uint8_t m_IncrementOrderOfMagnitude;
 
@@ -89,8 +118,7 @@ private:
         GP3Configuration,
         InterruptConfiguration,
         EncoderStatus,
-        InterruptStatus,
-        FadeStatus,
+        SecondaryInterruptStatus,
         CounterValue_0 = 0x08,
         CounterMaxValue_0 = 0x0C,
         CounterMinValue_0 = 0x10,
@@ -193,6 +221,31 @@ private:
         };
 
         EncoderStatusBits(uint8_t const value)
+            : _Value(value)
+        {
+            static_assert(sizeof(*this) == sizeof(uint8_t));
+        }
+    };
+
+    struct SecondaryInterruptStatusBits
+    {
+        union
+        {
+            struct
+            {
+                bool GPIO1_HadPositiveEdge : 1;
+                bool GPIO1_HadNegativeEdge : 1;
+                bool GPIO2_HadPositiveEdge : 1;
+                bool GPIO2_HadNegativeEdge : 1;
+                bool GPIO3_HadPositiveEdge : 1;
+                bool GPIO3_HadNegativeEdge : 1;
+                bool FadeEventOccurred : 1;
+                bool _Unused : 1;
+            };
+            uint8_t _Value;
+        };
+
+        SecondaryInterruptStatusBits(uint8_t const value)
             : _Value(value)
         {
             static_assert(sizeof(*this) == sizeof(uint8_t));

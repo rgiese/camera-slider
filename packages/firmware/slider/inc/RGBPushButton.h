@@ -18,6 +18,7 @@ public:
         , m_Red(ledRed)
         , m_Green(ledGreen)
         , m_Blue(ledBlue)
+        , m_PushButtonCallback()
     {
     }
 
@@ -27,12 +28,13 @@ public:
     //
     void begin();
 
+    using PushButtonCallback = std::function<void(void)>;
+    void setPushButtonCallback(PushButtonCallback callback);
+
 public:
     //
     // Runtime
     //
-    void pollForUpdates();
-
     void setColor(RGBColor const& color, bool const fScaleColorsEvenly = true);
 
 private:
@@ -45,4 +47,6 @@ private:
     EncoderAndGPIOPin const m_Red;
     EncoderAndGPIOPin const m_Green;
     EncoderAndGPIOPin const m_Blue;
+
+    PushButtonCallback m_PushButtonCallback;
 };

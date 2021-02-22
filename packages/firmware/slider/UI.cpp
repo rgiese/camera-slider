@@ -263,6 +263,10 @@ void UI::begin()
         }
     });
 
+    // Set up start button
+    m_StartButton.setColor(RGBColor{0xFF, 0xFF, 0xFF});
+    m_StartButton.setPushButtonCallback([]() { Serial.println("Start button!"); });
+
     // Set up observers
     g_MotorController.TargetPosition.attach_and_initialize([this](int32_t const position) {
         if (!editingExistingStep())
@@ -342,12 +346,11 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
 
 void UI::onMainLoop()
 {
+    // Poll encoders for updates (may deliver callbacks)
     for (uint8_t idxEncoder = 0; idxEncoder < static_cast<uint8_t>(EncoderFunction::__count); ++idxEncoder)
     {
         m_Encoders[idxEncoder].pollForUpdates();
     }
-
-    m_StartButton.pollForUpdates();
 
     // Pick up value updates from encoders
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
