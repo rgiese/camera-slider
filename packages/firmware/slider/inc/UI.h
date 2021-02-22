@@ -184,6 +184,8 @@ private:
     {
         return m_Encoders[static_cast<uint8_t>(encoderFunction)];
     };
+
+    RGBPushButton m_StartButton;
 };
 
 extern UI g_UI;

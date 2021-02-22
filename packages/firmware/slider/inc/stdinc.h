@@ -33,6 +33,7 @@
 #include "inc/MovementProgramStore.h"
 #include "inc/Display.h"
 #include "inc/Encoder.h"
+#include "inc/RGBPushButton.h"
 #include "bluetooth/Bluetooth.h"
 #include "motor/MotorController.h"
 #include "inc/Requests.h"

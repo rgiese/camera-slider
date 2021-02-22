@@ -19,11 +19,16 @@ union RGBColor
         return (red5Bits << (5 + 6)) | (green6Bits << 5) | blue5Bits;
     };
 
+    constexpr RGBColor multiply(float const ratioRed, float const ratioGreen, float const ratioBlue) const
+    {
+        return RGBColor{clamp<uint8_t>(static_cast<uint8_t>((Red * ratioRed) + 0.5), 0, 255),
+                        clamp<uint8_t>(static_cast<uint8_t>((Green * ratioGreen) + 0.5), 0, 255),
+                        clamp<uint8_t>(static_cast<uint8_t>((Blue * ratioBlue) + 0.5), 0, 255)};
+    };
+
     constexpr RGBColor multiply(float const ratio) const
     {
-        return RGBColor{clamp<uint8_t>(static_cast<uint8_t>((Red * ratio) + 0.5), 0, 255),
-                        clamp<uint8_t>(static_cast<uint8_t>((Green * ratio) + 0.5), 0, 255),
-                        clamp<uint8_t>(static_cast<uint8_t>((Blue * ratio) + 0.5), 0, 255)};
+        return multiply(ratio, ratio, ratio);
     };
 
     bool constexpr operator==(RGBColor const& other) const

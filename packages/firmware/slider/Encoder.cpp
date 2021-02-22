@@ -3,12 +3,7 @@
 void Encoder::begin()
 {
     // Initiate reset in GeneralConfiguration
-    {
-        AutoTransmission autoTransmission(m_Wire, m_Address);
-
-        m_Wire.write(static_cast<uint8_t>(I2CRegister::GeneralConfiguration));
-        m_Wire.write(GeneralConfigurationRegister{.Reset = true});
-    }
+    writeRegister(I2CRegister::GeneralConfiguration, GeneralConfigurationRegister{.Reset = true});
 
     // Wait for reset to complete
     delay(1);
@@ -36,6 +31,32 @@ void Encoder::setPushButtonDownCallback(PushButtonDownCallback callback)
 void Encoder::setPushButtonUpCallback(PushButtonUpCallback callback)
 {
     m_PushButtonUpCallback = callback;
+}
+
+void Encoder::setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode)
+{
+    GPIOConfigurationRegister configuration;
+    {
+        switch (pinMode)
+        {
+            case GPIOPinMode::PWMOutput:
+                configuration.PinMode = 0b00;
+                break;
+
+            case GPIOPinMode::PushPullOutput:
+                configuration.PinMode = 0b01;
+                break;
+
+            case GPIOPinMode::AnalogInput:
+                configuration.PinMode = 0b10;
+                break;
+
+            case GPIOPinMode::DigitalInput:
+                configuration.PinMode = 0b11;
+        }
+    }
+
+    writeRegister(getGPIOConfigurationRegister(pin), configuration);
 }
 
 void Encoder::pollForUpdates()
@@ -105,4 +126,9 @@ uint8_t Encoder::getIncrementOrderOfMagnitude()
 int32_t Encoder::getLatestValueDelta()
 {
     return readRegister<int32_t>(I2CRegister::CounterValue_0);
+}
+
+void Encoder::setGPIOOutput(GPIOPin const pin, uint8_t const value)
+{
+    writeRegister(getGPIOValueRegister(pin), value);
 }

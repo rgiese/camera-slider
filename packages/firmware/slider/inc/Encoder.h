@@ -9,6 +9,21 @@ public:
         Short
     };
 
+    enum class GPIOPin : uint8_t
+    {
+        GPIO1,
+        GPIO2,
+        // GPIO3, // not available on RGB encoders
+    };
+
+    enum class GPIOPinMode : uint8_t
+    {
+        PWMOutput,
+        PushPullOutput,
+        AnalogInput,
+        DigitalInput,
+    };
+
 public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
@@ -32,6 +47,8 @@ public:
     using PushButtonUpCallback = std::function<void(PushDuration const pushDuration)>;
     void setPushButtonUpCallback(PushButtonUpCallback callback);
 
+    void setGPIOConfiguration(GPIOPin const pin, GPIOPinMode const pinMode);
+
 public:
     //
     // Runtime
@@ -44,6 +61,8 @@ public:
     uint8_t getIncrementOrderOfMagnitude();
 
     int32_t getLatestValueDelta();
+
+    void setGPIOOutput(GPIOPin const pin, uint8_t const value);
 
 private:
     TwoWire& m_Wire;
@@ -141,6 +160,20 @@ private:
         };
     };
 
+    struct GPIOConfigurationRegister
+    {
+        uint8_t PinMode : 2;
+        bool EnablePullup : 1;
+        uint8_t InterruptConfiguration : 2;
+        uint8_t _Unused : 3;
+
+        operator uint8_t() const
+        {
+            static_assert(sizeof(*this) == sizeof(uint8_t));
+            return *reinterpret_cast<uint8_t const*>(this);
+        };
+    };
+
     struct EncoderStatusBits
     {
         union
@@ -165,6 +198,28 @@ private:
             static_assert(sizeof(*this) == sizeof(uint8_t));
         }
     };
+
+    constexpr I2CRegister getGPIOConfigurationRegister(GPIOPin const pin)
+    {
+        switch (pin)
+        {
+            case GPIOPin::GPIO1:
+                return I2CRegister::GP1Configuration;
+            case GPIOPin::GPIO2:
+                return I2CRegister::GP2Configuration;
+        }
+    }
+
+    constexpr I2CRegister getGPIOValueRegister(GPIOPin const pin)
+    {
+        switch (pin)
+        {
+            case GPIOPin::GPIO1:
+                return I2CRegister::GP1Register;
+            case GPIOPin::GPIO2:
+                return I2CRegister::GP2Register;
+        }
+    }
 
 private:
     //

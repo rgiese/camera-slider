@@ -143,6 +143,10 @@ UI::UI()
           Encoder(m_Wire, 0x10),  // Step
           Encoder(m_Wire, 0x11),  // Rate
       })
+    , m_StartButton({encoderFor(EncoderFunction::Rate), Encoder::GPIOPin::GPIO2},
+                    {encoderFor(EncoderFunction::Rate), Encoder::GPIOPin::GPIO1},
+                    {encoderFor(EncoderFunction::Step), Encoder::GPIOPin::GPIO1},
+                    {encoderFor(EncoderFunction::Step), Encoder::GPIOPin::GPIO2})
 {
     m_MovementProgramRows.reserve(LCDConstants::nMovementProgramTableRows);
 
@@ -198,6 +202,8 @@ void UI::begin()
         m_Encoders[idxEncoder].begin();
         m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
     }
+
+    m_StartButton.begin();
 
     auto const setIncrementCallback = [this](EncoderFunction const encoderFunction,
                                              uint8_t const maxEncoderOrderOfMagnitude,
@@ -340,6 +346,8 @@ void UI::onMainLoop()
     {
         m_Encoders[idxEncoder].pollForUpdates();
     }
+
+    m_StartButton.pollForUpdates();
 
     // Pick up value updates from encoders
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
