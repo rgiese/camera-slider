@@ -69,6 +69,12 @@ struct MovementProgram
     void applyRateDelta(int16_t const RateDelta);
 
     //
+    // Execution
+    //
+
+    void requestMoveToMovement(size_t const idxMovement) const;
+
+    //
     // Conversions
     //
 

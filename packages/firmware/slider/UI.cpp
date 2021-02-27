@@ -248,7 +248,11 @@ void UI::begin()
             .setValueDeltaCallback([this, desiredStateRequestParameter, movementProgramParameter](int32_t const delta) {
                 if (editingExistingStep())
                 {
-                    // Editing existing step - update program
+                    //
+                    // Editing existing step
+                    //
+
+                    // Update program
                     g_MovementProgramStore.CurrentMovementProgram.mutate(
                         [&](MovementProgram const& movementProgram) -> MovementProgram {
                             if (m_idxSelectedStep >= movementProgram.Movements.size())
@@ -264,10 +268,14 @@ void UI::begin()
 
                             return mutatedMovementProgram;
                         });
+
+                    // Then control live position from absolute movement values
+                    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+                    movementProgram.requestMoveToMovement(m_idxSelectedStep);
                 }
                 else
                 {
-                    // Controlling live position
+                    // Control live position via delta
                     Request request = {Type : desiredStateRequestParameter};
                     request.DesiredParameterDelta.delta = delta;
                     g_RequestQueue.push(request);
@@ -287,9 +295,24 @@ void UI::begin()
 
     // Encoder value change: Step
     encoderFor(EncoderFunction::Step).setValueDeltaCallback([this](int32_t delta) {
-        m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, m_nStepsInProgram);
-
         MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+        m_nStepsInProgram = movementProgram.Movements.size();
+
+        uint16_t const idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, m_nStepsInProgram);
+
+        if (idxSelectedStep == m_idxSelectedStep)
+        {
+            // Nothing left to do
+            return;
+        }
+
+        // Commit
+        m_idxSelectedStep = idxSelectedStep;
+
+        // Seek
+        movementProgram.requestMoveToMovement(m_idxSelectedStep);
+
+        // Update UI
         updateWithMovementProgram(movementProgram);
     });
 
@@ -460,7 +483,7 @@ void UI::onMainLoop()
 void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 {
     //
-    // Update step state
+    // Conform step state
     //
 
     m_nStepsInProgram = movementProgram.Movements.size();

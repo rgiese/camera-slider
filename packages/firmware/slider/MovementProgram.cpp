@@ -61,6 +61,39 @@ void MovementProgram::applyRateDelta(int16_t const RateDelta)
 }
 
 //
+// Execution
+//
+
+void MovementProgram::requestMoveToMovement(size_t const idxMovement) const
+{
+    if (idxMovement >= Movements.size())
+    {
+        return;
+    }
+
+    Movement const& movement = Movements[idxMovement];
+
+    {
+        Request request = {Type : RequestType::DesiredPosition};
+        request.DesiredPosition.value = movement.DesiredPosition;
+        g_RequestQueue.push(request);
+    }
+
+    {
+        Request request = {Type : RequestType::DesiredMaximumSpeed};
+        request.DesiredMaximumSpeed.value = static_cast<uint32_t>(movement.DesiredSpeed * RatePercent / 100.0f);
+        g_RequestQueue.push(request);
+    }
+
+    {
+        Request request = {Type : RequestType::DesiredMaximumAcceleration};
+        request.DesiredMaximumAcceleration.value =
+            static_cast<uint32_t>(movement.DesiredAcceleration * RatePercent / 100.0f);
+        g_RequestQueue.push(request);
+    }
+}
+
+//
 // Conversions
 //
 
