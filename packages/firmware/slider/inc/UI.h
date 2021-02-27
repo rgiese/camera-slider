@@ -117,13 +117,26 @@ private:
         static constexpr float ReportedMovementParameters_ColorMultiplier = 0.8f;
 
         //
+        // State display row
+        //
+
+        static constexpr uint16_t CurrentState_Width = LCD::StaticText::c_MaximumWidth;
+        static constexpr uint16_t CurrentState_X = (LCD::DisplayWidth - CurrentState_Width) / 2;
+
+        static constexpr uint16_t CurrentState_Height = ReportedMovementParameters_Height;
+        static constexpr uint16_t CurrentState_Y =
+            ReportedMovementParameters_Y - CurrentState_Height - 2 * PaddingMedium;
+
+        //
         // Step and rate controls column
         //
 
-        static constexpr uint16_t DesiredStepAndRateParameter_AvailableWidth = LCD::DisplayWidth - MovementProgramTableRightX;
+        static constexpr uint16_t DesiredStepAndRateParameter_AvailableWidth =
+            LCD::DisplayWidth - MovementProgramTableRightX;
 
         static constexpr uint16_t DesiredStepAndRateParameter_X = MovementProgramTableRightX;
-        static constexpr uint16_t DesiredStepAndRateParameter_Width = DesiredStepAndRateParameter_AvailableWidth - PaddingSmall;
+        static constexpr uint16_t DesiredStepAndRateParameter_Width =
+            DesiredStepAndRateParameter_AvailableWidth - PaddingSmall;
         static constexpr uint16_t DesiredStepAndRateParameter_Height = DesiredMovementParameters_Height;
 
         static_assert(DesiredStepAndRateParameter_Width <= LCD::StaticText::c_MaximumWidth);
@@ -148,6 +161,7 @@ private:
     GFXfont const* const m_MovementParameterLabels_Font;
     GFXfont const* const m_DesiredMovementParameters_Font;
     GFXfont const* const m_ReportedMovementParameters_Font;
+    GFXfont const* const m_CurrentState_Font;
 
     LCD::StaticNumericText m_Text_DesiredPosition;
     LCD::StaticNumericText m_Text_DesiredMaximumSpeed;
@@ -155,6 +169,8 @@ private:
 
     LCD::StaticNumericText m_Text_ReportedPosition;
     LCD::StaticNumericText m_Text_ReportedVelocity;
+
+    LCD::StaticText m_Text_CurrentState;
 
     LCD::StaticText m_Label_Step;
     LCD::StaticNumericText m_Text_DesiredStep;

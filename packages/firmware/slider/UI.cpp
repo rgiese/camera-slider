@@ -23,6 +23,7 @@ UI::UI()
     , m_MovementParameterLabels_Font(&FreeSans9pt7b)
     , m_DesiredMovementParameters_Font(&FreeSans18pt7b)
     , m_ReportedMovementParameters_Font(&FreeSans12pt7b)
+    , m_CurrentState_Font(&FreeSans9pt7b)
     // Movement controls
     , m_Text_DesiredPosition(m_LCD,
                              LCD::Rect{
@@ -84,6 +85,18 @@ UI::UI()
           m_ReportedMovementParameters_Font,
           colorFor(EncoderFunction::Speed).multiply(LCDConstants::ReportedMovementParameters_ColorMultiplier),
           RGBColor())
+    // Current state
+    , m_Text_CurrentState(m_LCD,
+                          LCD::Rect{
+                              X : LCDConstants::CurrentState_X,
+                              Y : LCDConstants::CurrentState_Y,
+                              Width : LCDConstants::CurrentState_Width,
+                              Height : LCDConstants::CurrentState_Height
+                          },
+                          LCD::Alignment::Center,
+                          m_CurrentState_Font,
+                          RGBColor::White().multiply(0.9f),
+                          RGBColor())
     // Step
     , m_Label_Step(m_LCD,
                    LCD::Rect{
@@ -221,6 +234,8 @@ void UI::begin()
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
 
+    m_Text_CurrentState.setText("Hello");
+
     //
     // Configure encoder callbacks (these will run in onMainLoop->[encoders]->pollForUpdates)
     //
@@ -356,6 +371,10 @@ void UI::begin()
     //
     // Configure observers
     //
+
+    g_StateKeeper.CurrentSliderState.attach_and_initialize([this](SliderState const sliderState) {
+        m_Text_CurrentState.setText(getSliderStateFriendlyName(sliderState));
+    });
 
     // Bind Position/Speed/Acceleration to target values iff we're not editing a step
     g_MotorController.TargetPosition.attach_and_initialize([this](int32_t const position) {

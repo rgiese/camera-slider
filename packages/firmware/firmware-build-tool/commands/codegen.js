@@ -82,6 +82,13 @@ class CodegenCommand extends Command {
       return str.slice(0, 1).toUpperCase() + str.slice(1);
     };
 
+    const buildFriendlyName = str => {
+      const spacedOutName = str.replace(/([A-Z])/g, " $1");
+      const lowerSpacedOutName = spacedOutName.toLowerCase();
+
+      return capitalize(lowerSpacedOutName);
+    };
+
     // Enum
     headerFileContent += `enum class SliderState {\n`;
 
@@ -98,6 +105,20 @@ class CodegenCommand extends Command {
     for (const sliderState of SliderStateNames) {
       const capitalState = capitalize(sliderState);
       headerFileContent += `    case SliderState::${capitalState}: return "${sliderState}";\n`;
+    }
+
+    headerFileContent += `    default: return "<unknown>";\n`;
+    headerFileContent += `  }\n`;
+    headerFileContent += `}\n`;
+
+    // Enum->friendly string mapping
+    headerFileContent += `inline char const* getSliderStateFriendlyName(SliderState const state) {\n`;
+    headerFileContent += `  switch (state) {\n`;
+
+    for (const sliderState of SliderStateNames) {
+      const capitalState = capitalize(sliderState);
+      const friendlyName = buildFriendlyName(sliderState);
+      headerFileContent += `    case SliderState::${capitalState}: return "${friendlyName}";\n`;
     }
 
     headerFileContent += `    default: return "<unknown>";\n`;

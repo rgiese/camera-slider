@@ -5,7 +5,7 @@
 class LCD
 {
 private:
-    static constexpr uint16_t c_MonochromeCanvasWidth = 128;
+    static constexpr uint16_t c_MonochromeCanvasWidth = 256;
     static constexpr uint16_t c_MonochromeCanvasHeight = 64;
 
 public:
