@@ -24,22 +24,35 @@ MovementProgram::Movement::Movement(Flatbuffers::Firmware::MovementType const ty
                                 MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
 }
 
-void MovementProgram::Movement::applyDeltas(int32_t const desiredPositionDelta,
-                                            int32_t const desiredSpeedDelta,
-                                            int32_t const desiredAccelerationDelta)
+void MovementProgram::Movement::applyDelta(Parameter const parameter, int32_t delta)
 {
-    DesiredPosition = clamp_delta(DesiredPosition,
-                                  desiredPositionDelta,
-                                  MotorController::c_MinimumPosition_Steps,
-                                  MotorController::c_MaxSafePosition_Steps);
-    DesiredSpeed = clamp_delta(DesiredSpeed,
-                               desiredSpeedDelta,
-                               MotorController::c_MinimumSpeed_StepsPerSec,
-                               MotorController::c_MaxSafeSpeed_StepsPerSec);
-    DesiredAcceleration = clamp_delta(DesiredAcceleration,
-                                      desiredAccelerationDelta,
-                                      MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
-                                      MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+    switch (parameter)
+    {
+        case Parameter::DesiredPosition:
+            DesiredPosition = clamp_delta(DesiredPosition,
+                                          delta,
+                                          MotorController::c_MinimumPosition_Steps,
+                                          MotorController::c_MaxSafePosition_Steps);
+            return;
+
+        case Parameter::DesiredSpeed:
+            DesiredSpeed = clamp_delta(DesiredSpeed,
+                                       delta,
+                                       MotorController::c_MinimumSpeed_StepsPerSec,
+                                       MotorController::c_MaxSafeSpeed_StepsPerSec);
+            return;
+
+        case Parameter::DesiredAcceleration:
+            DesiredAcceleration = clamp_delta(DesiredAcceleration,
+                                              delta,
+                                              MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                              MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+            return;
+
+        default:
+            // Ignore
+            return;
+    }
 }
 
 void MovementProgram::applyRateDelta(int16_t const RateDelta)

@@ -34,25 +34,25 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             g_MotorController.setTargetPosition(request.DesiredPosition.value);
             return true;
 
-        case RequestType::DesiredPositionDelta:
-            g_MotorController.setTargetPosition(g_MotorController.TargetPosition + request.DesiredPositionDelta.delta);
-            return true;
-
         case RequestType::DesiredMaximumSpeed:
             g_MotorController.setMaxSpeed(request.DesiredMaximumSpeed.value);
-            return true;
-
-        case RequestType::DesiredMaximumSpeedDelta:
-            g_MotorController.setMaxSpeed(g_MotorController.MaximumSpeed + request.DesiredMaximumSpeedDelta.delta);
             return true;
 
         case RequestType::DesiredMaximumAcceleration:
             g_MotorController.setMaxAcceleration(request.DesiredMaximumAcceleration.value);
             return true;
 
-        case RequestType::DesiredMaximumAccelerationDelta:
+        case RequestType::DesiredParameterDelta_Position:
+            g_MotorController.setTargetPosition(g_MotorController.TargetPosition + request.DesiredParameterDelta.delta);
+            return true;
+
+        case RequestType::DesiredParameterDelta_MaximumSpeed:
+            g_MotorController.setMaxSpeed(g_MotorController.MaximumSpeed + request.DesiredParameterDelta.delta);
+            return true;
+
+        case RequestType::DesiredParameterDelta_MaximumAcceleration:
             g_MotorController.setMaxAcceleration(g_MotorController.MaximumAcceleration +
-                                                 request.DesiredMaximumAccelerationDelta.delta);
+                                                 request.DesiredParameterDelta.delta);
             return true;
 
         case RequestType::StartMovementProgram:

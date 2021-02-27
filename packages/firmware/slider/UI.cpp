@@ -409,8 +409,13 @@ void UI::onMainLoop()
                 }
 
                 MovementProgram mutatedMovementProgram = movementProgram;
-                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDeltas(
-                    positionDelta, speedDelta, accelerationDelta);
+
+                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
+                    MovementProgram::Movement::Parameter::DesiredPosition, positionDelta);
+                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
+                    MovementProgram::Movement::Parameter::DesiredSpeed, speedDelta);
+                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
+                    MovementProgram::Movement::Parameter::DesiredAcceleration, accelerationDelta);
 
                 return mutatedMovementProgram;
             });
@@ -420,22 +425,22 @@ void UI::onMainLoop()
         // Creating new step - control live position
         if (positionDelta != 0)
         {
-            Request request = {Type : RequestType::DesiredPositionDelta};
-            request.DesiredPositionDelta.delta = positionDelta;
+            Request request = {Type : RequestType::DesiredParameterDelta_Position};
+            request.DesiredParameterDelta.delta = positionDelta;
             g_RequestQueue.push(request);
         }
 
         if (speedDelta != 0)
         {
-            Request request = {Type : RequestType::DesiredMaximumSpeedDelta};
-            request.DesiredMaximumSpeedDelta.delta = speedDelta;
+            Request request = {Type : RequestType::DesiredParameterDelta_MaximumSpeed};
+            request.DesiredParameterDelta.delta = speedDelta;
             g_RequestQueue.push(request);
         }
 
         if (accelerationDelta != 0)
         {
-            Request request = {Type : RequestType::DesiredMaximumAccelerationDelta};
-            request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
+            Request request = {Type : RequestType::DesiredParameterDelta_MaximumAcceleration};
+            request.DesiredParameterDelta.delta = accelerationDelta;
             g_RequestQueue.push(request);
         }
     }

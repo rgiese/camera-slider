@@ -4,11 +4,11 @@ enum class RequestType
 {
     UIButtonPressed,
     DesiredPosition,
-    DesiredPositionDelta,
     DesiredMaximumSpeed,
-    DesiredMaximumSpeedDelta,
     DesiredMaximumAcceleration,
-    DesiredMaximumAccelerationDelta,
+    DesiredParameterDelta_Position,
+    DesiredParameterDelta_MaximumSpeed,
+    DesiredParameterDelta_MaximumAcceleration,
     StartMovementProgram,
     StopMovementProgram,
     UpdatedMovementProgram,
@@ -32,18 +32,8 @@ struct Request
 
         struct
         {
-            int32_t delta;
-        } DesiredPositionDelta;
-
-        struct
-        {
             uint32_t value;
         } DesiredMaximumSpeed;
-
-        struct
-        {
-            int32_t delta;
-        } DesiredMaximumSpeedDelta;
 
         struct
         {
@@ -53,7 +43,7 @@ struct Request
         struct
         {
             int32_t delta;
-        } DesiredMaximumAccelerationDelta;
+        } DesiredParameterDelta;
 
         struct
         {

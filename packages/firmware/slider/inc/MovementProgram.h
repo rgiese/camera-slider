@@ -4,6 +4,14 @@ struct MovementProgram
 {
     struct Movement
     {
+        enum class Parameter
+        {
+            DelayTime,
+            DesiredPosition,
+            DesiredSpeed,
+            DesiredAcceleration,
+        };
+
         Movement() = default;
 
         Movement(Flatbuffers::Firmware::MovementType const type,
@@ -38,9 +46,7 @@ struct MovementProgram
             }
         }
 
-        void applyDeltas(int32_t const desiredPositionDelta,
-                         int32_t const desiredSpeedDelta,
-                         int32_t const desiredAccelerationDelta);
+        void applyDelta(Parameter const parameter, int32_t delta);
     };
 
     MovementProgram() = default;
