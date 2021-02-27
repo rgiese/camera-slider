@@ -191,6 +191,10 @@ UI::UI()
 
 void UI::begin()
 {
+    //
+    // Configure hardware
+    //
+
     m_LCD.begin();
 
     // Configure interrupt pin for encoders
@@ -205,6 +209,23 @@ void UI::begin()
 
     m_StartButton.begin();
 
+    //
+    // Set up static text
+    //
+
+    m_MovementProgramRows[0].Step.setText("Step");
+    m_MovementProgramRows[0].DesiredPosition.setText("Position");
+    m_MovementProgramRows[0].DesiredSpeed.setText("Speed");
+    m_MovementProgramRows[0].DesiredAcceleration.setText("Acceleration");
+
+    m_Label_Step.setText("Step");
+    m_Label_Rate.setText("Rate");
+
+    //
+    // Configure callbacks
+    //
+
+    // Encoder push buttons for Position/Speed/Acceleration/Rate: switch 'order of magnitude' selector on push
     auto const setIncrementCallback = [this](EncoderFunction const encoderFunction,
                                              uint8_t const maxEncoderOrderOfMagnitude,
                                              LCD::StaticNumericText& display) {
@@ -224,6 +245,7 @@ void UI::begin()
     setIncrementCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
     setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
+    // Encoder push button for Step: add new or delete existing step
     encoderFor(EncoderFunction::Step).setPushButtonUpCallback([this](Encoder::PushDuration const pushDuration) {
         if (editingExistingStep())
         {
@@ -263,11 +285,15 @@ void UI::begin()
         }
     });
 
-    // Set up start button
+    // Start button: <nothing for now>
     m_StartButton.setColor(RGBColor{0xFF, 0xFF, 0xFF});
     m_StartButton.setPushButtonCallback([]() { Serial.println("Start button!"); });
 
-    // Set up observers
+    //
+    // Configure observers
+    //
+
+    // Bind Position/Speed/Acceleration to target values iff we're not editing a step
     g_MotorController.TargetPosition.attach_and_initialize([this](int32_t const position) {
         if (!editingExistingStep())
         {
@@ -289,25 +315,20 @@ void UI::begin()
         }
     });
 
+    // Bind Reported Position/Speed to actual values (always)
     g_MotorController.CurrentPosition.attach_and_initialize(
         [this](int32_t const position) { m_Text_ReportedPosition.setValue(position); });
 
     g_MotorController.CurrentVelocity.attach_and_initialize(
         [this](int32_t const velocity) { m_Text_ReportedVelocity.setValue(velocity); });
 
-    g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize([this](MovementProgram const& movementProgram) {
-        updateWithMovementProgram(movementProgram);
-        m_Text_DesiredRate.setValue(movementProgram.RatePercent);
-    });
+    // Bind movement program traits to movement program updates
+    g_MovementProgramStore.CurrentMovementProgram.attach_and_initialize(
+        [this](MovementProgram const& movementProgram) { updateWithMovementProgram(movementProgram); });
 
-    // Set up labels
-    m_MovementProgramRows[0].Step.setText("Step");
-    m_MovementProgramRows[0].DesiredPosition.setText("Position");
-    m_MovementProgramRows[0].DesiredSpeed.setText("Speed");
-    m_MovementProgramRows[0].DesiredAcceleration.setText("Acceleration");
-
-    m_Label_Step.setText("Step");
-    m_Label_Rate.setText("Rate");
+    //
+    // Initial data update
+    //
 
     updateWithMovementProgram(g_MovementProgramStore.CurrentMovementProgram);
 }
@@ -405,14 +426,9 @@ void UI::onMainLoop()
     // Apply step selection
     if (stepDelta != 0)
     {
-        MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-
-        m_nStepsInProgram = movementProgram.Movements.size();
-
-        // Note: clamp_delta accepts values up to and _including_ the maximum value provided (m_nStepsInProgram)
-        // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
         m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, stepDelta, 0, m_nStepsInProgram);
 
+        MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
         updateWithMovementProgram(movementProgram);
     }
 
@@ -431,7 +447,20 @@ void UI::onMainLoop()
 
 void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 {
+    //
+    // Update step state
+    //
+
+    m_nStepsInProgram = movementProgram.Movements.size();
+
+    // Note: clamp accepts values up to and _including_ the maximum value provided (m_nStepsInProgram).
+    // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
+    m_idxSelectedStep = clamp<uint16_t>(m_idxSelectedStep, 0, m_nStepsInProgram);
+
+    //
     // Update Step control
+    //
+
     if (editingExistingStep())
     {
         m_Text_DesiredStep.setValue(m_idxSelectedStep + 1 /* human-readable */);
@@ -451,7 +480,16 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
         m_Text_DesiredMaximumAcceleration.setValue(g_MotorController.MaximumAcceleration);
     }
 
+    //
+    // Update Rate control
+    //
+
+    m_Text_DesiredRate.setValue(movementProgram.RatePercent);
+
+    //
     // Update movement program table
+    //
+
     size_t const cMovementTableHeaderRows = 1;
 
     if (cMovementTableHeaderRows >= m_MovementProgramRows.size())
