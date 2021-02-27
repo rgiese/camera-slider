@@ -225,6 +225,51 @@ void UI::begin()
     // Configure encoder callbacks (these will run in onMainLoop->[encoders]->pollForUpdates)
     //
 
+    // Encoder value change: movement parameters
+    auto const setValueChangeCallback = [this](EncoderFunction const encoderFunction,
+                                               RequestType const desiredStateRequestParameter,
+                                               MovementProgram::Movement::Parameter const movementProgramParameter) {
+        encoderFor(encoderFunction)
+            .setValueDeltaCallback([this, desiredStateRequestParameter, movementProgramParameter](int32_t const delta) {
+                if (editingExistingStep())
+                {
+                    // Editing existing step - update program
+                    g_MovementProgramStore.CurrentMovementProgram.mutate(
+                        [&](MovementProgram const& movementProgram) -> MovementProgram {
+                            if (m_idxSelectedStep >= movementProgram.Movements.size())
+                            {
+                                return movementProgram;
+                            }
+
+                            MovementProgram mutatedMovementProgram = movementProgram;
+                            {
+                                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(movementProgramParameter,
+                                                                                               delta);
+                            }
+
+                            return mutatedMovementProgram;
+                        });
+                }
+                else
+                {
+                    // Controlling live position
+                    Request request = {Type : desiredStateRequestParameter};
+                    request.DesiredParameterDelta.delta = delta;
+                    g_RequestQueue.push(request);
+                }
+            });
+    };
+
+    setValueChangeCallback(EncoderFunction::Position,
+                           RequestType::DesiredParameterDelta_Position,
+                           MovementProgram::Movement::Parameter::DesiredPosition);
+    setValueChangeCallback(EncoderFunction::Speed,
+                           RequestType::DesiredParameterDelta_MaximumSpeed,
+                           MovementProgram::Movement::Parameter::DesiredSpeed);
+    setValueChangeCallback(EncoderFunction::Acceleration,
+                           RequestType::DesiredParameterDelta_MaximumAcceleration,
+                           MovementProgram::Movement::Parameter::DesiredAcceleration);
+
     // Encoder value change: Step
     encoderFor(EncoderFunction::Step).setValueDeltaCallback([this](int32_t delta) {
         m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, m_nStepsInProgram);
@@ -386,63 +431,10 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
 
 void UI::onMainLoop()
 {
-    // Poll encoders for updates (may deliver callbacks)
+    // Poll encoders for updates (will deliver callbacks)
     for (uint8_t idxEncoder = 0; idxEncoder < static_cast<uint8_t>(EncoderFunction::__count); ++idxEncoder)
     {
         m_Encoders[idxEncoder].pollForUpdates();
-    }
-
-    // Pick up value updates from encoders
-    int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
-    int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();
-    int32_t const accelerationDelta = encoderFor(EncoderFunction::Acceleration).getLatestValueDelta();
-
-    // Apply movement parameters
-    if (editingExistingStep())
-    {
-        // Editing existing step - update program
-        g_MovementProgramStore.CurrentMovementProgram.mutate(
-            [&](MovementProgram const& movementProgram) -> MovementProgram {
-                if (m_idxSelectedStep >= movementProgram.Movements.size())
-                {
-                    return movementProgram;
-                }
-
-                MovementProgram mutatedMovementProgram = movementProgram;
-
-                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
-                    MovementProgram::Movement::Parameter::DesiredPosition, positionDelta);
-                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
-                    MovementProgram::Movement::Parameter::DesiredSpeed, speedDelta);
-                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
-                    MovementProgram::Movement::Parameter::DesiredAcceleration, accelerationDelta);
-
-                return mutatedMovementProgram;
-            });
-    }
-    else
-    {
-        // Creating new step - control live position
-        if (positionDelta != 0)
-        {
-            Request request = {Type : RequestType::DesiredParameterDelta_Position};
-            request.DesiredParameterDelta.delta = positionDelta;
-            g_RequestQueue.push(request);
-        }
-
-        if (speedDelta != 0)
-        {
-            Request request = {Type : RequestType::DesiredParameterDelta_MaximumSpeed};
-            request.DesiredParameterDelta.delta = speedDelta;
-            g_RequestQueue.push(request);
-        }
-
-        if (accelerationDelta != 0)
-        {
-            Request request = {Type : RequestType::DesiredParameterDelta_MaximumAcceleration};
-            request.DesiredParameterDelta.delta = accelerationDelta;
-            g_RequestQueue.push(request);
-        }
     }
 }
 
