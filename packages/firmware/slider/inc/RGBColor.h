@@ -10,6 +10,17 @@ union RGBColor
     };
     uint32_t Value;
 
+
+    static constexpr RGBColor Black()
+    {
+        return RGBColor{0, 0, 0};
+    }
+
+    static constexpr RGBColor White()
+    {
+        return RGBColor{0xFF, 0xFF, 0xFF};
+    }
+
     constexpr uint16_t to565Color() const
     {
         uint8_t const red5Bits = Red >> 3;
