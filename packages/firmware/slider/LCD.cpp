@@ -2,7 +2,7 @@
 
 LCD::LCD()
     : m_LCD(D14, D15, D7)
-    , m_MonochromeCanvas(128, 64)
+    , m_MonochromeCanvas(c_MonochromeCanvasWidth, c_MonochromeCanvasHeight)
 {
 }
 

@@ -4,6 +4,10 @@
 
 class LCD
 {
+private:
+    static constexpr uint16_t c_MonochromeCanvasWidth = 128;
+    static constexpr uint16_t c_MonochromeCanvasHeight = 64;
+
 public:
     struct Rect
     {
@@ -24,6 +28,9 @@ public:
     {
     public:
         static constexpr int16_t c_idxHighlightCharacter_None = -1;
+
+        static constexpr uint16_t c_MaximumWidth = LCD::c_MonochromeCanvasWidth;
+        static constexpr uint16_t c_MaximumHeight = LCD::c_MonochromeCanvasHeight;
 
     public:
         StaticText(LCD& parent,

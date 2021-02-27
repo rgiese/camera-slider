@@ -87,6 +87,11 @@ private:
 
         static constexpr uint16_t nMovementProgramTableRows = 7;
 
+        // Advisory values for laying out surrounding controls
+        static constexpr uint16_t MovementProgramTableWidth =
+            MovementProgramTableRow_StepWidth + 3 * MovementProgramTableRow_MovementParameterWidth;
+        static constexpr uint16_t MovementProgramTableRightX = MovementProgramTableX + MovementProgramTableWidth;
+
         //
         // Movement controls row
         //
@@ -94,7 +99,7 @@ private:
         static constexpr uint16_t nMovementControlsColumns = 3;
 
         static constexpr uint16_t DesiredMovementParameters_Width =
-            std::min(128, LCD::DisplayWidth / nMovementControlsColumns);
+            std::min<uint16_t>(LCD::StaticText::c_MaximumWidth, LCD::DisplayWidth / nMovementControlsColumns);
         static constexpr uint16_t DesiredMovementParameters_Height = 32;
         static constexpr uint16_t DesiredMovementParameters_HighlightHeight = 2;
         static constexpr uint16_t DesiredMovementParameters_X(uint16_t const idxLabel)
@@ -115,11 +120,13 @@ private:
         // Step and rate controls column
         //
 
-        static constexpr uint16_t DesiredStepAndRateParameter_Width = DesiredMovementParameters_Width;
-        static constexpr uint16_t DesiredStepAndRateParameter_Height = DesiredMovementParameters_Height;
-        static constexpr uint16_t DesiredStepAndRateParameter_X =
-            LCD::DisplayWidth - DesiredStepAndRateParameter_Width - PaddingSmall;
+        static constexpr uint16_t DesiredStepAndRateParameter_AvailableWidth = LCD::DisplayWidth - MovementProgramTableRightX;
 
+        static constexpr uint16_t DesiredStepAndRateParameter_X = MovementProgramTableRightX;
+        static constexpr uint16_t DesiredStepAndRateParameter_Width = DesiredStepAndRateParameter_AvailableWidth - PaddingSmall;
+        static constexpr uint16_t DesiredStepAndRateParameter_Height = DesiredMovementParameters_Height;
+
+        static_assert(DesiredStepAndRateParameter_Width <= LCD::StaticText::c_MaximumWidth);
 
         static constexpr uint16_t DesiredStepAndRateLabel_Width = DesiredStepAndRateParameter_Width;
         static constexpr uint16_t DesiredStepAndRateLabel_Height = 18;
