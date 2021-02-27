@@ -34,6 +34,7 @@ public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
         , m_Address(address)
+        , m_ValueDeltaCallback()
         , m_PushButtonDownCallback()
         , m_PushButtonUpCallback()
         , m_TimePushButtonPressedDown()
@@ -46,6 +47,9 @@ public:
     // Initialization
     //
     void begin();
+
+    using ValueDeltaCallback = std::function<void(int32_t delta)>;
+    void setValueDeltaCallback(ValueDeltaCallback callback);
 
     using PushButtonDownCallback = std::function<void(void)>;
     void setPushButtonDownCallback(PushButtonDownCallback callback);
@@ -78,6 +82,7 @@ private:
     TwoWire& m_Wire;
     uint8_t const m_Address;
 
+    ValueDeltaCallback m_ValueDeltaCallback;
     PushButtonDownCallback m_PushButtonDownCallback;
     PushButtonUpCallback m_PushButtonUpCallback;
     unsigned long m_TimePushButtonPressedDown;

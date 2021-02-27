@@ -222,8 +222,27 @@ void UI::begin()
     m_Label_Rate.setText("Rate");
 
     //
-    // Configure callbacks
+    // Configure encoder callbacks (these will run in onMainLoop->[encoders]->pollForUpdates)
     //
+
+    // Encoder value change: Step
+    encoderFor(EncoderFunction::Step).setValueDeltaCallback([this](int32_t delta) {
+        m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, m_nStepsInProgram);
+
+        MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+        updateWithMovementProgram(movementProgram);
+    });
+
+    // Encoder value change: Rate
+    encoderFor(EncoderFunction::Rate).setValueDeltaCallback([](int32_t delta) {
+        g_MovementProgramStore.CurrentMovementProgram.mutate(
+            [delta](MovementProgram const& movementProgram) -> MovementProgram {
+                MovementProgram mutatedMovementProgram = movementProgram;
+                mutatedMovementProgram.applyRateDelta(delta);
+
+                return mutatedMovementProgram;
+            });
+    });
 
     // Encoder push buttons for Position/Speed/Acceleration/Rate: switch 'order of magnitude' selector on push
     auto const setIncrementCallback = [this](EncoderFunction const encoderFunction,
@@ -377,8 +396,6 @@ void UI::onMainLoop()
     int32_t const positionDelta = encoderFor(EncoderFunction::Position).getLatestValueDelta();
     int32_t const speedDelta = encoderFor(EncoderFunction::Speed).getLatestValueDelta();
     int32_t const accelerationDelta = encoderFor(EncoderFunction::Acceleration).getLatestValueDelta();
-    int32_t const stepDelta = encoderFor(EncoderFunction::Step).getLatestValueDelta();
-    int32_t const rateDelta = encoderFor(EncoderFunction::Rate).getLatestValueDelta();
 
     // Apply movement parameters
     if (editingExistingStep())
@@ -421,27 +438,6 @@ void UI::onMainLoop()
             request.DesiredMaximumAccelerationDelta.delta = accelerationDelta;
             g_RequestQueue.push(request);
         }
-    }
-
-    // Apply step selection
-    if (stepDelta != 0)
-    {
-        m_idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, stepDelta, 0, m_nStepsInProgram);
-
-        MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-        updateWithMovementProgram(movementProgram);
-    }
-
-    // Apply rate selection
-    if (rateDelta != 0)
-    {
-        g_MovementProgramStore.CurrentMovementProgram.mutate(
-            [rateDelta](MovementProgram const& movementProgram) -> MovementProgram {
-                MovementProgram mutatedMovementProgram = movementProgram;
-                mutatedMovementProgram.applyRateDelta(rateDelta);
-
-                return mutatedMovementProgram;
-            });
     }
 }
 

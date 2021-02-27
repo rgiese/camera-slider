@@ -23,6 +23,11 @@ void Encoder::begin()
     setIncrementOrderOfMagnitude(0);
 }
 
+void Encoder::setValueDeltaCallback(ValueDeltaCallback callback)
+{
+    m_ValueDeltaCallback = callback;
+}
+
 void Encoder::setPushButtonDownCallback(PushButtonDownCallback callback)
 {
     m_PushButtonDownCallback = callback;
@@ -78,6 +83,16 @@ void Encoder::pollForUpdates()
     EncoderStatusBits encoderStatus{0};
     {
         encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
+    }
+
+    // Evalue value change
+    if (encoderStatus.IsEncoderIncreased || encoderStatus.IsEncoderDecreased)
+    {
+        if (m_ValueDeltaCallback)
+        {
+            int32_t const latestValueDelta = getLatestValueDelta();
+            m_ValueDeltaCallback(latestValueDelta);
+        }
     }
 
     // Evaluate pressed -> released in order in case we got a down+up in a single poll cycle
