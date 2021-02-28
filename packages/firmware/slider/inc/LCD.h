@@ -50,13 +50,16 @@ public:
             , m_Text()
             , m_idxCharacterToHighlight(c_idxHighlightCharacter_None)
             , m_ForegroundColor(foregroundColor)
-            , m_BackgroundColor(backgroundColor){};
+            , m_BackgroundColor(backgroundColor)
+            , m_fEnabled(true){};
 
         void clear();
         void setText(char const* const szText, int16_t const idxCharacterToHighlight = c_idxHighlightCharacter_None);
 
         void setForegroundColor(RGBColor const foregroundColor);
         void setBackgroundColor(RGBColor const backgroundColor);
+
+        void setEnabled(bool const fEnabled);
 
     protected:
         LCD& m_Parent;
@@ -73,6 +76,7 @@ public:
         int16_t m_idxCharacterToHighlight;
         RGBColor m_ForegroundColor;
         RGBColor m_BackgroundColor;
+        bool m_fEnabled;
 
     protected:
         void update();

@@ -234,7 +234,7 @@ void UI::begin()
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
 
-    m_Text_CurrentState.setText("Hello");
+    m_Text_CurrentState.setText("Starting");
 
     //
     // Configure encoder callbacks (these will run in onMainLoop->[encoders]->pollForUpdates)
@@ -397,6 +397,20 @@ void UI::begin()
 
     g_StateKeeper.CurrentSliderState.attach_and_initialize([this](SliderState const sliderState) {
         m_Text_CurrentState.setText(getSliderStateFriendlyName(sliderState));
+
+        switch (sliderState)
+        {
+            case SliderState::TrackingDesiredPosition:
+            case SliderState::RunningMovementProgram:
+                setMovementControlsEnabled(true);
+                setStepAndRateControlsEnabled(true);
+                break;
+
+            default:
+                setMovementControlsEnabled(false);
+                setStepAndRateControlsEnabled(false);
+                break;
+        }
     });
 
     // Bind Position/Speed/Acceleration to target values iff we're not editing a step
@@ -548,4 +562,27 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 bool UI::editingExistingStep() const
 {
     return m_idxSelectedStep < m_nStepsInProgram;
+}
+
+void UI::setMovementControlsEnabled(bool const fEnabled)
+{
+    encoderFor(EncoderFunction::Position).setEnabled(fEnabled);
+    encoderFor(EncoderFunction::Speed).setEnabled(fEnabled);
+    encoderFor(EncoderFunction::Acceleration).setEnabled(fEnabled);
+
+    m_Text_DesiredPosition.setEnabled(fEnabled);
+    m_Text_DesiredMaximumSpeed.setEnabled(fEnabled);
+    m_Text_DesiredMaximumAcceleration.setEnabled(fEnabled);
+}
+
+void UI::setStepAndRateControlsEnabled(bool const fEnabled)
+{
+    encoderFor(EncoderFunction::Step).setEnabled(fEnabled);
+    encoderFor(EncoderFunction::Rate).setEnabled(fEnabled);
+
+    m_Label_Step.setEnabled(fEnabled);
+    m_Text_DesiredStep.setEnabled(fEnabled);
+
+    m_Label_Rate.setEnabled(fEnabled);
+    m_Text_DesiredRate.setEnabled(fEnabled);
 }

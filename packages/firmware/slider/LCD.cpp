@@ -119,6 +119,15 @@ void LCD::StaticText::setBackgroundColor(RGBColor const backgroundColor)
     }
 }
 
+void LCD::StaticText::setEnabled(bool const fEnabled)
+{
+    if (fEnabled != m_fEnabled)
+    {
+        m_fEnabled = fEnabled;
+        update();
+    }
+}
+
 void LCD::StaticText::update()
 {
     constexpr uint16_t c_AnyColor = static_cast<uint16_t>(-1);
@@ -187,8 +196,12 @@ void LCD::StaticText::update()
     }
 
     // Write backbuffer to device
-    m_Parent.blitMonochromeCanvas(
-        m_Rect.X, m_Rect.Y, m_Rect.Width, m_Rect.Height, m_ForegroundColor, m_BackgroundColor);
+    m_Parent.blitMonochromeCanvas(m_Rect.X,
+                                  m_Rect.Y,
+                                  m_Rect.Width,
+                                  m_Rect.Height,
+                                  m_fEnabled ? m_ForegroundColor : RGBColor::Disabled(),
+                                  m_BackgroundColor);
 }
 
 void LCD::StaticNumericText::setValue(int32_t const value)

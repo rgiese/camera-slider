@@ -39,6 +39,8 @@ public:
         , m_PushButtonUpCallback()
         , m_TimePushButtonPressedDown()
         , m_IncrementOrderOfMagnitude(0)
+        , m_fEnabled(true)
+        , m_Color()
     {
     }
 
@@ -68,6 +70,7 @@ public:
     //
     void pollForUpdates();
 
+    void setEnabled(bool const fEnabled);
     void setColor(RGBColor const& color);
 
     void setIncrementOrderOfMagnitude(uint8_t const incrementOrderOfMagnitude);
@@ -88,6 +91,11 @@ private:
     unsigned long m_TimePushButtonPressedDown;
 
     static constexpr unsigned long c_LongPushThreshold_msec = 750;
+
+    bool m_fEnabled;
+    RGBColor m_Color;
+
+    void updateColor() const;
 
     struct GPIOConfiguration
     {

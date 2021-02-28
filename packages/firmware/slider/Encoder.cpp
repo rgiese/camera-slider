@@ -85,7 +85,7 @@ void Encoder::pollForUpdates()
         encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
     }
 
-    // Evalue value change
+    // Evaluate value change
     if (encoderStatus.IsEncoderIncreased || encoderStatus.IsEncoderDecreased)
     {
         if (m_ValueDeltaCallback)
@@ -156,8 +156,28 @@ void Encoder::pollForUpdates()
     }
 }
 
+void Encoder::setEnabled(bool const fEnabled)
+{
+    if (fEnabled != m_fEnabled)
+    {
+        m_fEnabled = fEnabled;
+        updateColor();
+    }
+}
+
 void Encoder::setColor(RGBColor const& color)
 {
+    if (color != m_Color)
+    {
+        m_Color = color;
+        updateColor();
+    }
+}
+
+void Encoder::updateColor() const
+{
+    RGBColor const color = m_fEnabled ? m_Color : RGBColor::Disabled();
+
     AutoTransmission autoTransmission(m_Wire, m_Address);
 
     m_Wire.write(static_cast<uint8_t>(I2CRegister::LED_R));

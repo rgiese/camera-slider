@@ -21,6 +21,11 @@ union RGBColor
         return RGBColor{0xFF, 0xFF, 0xFF};
     }
 
+    static constexpr RGBColor Disabled()
+    {
+        return RGBColor{0x00, 0x00, 0x55};
+    }
+
     constexpr uint16_t to565Color() const
     {
         uint8_t const red5Bits = Red >> 3;

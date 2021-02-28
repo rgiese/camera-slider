@@ -61,6 +61,9 @@ private:
     void updateWithMovementProgram(MovementProgram const& movementProgram);
     bool editingExistingStep() const;
 
+    void setMovementControlsEnabled(bool const fEnabled);
+    void setStepAndRateControlsEnabled(bool const fEnabled);
+
 private:
     //
     // LCD
