@@ -77,7 +77,7 @@ void Encoder::setGPIOEdgeCallback(GPIOPin const pin, GPIOInputEdgeCallback callb
 void Encoder::pollForUpdates()
 {
     //
-    // Encoder status
+    // Read values from device (clears registers)
     //
 
     EncoderStatusBits encoderStatus{0};
@@ -85,14 +85,33 @@ void Encoder::pollForUpdates()
         encoderStatus._Value = readRegister<uint8_t>(I2CRegister::EncoderStatus);
     }
 
-    // Evaluate value change
-    if (encoderStatus.IsEncoderIncreased || encoderStatus.IsEncoderDecreased)
+    int32_t latestValueDelta = 0;
     {
-        if (m_ValueDeltaCallback)
+        if (encoderStatus.IsEncoderIncreased || encoderStatus.IsEncoderDecreased)
         {
-            int32_t const latestValueDelta = getLatestValueDelta();
-            m_ValueDeltaCallback(latestValueDelta);
+            latestValueDelta = readRegister<int32_t>(I2CRegister::CounterValue_0);
         }
+    }
+
+    SecondaryInterruptStatusBits secondaryInterruptStatus{0};
+    {
+        secondaryInterruptStatus._Value = readRegister<uint8_t>(I2CRegister::SecondaryInterruptStatus);
+    }
+
+    if (!m_fEnabled)
+    {
+        // Ignore all updates, don't deliver callbacks
+        return;
+    }
+
+    //
+    // Process updates
+    //
+
+    // Evaluate value change
+    if (latestValueDelta && m_ValueDeltaCallback)
+    {
+        m_ValueDeltaCallback(latestValueDelta);
     }
 
     // Evaluate pressed -> released in order in case we got a down+up in a single poll cycle
@@ -118,15 +137,7 @@ void Encoder::pollForUpdates()
         }
     }
 
-    //
     // GPIO status
-    //
-
-    SecondaryInterruptStatusBits secondaryInterruptStatus{0};
-    {
-        secondaryInterruptStatus._Value = readRegister<uint8_t>(I2CRegister::SecondaryInterruptStatus);
-    }
-
     if (getGPIOConfiguration(GPIOPin::GPIO1).PinMode == GPIOPinMode::DigitalInput &&
         getGPIOConfiguration(GPIOPin::GPIO1).InputEdgeCallback)
     {
@@ -207,11 +218,6 @@ void Encoder::setIncrementOrderOfMagnitude(uint8_t const incrementOrderOfMagnitu
 uint8_t Encoder::getIncrementOrderOfMagnitude()
 {
     return m_IncrementOrderOfMagnitude;
-}
-
-int32_t Encoder::getLatestValueDelta()
-{
-    return readRegister<int32_t>(I2CRegister::CounterValue_0);
 }
 
 void Encoder::setGPIOOutput(GPIOPin const pin, uint8_t const value)

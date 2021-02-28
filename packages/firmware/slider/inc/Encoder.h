@@ -34,11 +34,11 @@ public:
     Encoder(TwoWire& wire, uint8_t const address)
         : m_Wire(wire)
         , m_Address(address)
+        , m_IncrementOrderOfMagnitude(0)
         , m_ValueDeltaCallback()
         , m_PushButtonDownCallback()
         , m_PushButtonUpCallback()
         , m_TimePushButtonPressedDown()
-        , m_IncrementOrderOfMagnitude(0)
         , m_fEnabled(true)
         , m_Color()
     {
@@ -76,14 +76,14 @@ public:
     void setIncrementOrderOfMagnitude(uint8_t const incrementOrderOfMagnitude);
     uint8_t getIncrementOrderOfMagnitude();
 
-    int32_t getLatestValueDelta();
-
     void setGPIOOutput(GPIOPin const pin, uint8_t const value);
     uint8_t getGPIOInput(GPIOPin const pin);
 
 private:
     TwoWire& m_Wire;
     uint8_t const m_Address;
+
+    uint8_t m_IncrementOrderOfMagnitude;
 
     ValueDeltaCallback m_ValueDeltaCallback;
     PushButtonDownCallback m_PushButtonDownCallback;
@@ -115,8 +115,6 @@ private:
                 return m_GPIOConfiguration[1];
         };
     }
-
-    uint8_t m_IncrementOrderOfMagnitude;
 
     //
     // Implementation constants
