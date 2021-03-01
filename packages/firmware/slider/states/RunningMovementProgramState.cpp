@@ -131,10 +131,7 @@ bool RunningMovementProgramState::onRequest(Request const& request)
 {
     switch (request.Type)
     {
-        case RequestType::UIButtonPressed:
         case RequestType::StopMovementProgram:
-            // Safety stop, return to tracking control
-            Serial.printlnf("!! Safety stop seek to %ld", g_MotorController.CurrentPosition.get());
             g_MotorController.safetyStop();
             g_StateKeeper.RequestState(new TrackingDesiredPositionState());
             return true;
