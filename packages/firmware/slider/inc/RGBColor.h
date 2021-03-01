@@ -10,22 +10,6 @@ union RGBColor
     };
     uint32_t Value;
 
-
-    static constexpr RGBColor Black()
-    {
-        return RGBColor{0, 0, 0};
-    }
-
-    static constexpr RGBColor White()
-    {
-        return RGBColor{0xFF, 0xFF, 0xFF};
-    }
-
-    static constexpr RGBColor Disabled()
-    {
-        return RGBColor{0x00, 0x00, 0x55};
-    }
-
     constexpr uint16_t to565Color() const
     {
         uint8_t const red5Bits = Red >> 3;
@@ -57,3 +41,14 @@ union RGBColor
         return this->Value != other.Value;
     }
 };
+
+namespace Colors
+{
+    constexpr RGBColor Black = RGBColor{0, 0, 0};
+    constexpr RGBColor White = RGBColor{0xFF, 0xFF, 0xFF};
+    constexpr RGBColor Red = RGBColor{0xFF, 0x00, 0x00};
+    constexpr RGBColor Green = RGBColor{0x00, 0xFF, 0x00};
+    constexpr RGBColor Blue = RGBColor{0x00, 0x00, 0xFF};
+
+    constexpr RGBColor Disabled = Blue.multiply(0.55f);
+}  // namespace Colors

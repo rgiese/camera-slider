@@ -200,7 +200,7 @@ void LCD::StaticText::update()
                                   m_Rect.Y,
                                   m_Rect.Width,
                                   m_Rect.Height,
-                                  m_fEnabled ? m_ForegroundColor : RGBColor::Disabled(),
+                                  m_fEnabled ? m_ForegroundColor : Colors::Disabled,
                                   m_BackgroundColor);
 }
 

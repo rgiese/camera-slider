@@ -96,7 +96,7 @@ UI::UI()
                           },
                           LCD::Alignment::Center,
                           m_CurrentState_Font,
-                          RGBColor::White().multiply(0.9f),
+                          Colors::White.multiply(0.9f),
                           RGBColor())
     // Step
     , m_Label_Step(m_LCD,

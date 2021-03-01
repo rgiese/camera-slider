@@ -187,7 +187,7 @@ void Encoder::setColor(RGBColor const& color)
 
 void Encoder::updateColor() const
 {
-    RGBColor const color = m_fEnabled ? m_Color : RGBColor::Disabled();
+    RGBColor const color = m_fEnabled ? m_Color : Colors::Disabled;
 
     AutoTransmission autoTransmission(m_Wire, m_Address);
 
