@@ -19,6 +19,8 @@ public:
         , m_Green(ledGreen)
         , m_Blue(ledBlue)
         , m_PushButtonCallback()
+        , m_fEnabled(true)
+        , m_Color(Colors::Black)
     {
     }
 
@@ -35,6 +37,7 @@ public:
     //
     // Runtime
     //
+    void setEnabled(bool const fEnabled);
     void setColor(RGBColor const& color, bool const fScaleColorsEvenly = true);
 
 private:
@@ -49,4 +52,9 @@ private:
     EncoderAndGPIOPin const m_Blue;
 
     PushButtonCallback m_PushButtonCallback;
+
+    bool m_fEnabled;
+    RGBColor m_Color;
+
+    void updateColor() const;
 };

@@ -390,20 +390,19 @@ void UI::begin()
         }
     });
 
-    // Start button: <nothing for now>
-    m_StartButton.setColor(RGBColor{0xFF, 0xFF, 0xFF});
-    m_StartButton.setPushButtonCallback([]() { Serial.println("Start button!"); });
-
     //
     // Configure observers
     //
 
     g_StateKeeper.CurrentSliderState.attach_and_initialize([this](SliderState const sliderState) {
+        // Update text
         m_Text_CurrentState.setText(getSliderStateFriendlyName(sliderState));
 
+        // Update state
         m_fCanControlLivePosition = sliderState == SliderState::TrackingDesiredPosition;
         m_idxSelectedStep = conformSelectedStep();  // Depends on previous line
 
+        // Update control enablement
         switch (sliderState)
         {
             case SliderState::TrackingDesiredPosition:
@@ -415,6 +414,27 @@ void UI::begin()
             default:
                 setMovementControlsEnabled(false);
                 setStepAndRateControlsEnabled(false);
+                break;
+        }
+
+        // Update start button
+        switch (sliderState)
+        {
+            case SliderState::TrackingDesiredPosition:
+                m_StartButton.setColor(Colors::Green);
+                m_StartButton.setPushButtonCallback(
+                    []() { g_RequestQueue.push({Type : RequestType::StartMovementProgram}); });
+                break;
+
+            case SliderState::RunningMovementProgram:
+                m_StartButton.setColor(Colors::Red);
+                m_StartButton.setPushButtonCallback(
+                    []() { g_RequestQueue.push({Type : RequestType::StopMovementProgram}); });
+                break;
+
+            default:
+                m_StartButton.setColor(Colors::Black);
+                m_StartButton.setPushButtonCallback([]() {});
                 break;
         }
     });
@@ -591,6 +611,12 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
         m_MovementProgramRows[idxRow + cMovementTableHeaderRows].updateWithMovement(
             idxRow + idxFirstMovement, movementProgram, m_idxSelectedStep);
     }
+
+    //
+    // Update Start button
+    //
+
+    m_StartButton.setEnabled(m_nStepsInProgram > 1);
 }
 
 void UI::setMovementControlsEnabled(bool const fEnabled)
