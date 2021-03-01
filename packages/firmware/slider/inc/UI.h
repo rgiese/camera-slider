@@ -57,9 +57,13 @@ private:
 
     uint16_t m_idxSelectedStep;
     uint16_t m_nStepsInProgram;
+    bool m_fCanControlLivePosition;
+
+    bool canAddNewStep() const;
+    uint16_t conformSelectedStep(int32_t delta = 0) const;
+    bool editingExistingStep() const;
 
     void updateWithMovementProgram(MovementProgram const& movementProgram);
-    bool editingExistingStep() const;
 
     void setMovementControlsEnabled(bool const fEnabled);
     void setStepAndRateControlsEnabled(bool const fEnabled);

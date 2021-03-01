@@ -16,6 +16,7 @@ UI::UI()
       })
     , m_idxSelectedStep()
     , m_nStepsInProgram()
+    , m_fCanControlLivePosition()
     //
     // LCD
     //
@@ -248,10 +249,6 @@ void UI::begin()
             .setValueDeltaCallback([this, desiredStateRequestParameter, movementProgramParameter](int32_t const delta) {
                 if (editingExistingStep())
                 {
-                    //
-                    // Editing existing step
-                    //
-
                     // Update program
                     g_MovementProgramStore.CurrentMovementProgram.mutate(
                         [&](MovementProgram const& movementProgram) -> MovementProgram {
@@ -270,10 +267,13 @@ void UI::begin()
                         });
 
                     // Then control live position from absolute movement values
-                    MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-                    movementProgram.requestMoveToMovement(m_idxSelectedStep);
+                    if (m_fCanControlLivePosition)
+                    {
+                        MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+                        movementProgram.requestMoveToMovement(m_idxSelectedStep);
+                    }
                 }
-                else
+                else if (m_fCanControlLivePosition)
                 {
                     // Control live position via delta
                     Request request = {Type : desiredStateRequestParameter};
@@ -298,7 +298,7 @@ void UI::begin()
         MovementProgram const movementProgram = g_MovementProgramStore.CurrentMovementProgram;
         m_nStepsInProgram = movementProgram.Movements.size();
 
-        uint16_t const idxSelectedStep = clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, m_nStepsInProgram);
+        uint16_t const idxSelectedStep = conformSelectedStep(delta);
 
         if (idxSelectedStep == m_idxSelectedStep)
         {
@@ -310,7 +310,10 @@ void UI::begin()
         m_idxSelectedStep = idxSelectedStep;
 
         // Seek
-        movementProgram.requestMoveToMovement(m_idxSelectedStep);
+        if (m_fCanControlLivePosition)
+        {
+            movementProgram.requestMoveToMovement(m_idxSelectedStep);
+        }
 
         // Update UI
         updateWithMovementProgram(movementProgram);
@@ -369,7 +372,7 @@ void UI::begin()
                     });
             }
         }
-        else
+        else if (canAddNewStep())
         {
             // Add step
             MovementProgram::Movement movement(Flatbuffers::Firmware::MovementType::Move,
@@ -397,6 +400,9 @@ void UI::begin()
 
     g_StateKeeper.CurrentSliderState.attach_and_initialize([this](SliderState const sliderState) {
         m_Text_CurrentState.setText(getSliderStateFriendlyName(sliderState));
+
+        m_fCanControlLivePosition = sliderState == SliderState::TrackingDesiredPosition;
+        m_idxSelectedStep = conformSelectedStep();  // Depends on previous line
 
         switch (sliderState)
         {
@@ -453,19 +459,43 @@ void UI::begin()
     updateWithMovementProgram(g_MovementProgramStore.CurrentMovementProgram);
 }
 
+bool UI::canAddNewStep() const
+{
+    return m_fCanControlLivePosition;
+}
+
+uint16_t UI::conformSelectedStep(int32_t delta) const
+{
+    uint16_t const nStepsInProgram = m_nStepsInProgram;
+
+    // We're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
+    // However, we'll only allow the sentinel "new" step if we're actually allowed to add a new step.
+    uint16_t const nAllowedSentinelSteps = canAddNewStep() ? 1 : 0;
+
+    uint16_t nTotalAllowedSteps = nStepsInProgram + nAllowedSentinelSteps;
+    {
+        if (nTotalAllowedSteps > 0)
+        {
+            // Note: clamp_delta accepts values up to and _including_ the maximum value provided.
+            --nTotalAllowedSteps;
+        }
+    }
+
+    return clamp_delta<uint16_t>(m_idxSelectedStep, delta, 0, nTotalAllowedSteps);
+}
+
+bool UI::editingExistingStep() const
+{
+    // See note in conformSelectedStep().
+    return m_idxSelectedStep < m_nStepsInProgram;
+}
+
 void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
                                                 MovementProgram const& movementProgram,
                                                 uint16_t const idxSelectedMovement)
 {
     // Update content
-    if (idxMovement >= movementProgram.Movements.size())
-    {
-        Step.clear();
-        DesiredPosition.clear();
-        DesiredSpeed.clear();
-        DesiredAcceleration.clear();
-    }
-    else
+    if (idxMovement < movementProgram.Movements.size())
     {
         MovementProgram::Movement const& movement = movementProgram.Movements[idxMovement];
 
@@ -473,6 +503,13 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
         DesiredPosition.setValue(movement.DesiredPosition);
         DesiredSpeed.setValue(movement.DesiredSpeed);
         DesiredAcceleration.setValue(movement.DesiredAcceleration);
+    }
+    else
+    {
+        Step.clear();
+        DesiredPosition.clear();
+        DesiredSpeed.clear();
+        DesiredAcceleration.clear();
     }
 
     // Update color
@@ -501,10 +538,7 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
     //
 
     m_nStepsInProgram = movementProgram.Movements.size();
-
-    // Note: clamp accepts values up to and _including_ the maximum value provided (m_nStepsInProgram).
-    // This is desired because we're using m_idxSelectedStep = m_nStepsInProgram as our sentinel "new" step.
-    m_idxSelectedStep = clamp<uint16_t>(m_idxSelectedStep, 0, m_nStepsInProgram);
+    m_idxSelectedStep = conformSelectedStep();
 
     //
     // Update Step control
@@ -557,11 +591,6 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
         m_MovementProgramRows[idxRow + cMovementTableHeaderRows].updateWithMovement(
             idxRow + idxFirstMovement, movementProgram, m_idxSelectedStep);
     }
-}
-
-bool UI::editingExistingStep() const
-{
-    return m_idxSelectedStep < m_nStepsInProgram;
 }
 
 void UI::setMovementControlsEnabled(bool const fEnabled)
