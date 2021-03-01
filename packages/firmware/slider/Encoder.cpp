@@ -98,42 +98,35 @@ void Encoder::pollForUpdates()
         secondaryInterruptStatus._Value = readRegister<uint8_t>(I2CRegister::SecondaryInterruptStatus);
     }
 
-    if (!m_fEnabled)
+    if (m_fEnabled)
     {
-        // Ignore all updates, don't deliver callbacks
-        return;
-    }
-
-    //
-    // Process updates
-    //
-
-    // Evaluate value change
-    if (latestValueDelta && m_ValueDeltaCallback)
-    {
-        m_ValueDeltaCallback(latestValueDelta);
-    }
-
-    // Evaluate pressed -> released in order in case we got a down+up in a single poll cycle
-    if (encoderStatus.IsPushButtonPressed)
-    {
-        m_TimePushButtonPressedDown = millis();
-
-        if (m_PushButtonDownCallback)
+        // Evaluate value change
+        if (latestValueDelta && m_ValueDeltaCallback)
         {
-            m_PushButtonDownCallback();
+            m_ValueDeltaCallback(latestValueDelta);
         }
-    }
 
-    if (encoderStatus.IsPushButtonReleased)
-    {
-        unsigned long const currentTime = millis();
-        unsigned long const durationPressed_msec = currentTime - m_TimePushButtonPressedDown;
-
-        if (m_PushButtonUpCallback)
+        // Evaluate pressed -> released in order in case we got a down+up in a single poll cycle
+        if (encoderStatus.IsPushButtonPressed)
         {
-            m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
-                                                                                    : PushDuration::Short);
+            m_TimePushButtonPressedDown = millis();
+
+            if (m_PushButtonDownCallback)
+            {
+                m_PushButtonDownCallback();
+            }
+        }
+
+        if (encoderStatus.IsPushButtonReleased)
+        {
+            unsigned long const currentTime = millis();
+            unsigned long const durationPressed_msec = currentTime - m_TimePushButtonPressedDown;
+
+            if (m_PushButtonUpCallback)
+            {
+                m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
+                                                                                        : PushDuration::Short);
+            }
         }
     }
 

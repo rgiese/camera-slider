@@ -6,7 +6,7 @@ void RGBPushButton::begin()
         m_ButtonInput.m_Pin, Encoder::GPIOPinMode::DigitalInput, true /* enable pullup */);
 
     m_ButtonInput.m_Encoder.setGPIOEdgeCallback(m_ButtonInput.m_Pin, [this](Encoder::GPIOInputEdge const edge) {
-        if (edge == Encoder::GPIOInputEdge::Negative && m_PushButtonCallback)
+        if (edge == Encoder::GPIOInputEdge::Negative && m_PushButtonCallback && m_fEnabled)
         {
             m_PushButtonCallback();
         }
