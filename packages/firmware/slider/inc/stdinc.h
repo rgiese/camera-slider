@@ -29,6 +29,7 @@
 #include "generated/firmware_generated.h"
 
 // Features
+#include "inc/Touch.h"
 #include "inc/MovementProgram.h"
 #include "inc/MovementProgramStore.h"
 #include "inc/Display.h"

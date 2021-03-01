@@ -22,3 +22,4 @@ extern StateKeeper g_StateKeeper;
 #include "RunningMovementProgramState.h"
 #include "TrackingDesiredPositionState.h"
 #include "FindingForwardRangeState.h"
+#include "CalibrateTouchScreenState.h"

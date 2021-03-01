@@ -53,6 +53,9 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             g_StateKeeper.RequestState(new RunningMovementProgramState(request.StartMovementProgram.atStep));
             return true;
 
+        case RequestType::CalibrateTouchStart:
+            g_StateKeeper.RequestState(new CalibrateTouchScreenState());
+
         default:
             return false;
     }

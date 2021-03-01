@@ -432,6 +432,17 @@ void UI::begin()
                     []() { g_RequestQueue.push({Type : RequestType::StopMovementProgram}); });
                 break;
 
+            case SliderState::CalibrateTouchStart:
+            case SliderState::CalibrateTouchTopLeft:
+            case SliderState::CalibrateTouchTopRight:
+            case SliderState::CalibrateTouchBottomLeft:
+            case SliderState::CalibrateTouchBottomRight:
+                m_StartButton.setColor(Colors::Blue);
+                m_StartButton.setEnabled(true);
+                m_StartButton.setPushButtonCallback(
+                    []() { g_RequestQueue.push({Type : RequestType::CalibrateTouchNext}); });
+                break;
+
             default:
                 m_StartButton.setColor(Colors::Black);
                 m_StartButton.setPushButtonCallback([]() {});

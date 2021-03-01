@@ -12,6 +12,8 @@ enum class RequestType
     StartMovementProgram,
     StopMovementProgram,
     UpdatedMovementProgram,
+    CalibrateTouchStart,
+    CalibrateTouchNext,
 };
 
 struct Request
@@ -57,6 +59,14 @@ struct Request
         struct
         {
         } StopMovementProgram;
+
+        struct
+        {
+        } CalibrateTouchStart;
+
+        struct
+        {
+        } CalibrateTouchNext;
     };
 };
 

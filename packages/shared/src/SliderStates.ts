@@ -5,6 +5,11 @@ export const SliderStateNames = [
   "runningMovementProgram",
   "trackingDesiredPosition",
   "unrecoverableError",
+  "calibrateTouchStart",
+  "calibrateTouchTopLeft",
+  "calibrateTouchTopRight",
+  "calibrateTouchBottomLeft",
+  "calibrateTouchBottomRight",
 ] as const;
 
 export type SliderState = typeof SliderStateNames[number];
