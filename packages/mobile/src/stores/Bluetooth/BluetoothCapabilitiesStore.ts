@@ -1,4 +1,4 @@
-import { Base64DecodeInt32, Base64DecodeUInt32 } from "./Base64";
+import { Base64DecodeInt32, Base64DecodeString, Base64DecodeUInt32 } from "./Base64";
 
 import { BluetoothCharacteristicsStoreBase } from "./BluetoothCharacteristicsStoreBase";
 import { BluetoothConnection } from "./BluetoothConnection";
@@ -12,6 +12,8 @@ export class BluetoothCapabilitiesStore extends BluetoothCharacteristicsStoreBas
   @observable public maximumSpeed = 0;
 
   @observable public maximumAcceleration = 0;
+
+  @observable public touchscreenCalibrationData = "";
 
   public constructor(bluetoothConnection: BluetoothConnection) {
     super(bluetoothConnection, BluetoothServices.Capabilities.Id);
@@ -39,6 +41,20 @@ export class BluetoothCapabilitiesStore extends BluetoothCharacteristicsStoreBas
       BluetoothServices.Capabilities.Characteristics.MaximumAcceleration,
       "maximumAcceleration",
       Base64DecodeUInt32
+    );
+
+    await this.addCharacteristicListener<BluetoothCapabilitiesStore, string>(
+      device,
+      BluetoothServices.Capabilities.Characteristics.TouchscreenCalibrationData,
+      "touchscreenCalibrationData",
+      Base64DecodeString
+    );
+  }
+
+  public async startTouchscreenCalibration(): Promise<void> {
+    await this.writeCharacteristicValue(
+      BluetoothServices.Capabilities.Characteristics.StartTouchscreenCalibration,
+      ""
     );
   }
 }

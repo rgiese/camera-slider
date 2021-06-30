@@ -17,9 +17,17 @@ private:
     void begin(BleAdvertisingData& advertisingData);
 
 private:
+    static void onStartTouchscreenCalibrationChanged(uint8_t const* const pData,
+                                                     size_t const cbData,
+                                                     BlePeerDevice const& peerDevice,
+                                                     void* pContext);
+
+private:
     BleCharacteristic m_MaximumPositionCharacteristic;
     BleCharacteristic m_MaximumSpeedCharacteristic;
     BleCharacteristic m_MaximumAccelerationCharacteristic;
+    BleCharacteristic m_StartTouchscreenCalibrationCharacteristic;
+    BleCharacteristic m_TouchscreenCalibrationDataCharacteristic;
 
 private:
     // Non-copyable

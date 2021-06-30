@@ -16,6 +16,8 @@ export const BluetoothServices: BluetoothServices = {
       MaximumPosition: "26bf9446-4d04-4c49-92a6-dad62302d9e3",
       MaximumSpeed: "ac607c74-6a7b-47e3-99bb-da7b36268b2c",
       MaximumAcceleration: "e24e1773-60e9-4287-86a0-eddd7d7ce2fd",
+      StartTouchscreenCalibration: "ae65050b-e6cf-4cfa-adb7-92623e18d29d",
+      TouchscreenCalibrationData: "24576982-5229-4317-91df-ed1377e6e602",
     },
   },
   Program: {
