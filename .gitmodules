@@ -7,3 +7,6 @@
 [submodule "packages/firmware/external/tic-arduino"]
 	path = packages/firmware/external/tic-arduino
 	url = https://github.com/rgiese/tic-arduino.git
+[submodule "packages/firmware/external/Adafruit_HX8357_Library"]
+	path = packages/firmware/external/Adafruit_HX8357_Library
+	url = https://github.com/adafruit/Adafruit_HX8357_Library.git
