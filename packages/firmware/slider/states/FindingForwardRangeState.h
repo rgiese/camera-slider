@@ -3,8 +3,7 @@
 class FindingForwardRangeState : public AbstractState
 {
 public:
-    FindingForwardRangeState()
-        : AbstractState(SliderState::FindingForwardRange)
+    FindingForwardRangeState() : AbstractState(SliderState::FindingForwardRange)
     {
     }
 

@@ -10,9 +10,7 @@ public:
 
 public:
     Button(pin_t const pinId, OnButtonPressedFunction const onButtonPressed)
-        : m_PinId(pinId)
-        , m_OnButtonPressed(onButtonPressed)
-        , m_LastInterruptTime(0)
+        : m_PinId(pinId), m_OnButtonPressed(onButtonPressed), m_LastInterruptTime(0)
     {
         pinMode(m_PinId, INPUT_PULLUP);
         attachInterrupt(m_PinId, &Button::onInterrupt, this, FALLING);

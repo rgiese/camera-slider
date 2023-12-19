@@ -3,8 +3,7 @@
 class InitializingMotorState : public AbstractState
 {
 public:
-    InitializingMotorState()
-        : AbstractState(SliderState::InitializingMotor)
+    InitializingMotorState() : AbstractState(SliderState::InitializingMotor)
     {
     }
 

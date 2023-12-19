@@ -3,8 +3,7 @@
 class AbstractState
 {
 public:
-    AbstractState(SliderState const sliderState)
-        : m_SliderState(sliderState){};
+    AbstractState(SliderState const sliderState) : m_SliderState(sliderState){};
 
     virtual ~AbstractState(){};
 

@@ -4,9 +4,7 @@ class Activity
 {
 public:
     Activity(char const* const szName, unsigned long const minimumTimeToReport_msec = 0)
-        : m_szName(szName)
-        , m_StartTime_msec(millis())
-        , m_MinimumTimeToReport_msec(minimumTimeToReport_msec)
+        : m_szName(szName), m_StartTime_msec(millis()), m_MinimumTimeToReport_msec(minimumTimeToReport_msec)
     {
         if (!m_MinimumTimeToReport_msec)
         {

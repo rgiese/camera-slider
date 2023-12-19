@@ -3,8 +3,7 @@
 class HomingState : public AbstractState
 {
 public:
-    HomingState()
-        : AbstractState(SliderState::Homing)
+    HomingState() : AbstractState(SliderState::Homing)
     {
     }
 

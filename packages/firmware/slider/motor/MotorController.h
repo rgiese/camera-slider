@@ -5,8 +5,7 @@
 class MotorController
 {
 public:
-    MotorController()
-        : m_Tic(14 /* default I2C address */){};
+    MotorController() : m_Tic(14 /* default I2C address */){};
 
     //
     // For use by Main.cpp

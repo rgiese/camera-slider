@@ -3,8 +3,7 @@
 class TrackingDesiredPositionState : public AbstractState
 {
 public:
-    TrackingDesiredPositionState()
-        : AbstractState(SliderState::TrackingDesiredPosition)
+    TrackingDesiredPositionState() : AbstractState(SliderState::TrackingDesiredPosition)
     {
     }
 
