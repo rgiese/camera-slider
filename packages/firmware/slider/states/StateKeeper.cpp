@@ -22,7 +22,6 @@ void StateKeeper::onLoop()
             char const* const stateName = getSliderStateName(m_CurrentState->getSliderState());
 
             Serial.printlnf("-> State: %s", stateName);
-            g_Bluetooth.statusService().setState(stateName);
         }
     }
 

@@ -5,8 +5,7 @@
 // Particle configuration
 //
 
-PRODUCT_ID(11817);
-PRODUCT_VERSION(1);  // Increment for each release
+PRODUCT_VERSION(2);  // Increment for each release
 
 //
 // Declarations
@@ -48,9 +47,6 @@ void setup()
     // Configure motor controller
     g_MotorController.begin();
 
-    // Configure BLE
-    g_Bluetooth.begin();
-
     // Request connection to cloud (not blocking)
     {
         // Activity connectActivity("Connect");
@@ -79,15 +75,6 @@ void loop()
 {
     delay(100);
 
-    {
-        Activity mainLoopActivity("mainThreadLoop", 10);
-
-        {
-            Activity mainLoopSectionActivity("bluetoothState", 10);
-            g_Bluetooth.statusService().onMainThreadLoop();
-        }
-    }
-
     if (Particle.connected())
     {
         Particle.process();
@@ -115,11 +102,6 @@ void stateMachineThreadFn(void*)
             {
                 Activity mainLoopSectionActivity("motorController", 10);
                 g_MotorController.onLoop();
-            }
-
-            {
-                Activity mainLoopSectionActivity("bluetoothState", 10);
-                g_Bluetooth.statusService().onStateMachineThreadLoop();
             }
 
             // Deliver interrupt-sourced events (creates Requests)

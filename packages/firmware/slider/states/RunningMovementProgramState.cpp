@@ -25,7 +25,7 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
     // Prep for movement
     switch (movement.Type)
     {
-        case Flatbuffers::Firmware::MovementType::Move: {
+        case MovementType::Move: {
             // Apply desired motor settings
             g_MotorController.setMaxSpeed(static_cast<uint32_t>(movement.DesiredSpeed * movementProgram.Rate));
             g_MotorController.setMaxAcceleration(
@@ -37,7 +37,7 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
             break;
         }
 
-        case Flatbuffers::Firmware::MovementType::Delay: {
+        case MovementType::Delay: {
             // Snap current time
             m_DelayStart_msec = millis();
             break;
@@ -71,7 +71,7 @@ void RunningMovementProgramState::onLoop()
 
     switch (movement.Type)
     {
-        case Flatbuffers::Firmware::MovementType::Move: {
+        case MovementType::Move: {
             if (g_MotorController.getCurrentPosition() == movement.DesiredPosition)
             {
                 return nextStep();
@@ -79,7 +79,7 @@ void RunningMovementProgramState::onLoop()
             break;
         }
 
-        case Flatbuffers::Firmware::MovementType::Delay: {
+        case MovementType::Delay: {
             unsigned long const timeDelayed_msec = millis() - m_DelayStart_msec;
 
             if (timeDelayed_msec > static_cast<unsigned long>(movement.DelayTime * movementProgram.Rate))
@@ -103,9 +103,7 @@ void RunningMovementProgramState::nextStep()
     if ((m_idxCurrentStep + 1) >= movementProgram.Movements.size())
     {
         // Reached end of movement list
-        bool const isRepeatRequested = !!(movementProgram.Flags & Flatbuffers::Firmware::MovementProgramFlags::Repeat);
-
-        if (isRepeatRequested && movementProgram.Movements.size() > 1)
+        if (movementProgram.Repeat && movementProgram.Movements.size() > 1)
         {
             // Repeat (provided we had more than one step)
             return enterStep(0);

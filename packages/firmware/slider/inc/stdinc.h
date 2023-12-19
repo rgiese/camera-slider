@@ -20,14 +20,10 @@
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
 
-// Shared dependencies
-#include "generated/firmware_generated.h"
-
 // Features
 #include "inc/MovementProgram.h"
 #include "inc/MovementProgramStore.h"
 #include "inc/Display.h"
-#include "bluetooth/Bluetooth.h"
 #include "motor/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"

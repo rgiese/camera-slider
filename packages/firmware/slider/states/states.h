@@ -8,7 +8,36 @@
 // so we can make sure only one state object is operating at a time.
 //
 
-#include "generated/sliderStates.h"
+enum class SliderState
+{
+    FindingForwardRange,
+    Homing,
+    InitializingMotor,
+    RunningMovementProgram,
+    TrackingDesiredPosition,
+    UnrecoverableError,
+};
+
+inline char const* getSliderStateName(SliderState const state)
+{
+    switch (state)
+    {
+        case SliderState::FindingForwardRange:
+            return "FindingForwardRange";
+        case SliderState::Homing:
+            return "Homing";
+        case SliderState::InitializingMotor:
+            return "InitializingMotor";
+        case SliderState::RunningMovementProgram:
+            return "RunningMovementProgram";
+        case SliderState::TrackingDesiredPosition:
+            return "TrackingDesiredPosition";
+        case SliderState::UnrecoverableError:
+            return "UnrecoverableError";
+        default:
+            return "<unknown>";
+    }
+}
 
 #include "AbstractState.h"
 #include "StateKeeper.h"

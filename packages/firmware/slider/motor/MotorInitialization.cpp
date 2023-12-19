@@ -191,13 +191,6 @@ bool MotorController::tryInitialize()
         m_Tic.setMaxDecel(maxAcceleration);
     }
 
-    // Post settings to BLE
-    {
-        g_Bluetooth.capabilitiesService().setMaximumSpeed(c_MaxSafeSpeed_StepsPerSec);
-        g_Bluetooth.capabilitiesService().setMaximumAcceleration(c_MaxSafeAcceleration_StepsPerSecPerSec);
-        g_Bluetooth.capabilitiesService().setMaximumPosition(10000);
-    }
-
     // Energize
     m_Tic.exitSafeStart();
     m_Tic.energize();
