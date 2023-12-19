@@ -56,31 +56,6 @@ jobs:
           paths:
             - packages
 
-  firmware-deploy:
-    executor: grumpy-executor
-    steps:
-      # Check out source
-      - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-
-      # Attach to `build` workspace (provides built packages/)
-      - attach_workspace:
-          at: .
-
-      # Install dependencies
-      - run: npm install -ws
-
-      # (Don't save cache again, we'll just let `build` deal with it)
-
-      # Upload firmware to Particle cloud
-      - run:
-          name: Upload firmware to Particle
-          command: npm run deploy-firmware:prod
-
 #
 # Workflows
 #
@@ -90,17 +65,3 @@ workflows:
     jobs:
       - build:
           context: camera-slider-particle
-      - hold-to-deploy-firmware:
-          type: approval
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      - firmware-deploy:
-          context: camera-slider-particle
-          requires:
-            - hold-to-deploy-firmware
-          filters:
-            branches:
-              only: master
