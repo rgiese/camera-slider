@@ -4,7 +4,7 @@ version: 2.1
 executors:
   grumpy-executor:
     docker:
-      - image: grumpycorp/warm-and-fuzzy-ci:7
+      - image: grumpycorp/warm-and-fuzzy-ci:11
     working_directory: ~/camera-slider
 
 jobs:
@@ -22,7 +22,6 @@ jobs:
 
       # Install dependencies
       - run: npm install
-      - run: npm run bootstrap
 
       # Save cache
       - save_cache:
@@ -35,9 +34,9 @@ jobs:
           name: Build
           command: |
             if [ "$CIRCLE_BRANCH" == "master" ]; then
-              REACT_APP_API_STAGE=prod npm run build
+              REACT_APP_API_STAGE=prod npm run build -ws
             else
-            npm run build
+            npm run build -ws
             fi
           environment:
             # Limit NodeJS heap size so we don't OOM
@@ -46,10 +45,10 @@ jobs:
       - run: npm run bundle-mobile
 
       # Run tests
-      - run: npm run test
+      - run: npm run test -ws
 
       # Run lint
-      - run: npm run lint
+      - run: npm run lint -ws
 
       # Persist workspace for deployment
       - persist_to_workspace:
@@ -73,8 +72,7 @@ jobs:
           at: .
 
       # Install dependencies
-      - run: npm install
-      - run: npm run bootstrap
+      - run: npm install -ws
 
       # (Don't save cache again, we'll just let `build` deal with it)
 
@@ -88,8 +86,6 @@ jobs:
 #
 
 workflows:
-  version: 2
-
   all:
     jobs:
       - build:

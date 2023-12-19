@@ -1,4 +1,3 @@
-[![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 [![CircleCI](https://circleci.com/gh/rgiese/camera-slider/tree/master.svg?style=shield)](https://circleci.com/gh/rgiese/camera-slider/tree/master)
 
 # camera-slider
@@ -20,25 +19,7 @@ Licensed under [CC-BY-NC-SA](LICENSE.md). Commercial licensing negotiable (hah).
       - Set the environment variable `PARTICLE_ACCESS_TOKEN` to a Particle API token (generate with `particle token create`)
   - For Android development: https://reactnative.dev/docs/environment-setup
   - `npm install`
-  - `lerna bootstrap`
-  - `lerna run build`
+  - `npm run build -ws`
 - Pre-commit
-  - `npm run format:fix`
-  - `npm run lint:fix`
-
-## Dev tooling tricks
-
-### Lerna
-
-- `lerna clean` to wipe all `node_modules` from packages (though not the root)
-- `lerna link convert` to move a new package's dev dependencies up to the root `package.json`
-- `npx sort-package-json` to clean up `package.json` files
-- Updating packages (run in repo root):
-  - `npm update`
-  - `lerna exec npm update --stream`
-  - `lerna bootstrap`
-  - `npm run build` to verify
-
-### Android
-
-- If the tooling complains about unaccepted SDK licenses, use an elevated command prompt to run "%ANDROID_SDK_ROOT%/tools/bin/sdkmanager" --licenses
+  - `npm run format -ws`
+  - `npm run lint -ws`
