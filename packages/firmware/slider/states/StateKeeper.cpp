@@ -19,9 +19,8 @@ void StateKeeper::onLoop()
 
         // Update subscribers
         {
-            char const* const stateName = getSliderStateName(m_CurrentState->getSliderState());
-
-            Serial.printlnf("-> State: %s", stateName);
+            CurrentSliderState.update(m_CurrentState->getSliderState());
+            Serial.printlnf("-> State: %s", getSliderStateName(m_CurrentState->getSliderState()));
         }
     }
 

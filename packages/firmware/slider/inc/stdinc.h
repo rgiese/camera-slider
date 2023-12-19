@@ -12,18 +12,29 @@
 #include <stdarg.h>
 #include <math.h>
 
+#include <array>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <type_traits>
 
 // Core definitions
 #include "inc/CoreDefs.h"
 #include "inc/Activity.h"
+#include "inc/Observable.h"
+#include "inc/RGBColor.h"
+
 
 // Features
+#include "inc/Touch.h"
 #include "inc/MovementProgram.h"
 #include "inc/MovementProgramStore.h"
 #include "inc/Display.h"
+#include "inc/Encoder.h"
+#include "inc/RGBPushButton.h"
 #include "motor/MotorController.h"
 #include "inc/Requests.h"
 #include "states/states.h"
+#include "inc/LCD.h"
+#include "inc/UI.h"

@@ -11,15 +11,7 @@ PRODUCT_VERSION(2);  // Increment for each release
 // Declarations
 //
 
-void onUIButtonPressed();
 void stateMachineThreadFn(void*);
-
-//
-// Globals
-//
-
-Button g_UIButton(D2, &onUIButtonPressed);
-
 
 //
 // Setup
@@ -40,7 +32,16 @@ void setup()
     Serial.begin();
     Serial.println("Slider started.");
 
+    // Configure buses
+    Wire.setSpeed(CLOCK_SPEED_100KHZ);  // Motor controller
+    Wire.begin();
+
+    Wire1.setSpeed(CLOCK_SPEED_400KHZ);  // Encoders
+    Wire1.begin();
+
     // Configure display
+    g_UI.begin();
+
     g_Display.begin();
     g_Display.set("Starting...");
 
@@ -75,6 +76,20 @@ void loop()
 {
     delay(100);
 
+    {
+        Activity mainLoopActivity("mainThreadLoop", 10);
+
+        {
+            Activity mainLoopSectionActivity("deliverObservables", 10);
+            ObservableStore::sharedInstance().deliverAll();
+        }
+
+        {
+            Activity mainLoopSectionActivity("uiLoop", 10);
+            g_UI.onMainLoop();
+        }
+    }
+
     if (Particle.connected())
     {
         Particle.process();
@@ -104,11 +119,6 @@ void stateMachineThreadFn(void*)
                 g_MotorController.onLoop();
             }
 
-            // Deliver interrupt-sourced events (creates Requests)
-            {
-                Activity mainLoopSectionActivity("uiButton", 10);
-                g_UIButton.onLoop();
-            }
 
             // Advance state machine (moves state, delivers Requests)
             {
@@ -131,14 +141,4 @@ void stateMachineThreadFn(void*)
         // Loop delay (needs to be under 1000ms so the motor controller watchdog doesn't trigger)
         os_thread_delay_until(&previousWakeTime, 25 /* msec */);
     }
-}
-
-
-//
-// Helpers
-//
-
-void onUIButtonPressed()
-{
-    g_RequestQueue.push({Type : RequestType::UIButtonPressed});
 }

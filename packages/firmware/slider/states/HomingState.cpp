@@ -4,7 +4,7 @@ void HomingState::onEnteringState()
 {
     g_Display.set("Homing");
 
-    if (g_MotorController.getOperationState() != TicOperationState::Normal)
+    if (g_MotorController.OperationState != TicOperationState::Normal)
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }
@@ -15,7 +15,7 @@ void HomingState::onEnteringState()
 
 void HomingState::onLoop()
 {
-    if (g_MotorController.getOperationState() != TicOperationState::Normal)
+    if (g_MotorController.OperationState != TicOperationState::Normal)
     {
         return g_StateKeeper.RequestState(new InitializingMotorState());
     }

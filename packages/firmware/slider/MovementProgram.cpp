@@ -1,5 +1,103 @@
 #include "inc/stdinc.h"
 
+//
+// Mutations
+//
+
+MovementProgram::Movement::Movement(MovementType const type,
+                                    uint16_t const delayTime,
+                                    int32_t const desiredPosition,
+                                    uint32_t const desiredSpeed,
+                                    uint32_t const desiredAcceleration)
+    : Type(type)
+{
+    DelayTime = delayTime;
+
+    DesiredPosition =
+        clamp(desiredPosition, MotorController::c_MinimumPosition_Steps, MotorController::c_MaxSafePosition_Steps);
+
+    DesiredSpeed =
+        clamp(desiredSpeed, MotorController::c_MinimumSpeed_StepsPerSec, MotorController::c_MaxSafeSpeed_StepsPerSec);
+
+    DesiredAcceleration = clamp(desiredAcceleration,
+                                MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+}
+
+void MovementProgram::Movement::applyDelta(Parameter const parameter, int32_t delta)
+{
+    switch (parameter)
+    {
+        case Parameter::DesiredPosition:
+            DesiredPosition = clamp_delta(DesiredPosition,
+                                          delta,
+                                          MotorController::c_MinimumPosition_Steps,
+                                          MotorController::c_MaxSafePosition_Steps);
+            return;
+
+        case Parameter::DesiredSpeed:
+            DesiredSpeed = clamp_delta(DesiredSpeed,
+                                       delta,
+                                       MotorController::c_MinimumSpeed_StepsPerSec,
+                                       MotorController::c_MaxSafeSpeed_StepsPerSec);
+            return;
+
+        case Parameter::DesiredAcceleration:
+            DesiredAcceleration = clamp_delta(DesiredAcceleration,
+                                              delta,
+                                              MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                              MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+            return;
+
+        default:
+            // Ignore
+            return;
+    }
+}
+
+void MovementProgram::applyRateDelta(int16_t const RateDelta)
+{
+    RatePercent = clamp_delta(RatePercent, RateDelta, RatePercent_Minimum, RatePercent_Maximum);
+}
+
+//
+// Execution
+//
+
+void MovementProgram::requestMoveToMovement(size_t const idxMovement) const
+{
+    if (idxMovement >= Movements.size())
+    {
+        return;
+    }
+
+    Movement const& movement = Movements[idxMovement];
+
+    {
+        Request request = {Type : RequestType::DesiredPosition};
+        request.DesiredPosition.value = movement.DesiredPosition;
+        g_RequestQueue.push(request);
+    }
+
+    {
+        Request request = {Type : RequestType::DesiredMaximumSpeed};
+        request.DesiredMaximumSpeed.value = static_cast<uint32_t>(movement.DesiredSpeed * RatePercent / 100.0f);
+        g_RequestQueue.push(request);
+    }
+
+    {
+        Request request = {Type : RequestType::DesiredMaximumAcceleration};
+        request.DesiredMaximumAcceleration.value =
+            static_cast<uint32_t>(movement.DesiredAcceleration * RatePercent / 100.0f);
+        g_RequestQueue.push(request);
+    }
+}
+
+
+//
+// Debugging
+//
+
 void MovementProgram::dump(char const* const szPrefix) const
 {
     Serial.printlnf("Movement program (%s):", szPrefix);
@@ -15,7 +113,7 @@ void MovementProgram::dump(char const* const szPrefix) const
             }
         }
 
-        Serial.printlnf("  Rate: %.2f", Rate);
+        Serial.printlnf("  Rate: %u", RatePercent);
     }
 
     if (!Movements.empty())

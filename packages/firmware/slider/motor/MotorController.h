@@ -23,46 +23,27 @@ public:
     bool tryInitialize();
 
     //
+    // Observable state (refreshed in onLoop())
+    //
+
+    //
     // For general use
     //
 
     // Getters
-    TicOperationState getOperationState() const
-    {
-        return m_OperationState;
-    }
-
-    int32_t getCurrentPosition() const
-    {
-        return m_CurrentPosition;
-    }
-
-    bool isPositionCertain() const
-    {
-        return m_IsPositionCertain;
-    }
-
-    int32_t getVelocity()
-    {
-        return velocityFromTicUnits(m_Tic.getCurrentVelocity());
-    }
-
-    uint32_t getMaximumSpeed()
-    {
-        return speedFromTicUnits(m_Tic.getMaxSpeed());
-    }
-
-    uint32_t getMaximumAcceleration()
-    {
-        return accelerationFromTicUnits(m_Tic.getMaxAccel());
-    }
+    Observable<TicOperationState> OperationState;
+    Observable<bool> IsPositionCertain;
+    Observable<int32_t> CurrentPosition;
+    Observable<int32_t> CurrentVelocity;
+    Observable<int32_t> TargetPosition;
+    Observable<uint32_t> MaximumSpeed;
+    Observable<uint32_t> MaximumAcceleration;
 
     bool isHomingActive()
     {
         // Not worth caching
         return m_Tic.getHomingActive();
     }
-
 
     // Setters
     void setTargetPosition(int32_t const targetPosition);
@@ -77,20 +58,20 @@ public:
     // Constants
     //
 
+    static constexpr int32_t c_MinimumPosition_Steps = 0;
+    static constexpr int32_t c_MaxSafePosition_Steps = 10000;
+
     static constexpr uint32_t c_MaxSafeHomingSpeed_StepsPerSec = 2000;
+    static constexpr uint32_t c_MinimumSpeed_StepsPerSec = 1;
     static constexpr uint32_t c_DefaultSpeed_StepsPerSec = 8000;
     static constexpr uint32_t c_MaxSafeSpeed_StepsPerSec = 15000;
 
+    static constexpr uint32_t c_MinimumAcceleration_StepsPerSecPerSec = 1000;
     static constexpr uint32_t c_DefaultAcceleration_StepsPerSecPerSec = 10000;
     static constexpr uint32_t c_MaxSafeAcceleration_StepsPerSecPerSec = 75000;
 
 private:
     TicI2C m_Tic;
-
-    // Refreshed in onLoop():
-    TicOperationState m_OperationState;
-    int32_t m_CurrentPosition;
-    bool m_IsPositionCertain;
 
 private:
     static uint32_t accelerationFromTicUnits(uint32_t const stepsPerSecPer100Sec)

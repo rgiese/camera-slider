@@ -17,10 +17,14 @@ void MotorController::onLoop()
     // Reset watchdog on motor controller
     m_Tic.resetCommandTimeout();
 
-    // Refresh latest values
-    m_OperationState = m_Tic.getOperationState();
-    m_CurrentPosition = m_Tic.getCurrentPosition();
-    m_IsPositionCertain = !m_Tic.getPositionUncertain();
+    // Refresh observables
+    OperationState.update(m_Tic.getOperationState());
+    IsPositionCertain.update(!m_Tic.getPositionUncertain());
+    CurrentPosition.update(m_Tic.getCurrentPosition());
+    CurrentVelocity.update(velocityFromTicUnits(m_Tic.getCurrentVelocity()));
+    TargetPosition.update(m_Tic.getTargetPosition());
+    MaximumSpeed.update(speedFromTicUnits(m_Tic.getMaxSpeed()));
+    MaximumAcceleration.update(accelerationFromTicUnits(m_Tic.getMaxAccel()));
 }
 
 //
@@ -29,18 +33,18 @@ void MotorController::onLoop()
 
 void MotorController::setTargetPosition(int32_t const targetPosition)
 {
-    m_Tic.setTargetPosition(targetPosition);
+    m_Tic.setTargetPosition(clamp<int32_t>(targetPosition, c_MinimumPosition_Steps, c_MaxSafePosition_Steps));
 }
 
 void MotorController::setMaxSpeed(uint32_t const stepsPerSecond)
 {
-    m_Tic.setMaxSpeed(speedToTicUnits(std::min(stepsPerSecond, c_MaxSafeSpeed_StepsPerSec)));
+    m_Tic.setMaxSpeed(speedToTicUnits(clamp(stepsPerSecond, c_MinimumSpeed_StepsPerSec, c_MaxSafeSpeed_StepsPerSec)));
 }
 
 void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
 {
-    uint32_t const safeStepsPerSecondPerSecond =
-        std::min(stepsPerSecondPerSecond, c_MaxSafeAcceleration_StepsPerSecPerSec);
+    uint32_t const safeStepsPerSecondPerSecond = clamp(
+        stepsPerSecondPerSecond, c_MinimumAcceleration_StepsPerSecPerSec, c_MaxSafeAcceleration_StepsPerSecPerSec);
 
     uint32_t const ticStepsPerSecondPerSecond = accelerationToTicUnits(safeStepsPerSecondPerSecond);
 
@@ -50,6 +54,7 @@ void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
 
 void MotorController::goHome()
 {
+    m_Tic.setTargetPosition(0);  // Update internal tracking
     m_Tic.goHomeReverse();
 }
 
@@ -57,7 +62,7 @@ void MotorController::safetyStop()
 {
     // Save current values
     int32_t const desiredPosition = m_Tic.getCurrentPosition();
-    uint32_t const desiredMaxAcceleration = getMaximumAcceleration();
+    uint32_t const desiredMaxAcceleration = MaximumAcceleration;
 
     // Apply safety stop
     setMaxAcceleration(MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);

@@ -16,6 +16,11 @@ enum class SliderState
     RunningMovementProgram,
     TrackingDesiredPosition,
     UnrecoverableError,
+    CalibrateTouchStart,
+    CalibrateTouchTopLeft,
+    CalibrateTouchTopRight,
+    CalibrateTouchBottomLeft,
+    CalibrateTouchBottomRight,
 };
 
 inline char const* getSliderStateName(SliderState const state)
@@ -34,6 +39,47 @@ inline char const* getSliderStateName(SliderState const state)
             return "TrackingDesiredPosition";
         case SliderState::UnrecoverableError:
             return "UnrecoverableError";
+        case SliderState::CalibrateTouchStart:
+            return "CalibrateTouchStart";
+        case SliderState::CalibrateTouchTopLeft:
+            return "CalibrateTouchTopLeft";
+        case SliderState::CalibrateTouchTopRight:
+            return "CalibrateTouchTopRight";
+        case SliderState::CalibrateTouchBottomLeft:
+            return "CalibrateTouchBottomLeft";
+        case SliderState::CalibrateTouchBottomRight:
+            return "CalibrateTouchBottomRight";
+        default:
+            return "<unknown>";
+    }
+}
+
+inline char const* getSliderStateFriendlyName(SliderState const state)
+{
+    switch (state)
+    {
+        case SliderState::FindingForwardRange:
+            return "Finding forward range";
+        case SliderState::Homing:
+            return "Homing";
+        case SliderState::InitializingMotor:
+            return "Initializing motor";
+        case SliderState::RunningMovementProgram:
+            return "Running movement program";
+        case SliderState::TrackingDesiredPosition:
+            return "Tracking desired position";
+        case SliderState::UnrecoverableError:
+            return "Unrecoverable error";
+        case SliderState::CalibrateTouchStart:
+            return "Calibrate touch start";
+        case SliderState::CalibrateTouchTopLeft:
+            return "Calibrate touch top left";
+        case SliderState::CalibrateTouchTopRight:
+            return "Calibrate touch top right";
+        case SliderState::CalibrateTouchBottomLeft:
+            return "Calibrate touch bottom left";
+        case SliderState::CalibrateTouchBottomRight:
+            return "Calibrate touch bottom right";
         default:
             return "<unknown>";
     }
@@ -51,3 +97,4 @@ extern StateKeeper g_StateKeeper;
 #include "RunningMovementProgramState.h"
 #include "TrackingDesiredPositionState.h"
 #include "FindingForwardRangeState.h"
+#include "CalibrateTouchScreenState.h"

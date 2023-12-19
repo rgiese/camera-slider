@@ -6,9 +6,14 @@ enum class RequestType
     DesiredPosition,
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
+    DesiredParameterDelta_Position,
+    DesiredParameterDelta_MaximumSpeed,
+    DesiredParameterDelta_MaximumAcceleration,
     StartMovementProgram,
     StopMovementProgram,
     UpdatedMovementProgram,
+    CalibrateTouchStart,
+    CalibrateTouchNext,
 };
 
 struct Request
@@ -39,6 +44,11 @@ struct Request
 
         struct
         {
+            int32_t delta;
+        } DesiredParameterDelta;
+
+        struct
+        {
         } UpdatedMovementProgram;
 
         struct
@@ -49,6 +59,14 @@ struct Request
         struct
         {
         } StopMovementProgram;
+
+        struct
+        {
+        } CalibrateTouchStart;
+
+        struct
+        {
+        } CalibrateTouchNext;
     };
 };
 

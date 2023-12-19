@@ -6,6 +6,7 @@ public:
     RunningMovementProgramState(uint32_t const desiredInitialStep)
         : AbstractState(SliderState::RunningMovementProgram)
         , m_idxInitialStep(desiredInitialStep)
+        , m_CurrentMovementProgram()
         , m_idxCurrentStep(static_cast<size_t>(-1))
         , m_DelayStart_msec(0)
     {
@@ -24,6 +25,7 @@ private:
 private:
     uint32_t const m_idxInitialStep;
 
+    MovementProgram m_CurrentMovementProgram;
     size_t m_idxCurrentStep;
     unsigned long m_DelayStart_msec;
 };
