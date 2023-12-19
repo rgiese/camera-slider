@@ -14,7 +14,7 @@
     "./slider"
   ],
   "scripts": {
-    "build": "ts-node firmware-build-tool/build.ts slider -r \"external/Adafruit{_BusIO,-GFX-Library}\" -r \"external/tic-arduino\" -i \"external/Adafruit{_BusIO,-GFX-Library}/*.{c,cpp,h}\" -x \"**/Adafruit_SPITFT*.{c,cpp,h}\" -i \"external/tic-arduino/*.{cpp,h}\"",
+    "build": "ts-node firmware-build-tool/build.ts slider -r \"external/Adafruit{_BusIO,-GFX-Library,_HX8357_Library}\" -r \"external/tic-arduino\" -i \"external/Adafruit{_BusIO,-GFX-Library,_HX8357_Library}/*.{c,cpp,h}\" -i \"external/Adafruit-GFX-Library/Fonts/*.h\" -i \"external/tic-arduino/*.{cpp,h}\"",
     "clean": "rimraf build slider/build slider/generated slider/tests/generated",
     "firmware:flash": "ts-node firmware-build-tool/flash.ts slider",
     "firmware:monitor": "ts-node firmware-build-tool/monitor.ts",
