@@ -60,7 +60,7 @@ struct MovementProgram
     // Data
     //
 
-    bool Repeat = false;
+    bool Repeat = true;
     uint16_t RatePercent = 100;
     std::vector<Movement> Movements = {};
 
