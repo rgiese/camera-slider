@@ -30,6 +30,7 @@ void setup()
 
     // Configure debugging output
     Serial.begin();
+    // delay(5000); // For debugging startup path
     Serial.println("Slider started.");
 
     // Configure buses
@@ -77,7 +78,7 @@ void loop()
     delay(100);
 
     {
-        Activity mainLoopActivity("mainThreadLoop", 10);
+        Activity mainLoopActivity("mainThreadLoop", 20);
 
         {
             Activity mainLoopSectionActivity("deliverObservables", 10);
@@ -85,7 +86,7 @@ void loop()
         }
 
         {
-            Activity mainLoopSectionActivity("uiLoop", 10);
+            Activity mainLoopSectionActivity("uiLoop", 20);
             g_UI.onMainLoop();
         }
     }
