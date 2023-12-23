@@ -66,6 +66,7 @@ public:
     static constexpr uint32_t c_MinimumSpeed_StepsPerSec = 1;
     static constexpr uint32_t c_DefaultSpeed_StepsPerSec = 2000;
     static constexpr uint32_t c_MaxSafeSpeed_StepsPerSec = 50000;
+    static constexpr uint32_t c_StartingSpeed_StepsPerSec = 500;  // No acceleration curve applies below this speed
 
     static constexpr uint32_t c_MinimumAcceleration_StepsPerSecPerSec = 1000;
     static constexpr uint32_t c_DefaultAcceleration_StepsPerSecPerSec = 10000;

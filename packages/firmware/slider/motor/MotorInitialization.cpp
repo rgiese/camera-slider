@@ -179,9 +179,8 @@ bool MotorController::tryInitialize()
     }
 
     {
-        uint32_t const maxSpeed = speedToTicUnits(c_DefaultSpeed_StepsPerSec);
-
-        m_Tic.setMaxSpeed(maxSpeed);
+        m_Tic.setMaxSpeed(speedToTicUnits(c_DefaultSpeed_StepsPerSec));
+        m_Tic.setStartingSpeed(speedToTicUnits(c_StartingSpeed_StepsPerSec));
     }
 
     {
