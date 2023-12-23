@@ -175,7 +175,7 @@ bool MotorController::tryInitialize()
     // Apply configurable settings
     {
         m_Tic.setCurrentLimit(990 /* mA */);
-        m_Tic.setStepMode(TicStepMode::Microstep8 /* 1/8th steps */);
+        m_Tic.setStepMode(TicStepMode::Microstep4 /* 1/4 steps */);
     }
 
     {

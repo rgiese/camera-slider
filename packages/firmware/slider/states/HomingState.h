@@ -9,4 +9,7 @@ public:
 
     void onEnteringState() override;
     void onLoop() override;
+
+private:
+    uint32_t m_PreviousMaxSpeed_StepsPerSec;
 };
