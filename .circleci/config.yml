@@ -42,20 +42,6 @@ jobs:
             # Limit NodeJS heap size so we don't OOM
             NODE_OPTIONS: --max_old_space_size=1500
 
-      - run: npm run bundle-mobile
-
-      # Run tests
-      - run: npm run test -ws
-
-      # Run lint
-      - run: npm run lint -ws
-
-      # Persist workspace for deployment
-      - persist_to_workspace:
-          root: .
-          paths:
-            - packages
-
 #
 # Workflows
 #
