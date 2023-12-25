@@ -37,16 +37,24 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             return true;
 
         case RequestType::DesiredParameterDelta_Position:
-            g_MotorController.setTargetPosition(g_MotorController.TargetPosition + request.DesiredParameterDelta.delta);
+            g_MotorController.setTargetPosition(clamp_delta(g_MotorController.TargetPosition.get(),
+                                                            request.DesiredParameterDelta.delta,
+                                                            MotorController::c_MinimumPosition_Steps,
+                                                            MotorController::c_MaxSafePosition_Steps));
             return true;
 
         case RequestType::DesiredParameterDelta_MaximumSpeed:
-            g_MotorController.setMaxSpeed(g_MotorController.MaximumSpeed + request.DesiredParameterDelta.delta);
+            g_MotorController.setMaxSpeed(clamp_delta(g_MotorController.MaximumSpeed.get(),
+                                                      request.DesiredParameterDelta.delta,
+                                                      MotorController::c_MinimumSpeed_StepsPerSec,
+                                                      MotorController::c_MaxSafeSpeed_StepsPerSec));
             return true;
 
         case RequestType::DesiredParameterDelta_MaximumAcceleration:
-            g_MotorController.setMaxAcceleration(g_MotorController.MaximumAcceleration +
-                                                 request.DesiredParameterDelta.delta);
+            g_MotorController.setMaxAcceleration(clamp_delta(g_MotorController.MaximumAcceleration.get(),
+                                                             request.DesiredParameterDelta.delta,
+                                                             MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                                             MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec));
             return true;
 
         case RequestType::StartMovementProgram:

@@ -31,9 +31,12 @@ constexpr T clamp(T const value, T const low, T const high)
 template <class T, typename U = ssize_t>
 constexpr T clamp_delta(T const value, U const delta, T const low, T const high)
 {
-    U const computedValue = value + delta;
+    // Perform operation and comparison in signed space (U)
+    U const computedValue = static_cast<U>(value) + delta;
 
-    return (computedValue < low) ? low : (high < computedValue) ? high : static_cast<T>(computedValue);
+    return (computedValue < static_cast<U>(low))    ? low
+           : (static_cast<U>(high) < computedValue) ? high
+                                                    : static_cast<T>(computedValue);
 }
 
 static constexpr uint16_t __byteswap_16(uint16_t const value)
