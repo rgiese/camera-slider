@@ -117,15 +117,20 @@ void Encoder::pollForUpdates()
             }
         }
 
-        if (encoderStatus.IsPushButtonReleased)
+        if (m_TimePushButtonPressedDown /* as a proxy for whether we're in a push right now */)
         {
             unsigned long const currentTime = millis();
             unsigned long const durationPressed_msec = currentTime - m_TimePushButtonPressedDown;
 
-            if (m_PushButtonUpCallback)
+            if (encoderStatus.IsPushButtonReleased || (durationPressed_msec >= c_LongPushThreshold_msec))
             {
-                m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
-                                                                                        : PushDuration::Short);
+                if (m_PushButtonUpCallback)
+                {
+                    m_PushButtonUpCallback(durationPressed_msec >= c_LongPushThreshold_msec ? PushDuration::Long
+                                                                                            : PushDuration::Short);
+                }
+
+                m_TimePushButtonPressedDown = 0;
             }
         }
     }
