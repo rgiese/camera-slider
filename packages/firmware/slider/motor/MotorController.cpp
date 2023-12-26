@@ -25,6 +25,7 @@ void MotorController::onLoop()
     TargetPosition.update(m_Tic.getTargetPosition());
     MaximumSpeed.update(speedFromTicUnits(m_Tic.getMaxSpeed()));
     MaximumAcceleration.update(accelerationFromTicUnits(m_Tic.getMaxAccel()));
+    MaximumDeceleration.update(accelerationFromTicUnits(m_Tic.getMaxDecel()));
 }
 
 //
@@ -49,6 +50,15 @@ void MotorController::setMaxAcceleration(uint32_t const stepsPerSecondPerSecond)
     uint32_t const ticStepsPerSecondPerSecond = accelerationToTicUnits(safeStepsPerSecondPerSecond);
 
     m_Tic.setMaxAccel(ticStepsPerSecondPerSecond);
+}
+
+void MotorController::setMaxDeceleration(uint32_t const stepsPerSecondPerSecond)
+{
+    uint32_t const safeStepsPerSecondPerSecond = clamp(
+        stepsPerSecondPerSecond, c_MinimumAcceleration_StepsPerSecPerSec, c_MaxSafeAcceleration_StepsPerSecPerSec);
+
+    uint32_t const ticStepsPerSecondPerSecond = accelerationToTicUnits(safeStepsPerSecondPerSecond);
+
     m_Tic.setMaxDecel(ticStepsPerSecondPerSecond);
 }
 
@@ -63,9 +73,11 @@ void MotorController::safetyStop()
     // Save current values
     int32_t const desiredPosition = m_Tic.getCurrentPosition();
     uint32_t const desiredMaxAcceleration = MaximumAcceleration;
+    uint32_t const desiredMaxDeceleration = MaximumDeceleration;
 
     // Apply safety stop
     setMaxAcceleration(MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+    setMaxDeceleration(MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
     setTargetPosition(desiredPosition);
 
     // Wait for safety stop to complete
@@ -80,4 +92,5 @@ void MotorController::safetyStop()
 
     // Restore previous values
     setMaxAcceleration(desiredMaxAcceleration);
+    setMaxDeceleration(desiredMaxDeceleration);
 }

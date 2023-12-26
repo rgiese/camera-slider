@@ -38,6 +38,7 @@ public:
     Observable<int32_t> TargetPosition;
     Observable<uint32_t> MaximumSpeed;
     Observable<uint32_t> MaximumAcceleration;
+    Observable<uint32_t> MaximumDeceleration;
 
     bool isHomingActive()
     {
@@ -49,6 +50,7 @@ public:
     void setTargetPosition(int32_t const targetPosition);
     void setMaxSpeed(uint32_t const stepsPerSecond);
     void setMaxAcceleration(uint32_t const stepsPerSecondPerSecond);
+    void setMaxDeceleration(uint32_t const stepsPerSecondPerSecond);
 
     void goHome();
     void safetyStop();

@@ -35,19 +35,42 @@ private:
 
     enum class EncoderFunction : uint8_t
     {
+        // Physical encoders
         Position,
         Speed,
         Acceleration,
         Step,
         Rate,
-        __count
+        __count,
+        // Virtual encoders
+        Deceleration,
     };
 
-    RGBColor m_FunctionColors[static_cast<size_t>(EncoderFunction::__count)];
-
-    constexpr RGBColor const& colorFor(EncoderFunction const encoderFunction)
+    enum class AccelerationEncoderMappedTo
     {
-        return m_FunctionColors[static_cast<uint8_t>(encoderFunction)];
+        Acceleration,
+        Deceleration,
+    };
+
+    constexpr RGBColor const colorFor(EncoderFunction const encoderFunction)
+    {
+        switch (encoderFunction)
+        {
+            case EncoderFunction::Position:
+                return RGBColor{0xf2, 0x67, 0x39};
+            case EncoderFunction::Speed:
+                return RGBColor{0xf5, 0x2c, 0x68};
+            case EncoderFunction::Acceleration:
+                return RGBColor{0xe0, 0xca, 0x3e};
+            case EncoderFunction::Deceleration:
+                return RGBColor{0x3e, 0xe0, 0x46};
+            case EncoderFunction::Step:
+                return RGBColor{0xff, 0xff, 0xff};
+            case EncoderFunction::Rate:
+                return RGBColor{0x0c, 0xf2, 0xbd};
+            default:
+                return Colors::Black;
+        }
     };
 
 private:
@@ -58,6 +81,7 @@ private:
     uint16_t m_idxSelectedStep;
     uint16_t m_nStepsInProgram;
     bool m_fCanControlLivePosition;
+    AccelerationEncoderMappedTo m_AccelerationEncoderMappedTo;
 
     bool canAddNewStep() const;
     uint16_t conformSelectedStep(int32_t delta = 0) const;
@@ -67,6 +91,8 @@ private:
 
     void setMovementControlsEnabled(bool const fEnabled);
     void setStepAndRateControlsEnabled(bool const fEnabled);
+
+    void updateAccelerationControlColor();
 
 private:
     //
@@ -88,15 +114,17 @@ private:
         static constexpr uint16_t MovementProgramTableY = PaddingSmall;
 
         static constexpr uint16_t MovementProgramTableRow_StepWidth = 50;
-        static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth = 100;
+        static constexpr uint16_t MovementProgramTableRow_MovementParameterWidth = 80;
         static constexpr uint16_t MovementProgramTableRow_Height = 18;
         static constexpr uint16_t MovementProgramTableRow_TextYOffset = 2;
 
         static constexpr uint16_t nMovementProgramTableRows = 7;
+        static constexpr uint16_t nMovementProgramTableColumns = 4;
 
         // Advisory values for laying out surrounding controls
         static constexpr uint16_t MovementProgramTableWidth =
-            MovementProgramTableRow_StepWidth + 3 * MovementProgramTableRow_MovementParameterWidth;
+            MovementProgramTableRow_StepWidth +
+            nMovementProgramTableColumns * MovementProgramTableRow_MovementParameterWidth;
         static constexpr uint16_t MovementProgramTableRightX = MovementProgramTableX + MovementProgramTableWidth;
 
         //
@@ -191,6 +219,7 @@ private:
         LCD::StaticNumericText DesiredPosition;
         LCD::StaticNumericText DesiredSpeed;
         LCD::StaticNumericText DesiredAcceleration;
+        LCD::StaticNumericText DesiredDeceleration;
 
         void updateWithMovement(uint16_t const idxMovement,
                                 MovementProgram const& movementProgram,

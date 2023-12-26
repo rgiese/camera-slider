@@ -6,9 +6,11 @@ enum class RequestType
     DesiredPosition,
     DesiredMaximumSpeed,
     DesiredMaximumAcceleration,
+    DesiredMaximumDeceleration,
     DesiredParameterDelta_Position,
     DesiredParameterDelta_MaximumSpeed,
     DesiredParameterDelta_MaximumAcceleration,
+    DesiredParameterDelta_MaximumDeceleration,
     StartMovementProgram,
     StopMovementProgram,
     UpdatedMovementProgram,
@@ -41,6 +43,11 @@ struct Request
         {
             uint32_t value;
         } DesiredMaximumAcceleration;
+
+        struct
+        {
+            uint32_t value;
+        } DesiredMaximumDeceleration;
 
         struct
         {

@@ -30,6 +30,8 @@ void RunningMovementProgramState::enterStep(size_t const idxStep)
                 static_cast<uint32_t>(movement.DesiredSpeed * m_CurrentMovementProgram.RatePercent / 100.0f));
             g_MotorController.setMaxAcceleration(
                 static_cast<uint32_t>(movement.DesiredAcceleration * m_CurrentMovementProgram.RatePercent / 100.0f));
+            g_MotorController.setMaxDeceleration(
+                static_cast<uint32_t>(movement.DesiredDeceleration * m_CurrentMovementProgram.RatePercent / 100.0f));
 
             // Seek to position
             g_MotorController.setTargetPosition(movement.DesiredPosition);

@@ -15,6 +15,7 @@ struct MovementProgram
             DesiredPosition,
             DesiredSpeed,
             DesiredAcceleration,
+            DesiredDeceleration,
         };
 
         Movement() = default;
@@ -23,13 +24,15 @@ struct MovementProgram
                  uint16_t const delayTime,
                  int32_t const desiredPosition,
                  uint32_t const desiredSpeed,
-                 uint32_t const desiredAcceleration);
+                 uint32_t const desiredAcceleration,
+                 uint32_t const desiredDeceleration);
 
         MovementType Type = MovementType::Move;
         uint16_t DelayTime = 0;
         int32_t DesiredPosition = 0;
         uint32_t DesiredSpeed = 0;
         uint32_t DesiredAcceleration = 0;
+        uint32_t DesiredDeceleration = 0;
 
         bool operator==(Movement const& other) const
         {
@@ -44,7 +47,8 @@ struct MovementProgram
 
                 case MovementType::Move:
                     return DesiredPosition == other.DesiredPosition && DesiredSpeed == other.DesiredSpeed &&
-                           DesiredAcceleration == other.DesiredAcceleration;
+                           DesiredAcceleration == other.DesiredAcceleration &&
+                           DesiredDeceleration == other.DesiredDeceleration;
 
                 default:
                     return true;

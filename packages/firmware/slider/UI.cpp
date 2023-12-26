@@ -7,16 +7,10 @@
 UI g_UI;
 
 UI::UI()
-    : m_FunctionColors({
-          RGBColor{0xf2, 0x67, 0x39},  // Position
-          RGBColor{0xf5, 0x2c, 0x68},  // Speed
-          RGBColor{0xe0, 0xca, 0x3e},  // Acceleration
-          RGBColor{0xff, 0xff, 0xff},  // Step
-          RGBColor{0x0c, 0xf2, 0xbd},  // Rate
-      })
-    , m_idxSelectedStep()
+    : m_idxSelectedStep()
     , m_nStepsInProgram()
     , m_fCanControlLivePosition()
+    , m_AccelerationEncoderMappedTo(AccelerationEncoderMappedTo::Acceleration)
     //
     // LCD
     //
@@ -199,6 +193,7 @@ UI::UI()
             buildControl(1, colorFor(EncoderFunction::Position)),
             buildControl(2, colorFor(EncoderFunction::Speed)),
             buildControl(3, colorFor(EncoderFunction::Acceleration)),
+            buildControl(4, colorFor(EncoderFunction::Deceleration)),
         });
     }
 }
@@ -218,7 +213,7 @@ void UI::begin()
     for (uint8_t idxEncoder = 0; idxEncoder < static_cast<uint8_t>(EncoderFunction::__count); ++idxEncoder)
     {
         m_Encoders[idxEncoder].begin();
-        m_Encoders[idxEncoder].setColor(m_FunctionColors[idxEncoder]);
+        m_Encoders[idxEncoder].setColor(colorFor(static_cast<EncoderFunction>(idxEncoder)));
     }
 
     m_StartButton.begin();
@@ -230,10 +225,13 @@ void UI::begin()
     m_MovementProgramRows[0].Step.setText("Step");
     m_MovementProgramRows[0].DesiredPosition.setText("Position");
     m_MovementProgramRows[0].DesiredSpeed.setText("Speed");
-    m_MovementProgramRows[0].DesiredAcceleration.setText("Acceleration");
+    m_MovementProgramRows[0].DesiredAcceleration.setText("Accel");
+    m_MovementProgramRows[0].DesiredDeceleration.setText("Decel");
 
     m_Label_Step.setText("Step");
     m_Label_Rate.setText("Rate");
+
+    updateAccelerationControlColor();
 
     m_Text_CurrentState.setText("Starting");
 
@@ -242,56 +240,80 @@ void UI::begin()
     //
 
     // Encoder value change: movement parameters
-    auto const setValueChangeCallback = [this](EncoderFunction const encoderFunction,
-                                               RequestType const desiredStateRequestParameter,
-                                               MovementProgram::Movement::Parameter const movementProgramParameter) {
-        encoderFor(encoderFunction)
-            .setValueDeltaCallback([this, desiredStateRequestParameter, movementProgramParameter](int32_t const delta) {
-                if (editingExistingStep())
-                {
-                    // Update program
-                    g_MovementProgramStore.CurrentMovementProgram.mutate(
-                        [&](MovementProgram const& movementProgram) -> MovementProgram {
-                            if (m_idxSelectedStep >= movementProgram.Movements.size())
-                            {
-                                return movementProgram;
-                            }
-
-                            MovementProgram mutatedMovementProgram = movementProgram;
-                            {
-                                mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(movementProgramParameter,
-                                                                                               delta);
-                            }
-
-                            return mutatedMovementProgram;
-                        });
-
-                    // Then control live position from absolute movement values
-                    if (m_fCanControlLivePosition)
+    auto const setValueChangeCallback = [this](EncoderFunction const encoderFunction) {
+        encoderFor(encoderFunction).setValueDeltaCallback([this, encoderFunction](int32_t const delta) {
+            auto const movementEncoderValueDeltaCallback =
+                [this](MovementProgram::Movement::Parameter const movementProgramParameter,
+                       RequestType const desiredStateRequestParameter,
+                       int32_t const delta) {
+                    if (editingExistingStep())
                     {
-                        MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
-                        movementProgram.requestMoveToMovement(m_idxSelectedStep);
+                        // Update program
+                        g_MovementProgramStore.CurrentMovementProgram.mutate(
+                            [&](MovementProgram const& movementProgram) -> MovementProgram {
+                                if (m_idxSelectedStep >= movementProgram.Movements.size())
+                                {
+                                    return movementProgram;
+                                }
+
+                                MovementProgram mutatedMovementProgram = movementProgram;
+                                {
+                                    mutatedMovementProgram.Movements[m_idxSelectedStep].applyDelta(
+                                        movementProgramParameter, delta);
+                                }
+
+                                return mutatedMovementProgram;
+                            });
+
+                        // Then control live position from absolute movement values
+                        if (m_fCanControlLivePosition)
+                        {
+                            MovementProgram const& movementProgram = g_MovementProgramStore.CurrentMovementProgram;
+                            movementProgram.requestMoveToMovement(m_idxSelectedStep);
+                        }
                     }
-                }
-                else if (m_fCanControlLivePosition)
-                {
-                    // Control live position via delta
-                    Request request = {Type : desiredStateRequestParameter};
-                    request.DesiredParameterDelta.delta = delta;
-                    g_RequestQueue.push(request);
-                }
-            });
+                    else if (m_fCanControlLivePosition)
+                    {
+                        // Control live position via delta
+                        Request request = {Type : desiredStateRequestParameter};
+                        request.DesiredParameterDelta.delta = delta;
+                        g_RequestQueue.push(request);
+                    }
+                };
+
+            switch (encoderFunction)
+            {
+                case EncoderFunction::Position:
+                    return movementEncoderValueDeltaCallback(MovementProgram::Movement::Parameter::DesiredPosition,
+                                                             RequestType::DesiredParameterDelta_Position,
+                                                             delta);
+                case EncoderFunction::Speed:
+                    return movementEncoderValueDeltaCallback(MovementProgram::Movement::Parameter::DesiredSpeed,
+                                                             RequestType::DesiredParameterDelta_MaximumSpeed,
+                                                             delta);
+                case EncoderFunction::Acceleration:
+                    switch (m_AccelerationEncoderMappedTo)
+                    {
+                        case AccelerationEncoderMappedTo::Acceleration:
+                            return movementEncoderValueDeltaCallback(
+                                MovementProgram::Movement::Parameter::DesiredAcceleration,
+                                RequestType::DesiredParameterDelta_MaximumAcceleration,
+                                delta);
+                        case AccelerationEncoderMappedTo::Deceleration:
+                            return movementEncoderValueDeltaCallback(
+                                MovementProgram::Movement::Parameter::DesiredDeceleration,
+                                RequestType::DesiredParameterDelta_MaximumDeceleration,
+                                delta);
+                    }
+                default:
+                    return;
+            }
+        });
     };
 
-    setValueChangeCallback(EncoderFunction::Position,
-                           RequestType::DesiredParameterDelta_Position,
-                           MovementProgram::Movement::Parameter::DesiredPosition);
-    setValueChangeCallback(EncoderFunction::Speed,
-                           RequestType::DesiredParameterDelta_MaximumSpeed,
-                           MovementProgram::Movement::Parameter::DesiredSpeed);
-    setValueChangeCallback(EncoderFunction::Acceleration,
-                           RequestType::DesiredParameterDelta_MaximumAcceleration,
-                           MovementProgram::Movement::Parameter::DesiredAcceleration);
+    setValueChangeCallback(EncoderFunction::Position);
+    setValueChangeCallback(EncoderFunction::Speed);
+    setValueChangeCallback(EncoderFunction::Acceleration);
 
     // Encoder value change: Step
     encoderFor(EncoderFunction::Step).setValueDeltaCallback([this](int32_t delta) {
@@ -330,25 +352,89 @@ void UI::begin()
             });
     });
 
-    // Encoder push buttons for Position/Speed/Acceleration/Rate: switch 'order of magnitude' selector on push
-    auto const setIncrementCallback = [this](EncoderFunction const encoderFunction,
-                                             uint8_t const maxEncoderOrderOfMagnitude,
-                                             LCD::StaticNumericText& display) {
+    // Encoder push buttons for Position/Speed/Acceleration/Rate: switch 'order of magnitude' selector, value target on
+    // push
+    auto const setIncrementAndTargetCallback = [this](EncoderFunction const encoderFunction,
+                                                      uint8_t const maxEncoderOrderOfMagnitude,
+                                                      LCD::StaticNumericText& display) {
         encoderFor(encoderFunction)
-            .setPushButtonDownCallback([this, encoderFunction, maxEncoderOrderOfMagnitude, &display]() {
-                uint8_t const currentOrderOfMagnitude = encoderFor(encoderFunction).getIncrementOrderOfMagnitude();
-                uint8_t const updatedOrderOfMagnitude =
-                    (currentOrderOfMagnitude < maxEncoderOrderOfMagnitude) ? currentOrderOfMagnitude + 1 : 0;
+            .setPushButtonUpCallback([this, encoderFunction, maxEncoderOrderOfMagnitude, &display](
+                                         Encoder::PushDuration const pushDuration) {
+                if (pushDuration == Encoder::PushDuration::Short)
+                {
+                    // Short push: change order of magnitude setting
+                    uint8_t const currentOrderOfMagnitude = encoderFor(encoderFunction).getIncrementOrderOfMagnitude();
+                    uint8_t const updatedOrderOfMagnitude =
+                        (currentOrderOfMagnitude < maxEncoderOrderOfMagnitude) ? currentOrderOfMagnitude + 1 : 0;
 
-                encoderFor(encoderFunction).setIncrementOrderOfMagnitude(updatedOrderOfMagnitude);
-                display.setActiveDigit(updatedOrderOfMagnitude);
+                    encoderFor(encoderFunction).setIncrementOrderOfMagnitude(updatedOrderOfMagnitude);
+                    display.setActiveDigit(updatedOrderOfMagnitude);
+                }
+                else
+                {
+                    // Long push: change affected parameter
+                    switch (encoderFunction)
+                    {
+                        case EncoderFunction::Acceleration: {
+                            // Update state
+                            switch (m_AccelerationEncoderMappedTo)
+                            {
+                                case AccelerationEncoderMappedTo::Acceleration:
+                                    m_AccelerationEncoderMappedTo = AccelerationEncoderMappedTo::Deceleration;
+                                    break;
+
+                                case AccelerationEncoderMappedTo::Deceleration:
+                                    m_AccelerationEncoderMappedTo = AccelerationEncoderMappedTo::Acceleration;
+                                    break;
+                            }
+
+                            // Update colors
+                            updateAccelerationControlColor();
+
+                            // Update text
+                            auto const getUpdatedValue = [this]() {
+                                if (editingExistingStep())
+                                {
+                                    // - Update from movement program
+                                    MovementProgram const& movementProgram =
+                                        g_MovementProgramStore.CurrentMovementProgram;
+                                    MovementProgram::Movement const movement =
+                                        movementProgram.Movements[m_idxSelectedStep];
+
+                                    switch (m_AccelerationEncoderMappedTo)
+                                    {
+                                        case AccelerationEncoderMappedTo::Acceleration:
+                                            return movement.DesiredAcceleration;
+                                        case AccelerationEncoderMappedTo::Deceleration:
+                                            return movement.DesiredDeceleration;
+                                    }
+                                }
+                                else
+                                {
+                                    // - Update from motor controller
+                                    switch (m_AccelerationEncoderMappedTo)
+                                    {
+                                        case AccelerationEncoderMappedTo::Acceleration:
+                                            return g_MotorController.MaximumAcceleration.get();
+                                        case AccelerationEncoderMappedTo::Deceleration:
+                                            return g_MotorController.MaximumDeceleration.get();
+                                    }
+                                }
+
+                                return static_cast<uint32_t>(0);
+                            };
+
+                            m_Text_DesiredMaximumAcceleration.setValue(getUpdatedValue());
+                        }
+                    }
+                }
             });
     };
 
-    setIncrementCallback(EncoderFunction::Position, 3, m_Text_DesiredPosition);
-    setIncrementCallback(EncoderFunction::Speed, 3, m_Text_DesiredMaximumSpeed);
-    setIncrementCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
-    setIncrementCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
+    setIncrementAndTargetCallback(EncoderFunction::Position, 3, m_Text_DesiredPosition);
+    setIncrementAndTargetCallback(EncoderFunction::Speed, 3, m_Text_DesiredMaximumSpeed);
+    setIncrementAndTargetCallback(EncoderFunction::Acceleration, 3, m_Text_DesiredMaximumAcceleration);
+    setIncrementAndTargetCallback(EncoderFunction::Rate, 2, m_Text_DesiredRate);
 
     // Encoder push button for Step: add new or delete existing step
     encoderFor(EncoderFunction::Step).setPushButtonUpCallback([this](Encoder::PushDuration const pushDuration) {
@@ -379,7 +465,8 @@ void UI::begin()
                                                0,
                                                g_MotorController.TargetPosition,
                                                g_MotorController.MaximumSpeed,
-                                               g_MotorController.MaximumAcceleration);
+                                               g_MotorController.MaximumAcceleration,
+                                               g_MotorController.MaximumDeceleration);
 
             g_MovementProgramStore.CurrentMovementProgram.mutate(
                 [&movement](MovementProgram const& movementProgram) -> MovementProgram {
@@ -468,7 +555,20 @@ void UI::begin()
     g_MotorController.MaximumAcceleration.attach_and_initialize([this](uint32_t const acceleration) {
         if (!editingExistingStep())
         {
-            m_Text_DesiredMaximumAcceleration.setValue(acceleration);
+            if (m_AccelerationEncoderMappedTo == AccelerationEncoderMappedTo::Acceleration)
+            {
+                m_Text_DesiredMaximumAcceleration.setValue(acceleration);
+            }
+        }
+    });
+
+    g_MotorController.MaximumDeceleration.attach_and_initialize([this](uint32_t const deceleration) {
+        if (!editingExistingStep())
+        {
+            if (m_AccelerationEncoderMappedTo == AccelerationEncoderMappedTo::Deceleration)
+            {
+                m_Text_DesiredMaximumAcceleration.setValue(deceleration);
+            }
         }
     });
 
@@ -534,6 +634,7 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
         DesiredPosition.setValue(movement.DesiredPosition);
         DesiredSpeed.setValue(movement.DesiredSpeed);
         DesiredAcceleration.setValue(movement.DesiredAcceleration);
+        DesiredDeceleration.setValue(movement.DesiredDeceleration);
     }
     else
     {
@@ -541,6 +642,7 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
         DesiredPosition.clear();
         DesiredSpeed.clear();
         DesiredAcceleration.clear();
+        DesiredDeceleration.clear();
     }
 
     // Update color
@@ -551,6 +653,7 @@ void UI::MovementProgramRow::updateWithMovement(uint16_t const idxMovement,
     DesiredPosition.setBackgroundColor(backgroundColor);
     DesiredSpeed.setBackgroundColor(backgroundColor);
     DesiredAcceleration.setBackgroundColor(backgroundColor);
+    DesiredDeceleration.setBackgroundColor(backgroundColor);
 }
 
 void UI::onMainLoop()
@@ -583,7 +686,9 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 
         m_Text_DesiredPosition.setValue(movement.DesiredPosition);
         m_Text_DesiredMaximumSpeed.setValue(movement.DesiredSpeed);
-        m_Text_DesiredMaximumAcceleration.setValue(movement.DesiredAcceleration);
+        m_Text_DesiredMaximumAcceleration.setValue(
+            m_AccelerationEncoderMappedTo == AccelerationEncoderMappedTo::Acceleration ? movement.DesiredAcceleration
+                                                                                       : movement.DesiredDeceleration);
     }
     else
     {
@@ -591,7 +696,10 @@ void UI::updateWithMovementProgram(MovementProgram const& movementProgram)
 
         m_Text_DesiredPosition.setValue(g_MotorController.TargetPosition);
         m_Text_DesiredMaximumSpeed.setValue(g_MotorController.MaximumSpeed);
-        m_Text_DesiredMaximumAcceleration.setValue(g_MotorController.MaximumAcceleration);
+        m_Text_DesiredMaximumAcceleration.setValue(m_AccelerationEncoderMappedTo ==
+                                                           AccelerationEncoderMappedTo::Acceleration
+                                                       ? g_MotorController.MaximumAcceleration
+                                                       : g_MotorController.MaximumDeceleration);
     }
 
     //
@@ -651,4 +759,15 @@ void UI::setStepAndRateControlsEnabled(bool const fEnabled)
 
     m_Label_Rate.setEnabled(fEnabled);
     m_Text_DesiredRate.setEnabled(fEnabled);
+}
+
+void UI::updateAccelerationControlColor()
+{
+    // Acceleration/Deceleration
+    RGBColor const color = colorFor(m_AccelerationEncoderMappedTo == AccelerationEncoderMappedTo::Acceleration
+                                        ? EncoderFunction::Acceleration
+                                        : EncoderFunction::Deceleration);
+
+    encoderFor(EncoderFunction::Acceleration).setColor(color);
+    m_Text_DesiredMaximumAcceleration.setForegroundColor(color);
 }

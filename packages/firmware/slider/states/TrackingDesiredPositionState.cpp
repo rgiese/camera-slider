@@ -36,6 +36,10 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
             g_MotorController.setMaxAcceleration(request.DesiredMaximumAcceleration.value);
             return true;
 
+        case RequestType::DesiredMaximumDeceleration:
+            g_MotorController.setMaxDeceleration(request.DesiredMaximumDeceleration.value);
+            return true;
+
         case RequestType::DesiredParameterDelta_Position:
             g_MotorController.setTargetPosition(clamp_delta(g_MotorController.TargetPosition.get(),
                                                             request.DesiredParameterDelta.delta,
@@ -52,6 +56,13 @@ bool TrackingDesiredPositionState::onRequest(Request const& request)
 
         case RequestType::DesiredParameterDelta_MaximumAcceleration:
             g_MotorController.setMaxAcceleration(clamp_delta(g_MotorController.MaximumAcceleration.get(),
+                                                             request.DesiredParameterDelta.delta,
+                                                             MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                                             MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec));
+            return true;
+
+        case RequestType::DesiredParameterDelta_MaximumDeceleration:
+            g_MotorController.setMaxDeceleration(clamp_delta(g_MotorController.MaximumDeceleration.get(),
                                                              request.DesiredParameterDelta.delta,
                                                              MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
                                                              MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec));

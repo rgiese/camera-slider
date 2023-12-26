@@ -8,7 +8,8 @@ MovementProgram::Movement::Movement(MovementType const type,
                                     uint16_t const delayTime,
                                     int32_t const desiredPosition,
                                     uint32_t const desiredSpeed,
-                                    uint32_t const desiredAcceleration)
+                                    uint32_t const desiredAcceleration,
+                                    uint32_t const desiredDeceleration)
     : Type(type)
 {
     DelayTime = delayTime;
@@ -20,6 +21,10 @@ MovementProgram::Movement::Movement(MovementType const type,
         clamp(desiredSpeed, MotorController::c_MinimumSpeed_StepsPerSec, MotorController::c_MaxSafeSpeed_StepsPerSec);
 
     DesiredAcceleration = clamp(desiredAcceleration,
+                                MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+
+    DesiredDeceleration = clamp(desiredDeceleration,
                                 MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
                                 MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
 }
@@ -49,6 +54,13 @@ void MovementProgram::Movement::applyDelta(Parameter const parameter, int32_t de
                                               MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
             return;
 
+        case Parameter::DesiredDeceleration:
+            DesiredDeceleration = clamp_delta(DesiredDeceleration,
+                                              delta,
+                                              MotorController::c_MinimumAcceleration_StepsPerSecPerSec,
+                                              MotorController::c_MaxSafeAcceleration_StepsPerSecPerSec);
+            return;
+
         default:
             // Ignore
             return;
@@ -73,22 +85,32 @@ void MovementProgram::requestMoveToMovement(size_t const idxMovement) const
 
     Movement const& movement = Movements[idxMovement];
 
+    // Configure acceleration/deceleration
     {
-        Request request = {Type : RequestType::DesiredPosition};
-        request.DesiredPosition.value = movement.DesiredPosition;
+        Request request = {Type : RequestType::DesiredMaximumAcceleration};
+        request.DesiredMaximumAcceleration.value =
+            static_cast<uint32_t>(movement.DesiredAcceleration * RatePercent / 100.0f);
         g_RequestQueue.push(request);
     }
 
+    {
+        Request request = {Type : RequestType::DesiredMaximumDeceleration};
+        request.DesiredMaximumDeceleration.value =
+            static_cast<uint32_t>(movement.DesiredDeceleration * RatePercent / 100.0f);
+        g_RequestQueue.push(request);
+    }
+
+    // Configure speed
     {
         Request request = {Type : RequestType::DesiredMaximumSpeed};
         request.DesiredMaximumSpeed.value = static_cast<uint32_t>(movement.DesiredSpeed * RatePercent / 100.0f);
         g_RequestQueue.push(request);
     }
 
+    // Now go to position
     {
-        Request request = {Type : RequestType::DesiredMaximumAcceleration};
-        request.DesiredMaximumAcceleration.value =
-            static_cast<uint32_t>(movement.DesiredAcceleration * RatePercent / 100.0f);
+        Request request = {Type : RequestType::DesiredPosition};
+        request.DesiredPosition.value = movement.DesiredPosition;
         g_RequestQueue.push(request);
     }
 }
@@ -125,10 +147,11 @@ void MovementProgram::dump(char const* const szPrefix) const
             switch (movement.Type)
             {
                 case MovementType::Move:
-                    Serial.printlnf("    Move: to %d steps, speed %u steps/sec, acceleration %u steps/sec^2",
+                    Serial.printlnf("    Move: to %ld steps, speed %lu steps/sec, accel %lu decel %lu steps/sec^2",
                                     movement.DesiredPosition,
                                     movement.DesiredSpeed,
-                                    movement.DesiredAcceleration);
+                                    movement.DesiredAcceleration,
+                                    movement.DesiredDeceleration);
                     break;
 
                 case MovementType::Delay:
